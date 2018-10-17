@@ -1,4 +1,4 @@
-console.log(dataset);
+console.log(dataset.activities);
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1200 - margin.left - margin.right,
@@ -66,11 +66,11 @@ svg.selectAll("circle")
     .data(dataset.activities)
 	.enter()
     .append("circle")
-	.attr("cx", function(d) {return xAxis(d.heart_rate);})
-	.attr("cy", function(d) {return yAxis(d.average_speed);})
-	.attr("r", 5)
-    .attr("fill", "#ff471a")
-    .on('mouseover', function(d, i) {
+	    .attr("cx", function(d) {return xAxis(d.heart_rate);})
+	    .attr("cy", function(d) {return yAxis(d.average_speed);})
+	    .attr("r", 5)
+        .attr("fill", "#ff471a")
+    .on('mouseover', function() {
         d3.select(this)
             .transition()
             .attr("fill", "#000000")
