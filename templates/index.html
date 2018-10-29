@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <link rel='stylesheet' href="{{ url_for('static',filename='styles/style.css') }}" />        
+        <script src="https://d3js.org/d3.v5.js"></script>
+    </head>
+    <body>
+        <div id="graph_container"></div> 
+        <script>
+            var dataset = {{ sample|tojson }};
+        </script>
+        <script src="https://d3js.org/d3.v5.js"></script>
+        <script src="{{url_for('static', filename='javascripts/regression.min.js')}}"></script>
+        <script src="{{url_for('static', filename='javascripts/index.js')}}"></script>
+    </body>
+</html>

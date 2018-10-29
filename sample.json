@@ -1,5 +1,4 @@
-{
-"activities" : [
+[
   {
     "id" : 12345678987654321,
     "resource_state" : 3,
@@ -369,4 +368,5 @@
     "leaderboard_opt_out" : false
   }
 ]
-}
+
+7c1612c0ce6d71f093402f23ab3d20e8a2be4c87

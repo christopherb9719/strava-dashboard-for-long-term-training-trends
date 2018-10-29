@@ -1,0 +1,35 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #eee;
+    shape-rendering: crispEdges;
+}
+ 
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+ 
+.loading {
+    font-family: sans-serif;
+    font-size: 15px;
+}
+ 
+.circle {
+    fill: #222;
+}
+
+.tooltip {                                                        /* NEW */
+    position: absolute;
+    pointer-events: none;
+    background-color: #eee;                                                   /* NEW */
+  }                      
