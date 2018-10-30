@@ -67,24 +67,26 @@ svg.selectAll("line")
 //Append data points to the scatterplot
 svg.selectAll("circle")
     .data(dataset)
-	.enter()
-    .append("circle")
-	    .attr("cx", function(d) {return xAxis(d.heart_rate);})
-	    .attr("cy", function(d) {return yAxis(d.average_speed);})
-	    .attr("r", 5)
-        .attr("fill", "#ff471a")
-    .on('mouseover', function() {
-        d3.select(this)
-            .transition()
-            .attr("fill", "#000000")
-            .attr("r", 7)
-    })
-    .on('mouseout', function() {
-        d3.select(this)
-            .transition()
-            .attr("fill", "#ff471a")
+    .enter()
+    .append("a")
+        .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
+        .append("circle")
+            .attr("cx", function(d) {return xAxis(d.heart_rate);})
+            .attr("cy", function(d) {return yAxis(d.average_speed);})
             .attr("r", 5)
-    }); 
+            .attr("fill", "#ff471a")
+        .on('mouseover', function() {
+            d3.select(this)
+                .transition()
+                .attr("fill", "#000000")
+                .attr("r", 7)
+        })
+        .on('mouseout', function() {
+            d3.select(this)
+                .transition()
+                .attr("fill", "#ff471a")
+                .attr("r", 5)
+        }); 
 
 
 function calcLinear(data, x, y, minX, minY){

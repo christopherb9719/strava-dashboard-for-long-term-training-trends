@@ -28,9 +28,11 @@ def rdr():
     
     for run in runs:
         summary = {}
+        summary['id'] = run.id
         summary['distance'] = run.distance.num
         summary['heart_rate'] = run.average_heartrate
         summary['average_speed'] = run.average_speed.num
+        summary['description'] = run.description
         summaries.append(summary.copy())
 
     return render_template("index.html", sample = summaries)
