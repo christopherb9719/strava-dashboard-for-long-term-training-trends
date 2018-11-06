@@ -9,145 +9,71 @@ var y = d3.scaleLinear().range([h, 0]);
 
 var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }) - 5, d3.max(dataset, function(d) { return d.heart_rate; })+5]);
 var yAxis = y.domain([d3.max(dataset, function(d) { return d.average_speed; })+0.2, d3.min(dataset, function(d) {return d.average_speed; }) - 0.2]);
-
+        
 var svgContainer = d3.select('#graph_container').append("g");   
 var svg;
+var barchart;
+//var scatterPlot = dc.scatterPlot('#graph_container');
+//var histPlot = dc.barChart('#hist_chart')
 
-buildGraph()
-d3.selectAll(".myCheckbox").on("change",update);
+buildScatter()
+//buildHistogram()
+//buildScatterPlot();
+
+
+
+//d3.selectAll(".myCheckbox").on("change",update);
 update();
 
-
-/**var dataArray = getDataArray(dataset);
-console.log(dataArray)
-var lg = calcLinear(dataArray, "x", "y", d3.min(dataset, function(d){ return d.heart_rate}), d3.min(dataset, function(d){ return d.average_speed}));
-console.log("Scaled values:")
-console.log("(" + x(lg.ptA.x) + ", " + y(lg.ptA.y) + ")");
-console.log("(" + x(lg.ptB.x) + ", " + y(lg.ptB.y) + ")");
-
-svg.selectAll("line")
-    .data(lg)
-    .enter()
-    .append("line")
-        .attr("class", "regression")
-        .attr("stroke", "black")
-        .attr("x1", x(lg.ptA.x))
-        .attr("y1", y(lg.ptA.y))
-        .attr("x2", x(lg.ptB.x))
-        .attr("y2", y(lg.ptB.y));
-
-//Append data points to the scatterplot
-
-
-
-function calcLinear(data, x, y, minX, minY){
-    /////////
-    //SLOPE//
-    /////////
-
-    console.log("minX: " + minX)
-    console.log("minY: " + minY)
-    // Let n = the number of data points
-    var n = data.length;
-    console.log("n: " + n)
-
-    // Get just the points
-    var pts = [];
-    data.forEach(function(d, i) {
-        var obj = {};
-        obj.x = d[0];
-        obj.y = d[1];
-        obj.mult = obj.x*obj.y;
-        pts.push(obj);
-    });
-
-    // Let a equal n times the summation of all x-values multiplied by their corresponding y-values
-    // Let b equal the sum of all x-values times the sum of all y-values
-    // Let c equal n times the sum of all squared x-values
-    // Let d equal the squared sum of all x-values
-    var sum = 0;
-    var xSum = 0;
-    var ySum = 0;
-    var sumSq = 0;
-    pts.forEach(function(pt){
-        sum = sum + pt.mult;
-        xSum = xSum + pt.x;
-        ySum = ySum + pt.y;
-        sumSq = sumSq + (pt.x * pt.x);
-    });
-    var a = sum * n;
-    var b = xSum * ySum;
-    var c = sumSq * n;
-    var d = xSum * xSum;
-
-    // Plug the values that you calculated for a, b, c, and d into the following equation to calculate the slope
-    // slope = m = (a - b) / (c - d)
-    var m = (a - b) / (c - d);
-    /////////////
-    //INTERCEPT//
-    /////////////
-
-    // Let e equal the sum of all y-values
-    var e = ySum;
-
-    // Let f equal the slope times the sum of all x-values
-    var f = m * xSum;
-
-    // Plug the values you have calculated for e and f into the following equation for the y-intercept
-    // y-intercept = b = (e - f) / n
-    var b = (e - f) / n;
-
-    console.log("Returned Values:")
-    console.log("( " + minX + ", " + Math.round(m*minX + b) + " )")
-    console.log("(" + Math.round((minY-b)/m) + ", " + minY + " )")
-        
-    // return an object of two points
-    // each point is an object with an x and y coordinate
-    return {
-        ptA : {
-        x: minX,
-        y: m*minX + b
-        },
-        ptB : {
-        y: (minY-b)/m,
-        x: minY
-        }
-    }
-}
-
-function getDataArray(data) {
-    dataArray = []
-    data.forEach(function(d, i) {
-        coords = []
-        coords.push(d.heart_rate)
-        coords.push(d.average_speed)
-        dataArray.push(coords)
-    })
-    return dataArray
-}*/
+d3.select(".filter-by-min").on("input", function() {
+    update();
+  });
+d3.select(".filter-by-max").on("input", function() {
+    update();
+  });
+d3.select(".filter-by-elevation").on("input", function() {
+    update();
+  });
 
 function update() {
-    console.log("UPDATING")
-    var min_distance = 0;
-    d3.selectAll(".myCheckbox").each(function(d) {
-        cb = d3.select(this);
-        if(cb.property("checked")){
-            min_distance = cb.property("value");
-        }
-    });
-    console.log("MIN DISTANCE: " + min_distance)
-    if(min_distance > 0){
-        console.log("GETTING NEW DATA");
+    min_distance = d3.select(".filter-by-min").property("value");
+    max_distance = d3.select(".filter-by-max").property("value");
+    max_elevation_gain = d3.select(".filter-by-elevation").property("value");
+    console.log("Min Distance: " + min_distance);
+    console.log("Max Distance: " + max_distance);
+    newData = dataset;
+
+    if (min_distance > 0 || max_distance > 0) {
         newData = dataset.filter(function(d,i) {
-            if (d.distance < min_distance) {
-                return d;
+            //filter by distance
+            if (!max_distance > 0) {
+                if (d.distance >= min_distance) {
+                    return d;
+                }
+            }
+            else if (!min_distance > 0) {
+                if (d.distance <= max_distance) {
+                    return d;
+                }
+            }
+            else {
+                if (d.distance <= max_distance && d.distance >= min_distance) {
+                    return d;
+                }
+            }
+        })
+    }
+    if (max_elevation_gain > 0) {
+        //filter by elevation
+        newData = newData.filter(function(d, i) {
+            if (max_elevation_gain > 0) {
+                if (d.total_elevation_gain <= max_elevation_gain) {
+                    return d;
+                }
             }
         });
-    } else {
-        newData = dataset;     
     }
-    console.log("NEW DATA SIZE: " + newData.length);
-    console.log("DATA SET SIZE: " + dataset.length);
+
 
     svg.selectAll("circle").remove();
     svg.selectAll("circle")
@@ -174,7 +100,7 @@ function update() {
             }); 
 }
 
-function buildGraph() {                                                               
+function buildScatter() {                                                       
     //Create SVG variable to build the graph into
     svg = svgContainer.append('svg')
         .attr("width", w + margin.left + margin.right)
@@ -208,4 +134,108 @@ function buildGraph() {
         .attr("dy", "1em")
         .style("text-anchor", "middle")
         .text("Average Speed (m/s)");  
+}
+
+function buildHistogram() {
+    var countObj = {};
+
+    // count how much each city occurs in list and store in countObj
+    dataset.forEach(function(d) {
+        var dist = Math.ceil(d.distance/1000)*1000;
+        if(countObj[dist] == undefined) {
+            countObj[dist] = 0;
+        } else {
+            countObj[dist] += 1;
+        }
+    });
+
+    console.log(Math.max(Object.keys(countObj)));
+    console.log(countObj);
+    var xAxisHist = x.domain([0, d3.max(Object.keys(countObj))]);
+    var yAxisHist = y.domain([0, d3.max(countObj)]);
+
+    barchart = d3.select('#hist_chart').append('svg')
+        .attr('class', 'barchart')
+        .attr('width', w + margin.left + margin.right)
+        .attr("height", h + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")");
+
+    //Append x axis
+    barchart.append("g")
+        .attr("transform", "translate(0, "+ h +")")
+        .call(d3.axisBottom(xAxisHist));
+
+    //Append y axis
+    barchart.append("g")
+        .call(d3.axisLeft(yAxisHist));
+
+    console.log(countObj);
+
+    svg.selectAll("bar")
+        .data(countObj)
+        .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return x(d.dist); })
+            .attr("y", function(d) { return y(d.dist); })
+}
+
+
+
+
+
+
+
+
+
+function buildScatterPlot() {
+    var ndx = crossfilter(dataset);
+    var scatterPlotDim = ndx.dimension( function(d) {
+        return [+d.heart_rate, +d.average_speed, d.id];
+    });
+    var histogramDim = ndx.dimension( function(d) {
+        return +(Math.ceil(d.distance/1000)*1000);
+    });
+    var scatterPlotGroup = scatterPlotDim.group();
+    var histogramGroup = histogramDim.group().reduceCount();
+
+    scatterPlot
+        .width(w + margin.left + margin.right)
+        .height(h + margin.top + margin.bottom)
+        .x(xAxis)
+        .y(yAxis)
+        .xAxisLabel("Average Heart Rate (bpm)")
+        .yAxisLabel("Average Speed (m/s)")
+        .clipPadding(10)
+        .dimension(scatterPlotDim)
+        .excludedColor('#ddd')
+        .group(scatterPlotGroup)
+        .brushOn(false)
+        .symbolSize([7])
+        .on('renderlet', function(chart) {
+            console.log("Renderlet entered");
+            var dots = chart.selectAll("path.symbol");
+            console.log(dots);
+            chart.selectAll('path.symbol')
+                .on('mouseover', function(d) {
+                    console.log("Renderlet mouseover detected");
+                    chart.symbolSize([10])
+                })
+                .on('click', function(d) {
+                    console.log("id: " + d[1]);
+                })
+        });
+
+    histPlot
+        .width(w + margin.left + margin.right)
+        .dimension(histogramDim)
+        .group(histogramGroup)
+        .x(d3.scaleLinear().domain([0, d3.max(dataset, function(d) { return +(Math.ceil(d.distance/1000)*1000)})]))
+        .controlsUseVisibility(false)
+        .elasticY(true)
+        .xUnits(function() {return 100})
+        .outerPadding([0.05]);
+
+    dc.renderAll();
 }

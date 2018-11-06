@@ -5,15 +5,23 @@
     <head>
         <title>Dashboard</title>
         <link rel='stylesheet' href="{{ url_for('static',filename='styles/style.css') }}" />        
-        <script src="https://d3js.org/d3.v5.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
     </head>
     <body>
-        <input type="checkbox" class="myCheckbox" value=10000> Less than 10km
-        <div id="graph_container"></div> 
+        <input type="number" class="filter-by-min" id="minDist" size="30" style="font-size: 14px;" placeholder="Set a minimum distance">
+        <input type="number" class="filter-by-max" id="maxDist" size="30" style="font-size: 14px;" placeholder="Set a maximum distance">
+        <input type="number" class="filter-by-elevation" id="maxElev" size="30" style="font-size: 14px;" placeholder="Set a maximum elevation change">
+        <div id="graph_container"></div>
+        <div id="hist_chart" style="width:300px; height:300px">
+            <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+              <a href="javascript:spendHistChart.filterAll();dc.redrawAll();">reset</a>
+            </div>
+        </div>
         <script>
             var dataset = {{ sample|tojson }};
         </script>
-        <script src="https://d3js.org/d3.v5.js"></script>
+        <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
+        <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/regression.min.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/index.js')}}"></script>
     </body>

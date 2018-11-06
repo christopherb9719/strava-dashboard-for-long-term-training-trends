@@ -33,6 +33,7 @@ def rdr():
         summary['heart_rate'] = run.average_heartrate
         summary['average_speed'] = run.average_speed.num
         summary['description'] = run.description
+        summary['total_elevation_gain'] = run.total_elevation_gain.num
         summaries.append(summary.copy())
 
     return render_template("index.html", sample = summaries)
