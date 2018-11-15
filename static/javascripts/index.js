@@ -1,5 +1,19 @@
 console.log(dataset);
 
+
+var formatDateIntoYear = d3.timeFormat("%Y");
+var formatDate = d3.timeFormat("%b %Y");
+var parseDate = d3.timeParse("%m/%d/%y");
+
+dataset.forEach(function(d) {
+    console.log(d.month + "/" + d.year) ;
+})
+
+var startDate = new Date("2014-11-01"),
+    endDate = new Date("2019-04-01");
+
+var minDate = startDate;
+
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
 w = 1200 - margin.left - margin.right,
 h = 600 - margin.top - margin.bottom;
@@ -13,11 +27,64 @@ var yAxis = y.domain([d3.max(dataset, function(d) { return d.average_speed; })+0
 var svgContainer = d3.select('#graph_container').append("g");   
 var svg;
 var barchart;
-//var scatterPlot = dc.scatterPlot('#graph_container');
-//var histPlot = dc.barChart('#hist_chart')
+var scatterPlot = dc.scatterPlot('#graph_container');
+var histPlot = dc.barChart('#hist_chart')
+
+///////SLIDER///////
+var svgSlider = d3.select("#slider")
+    .append('svg')
+    .attr("width", w + margin.left + margin.right)
+    .attr("height", 100)
+
+var sx = d3.scaleTime()
+    .domain([startDate, endDate])
+    .range([0, w])
+    .clamp(true);
+
+var slider = svgSlider.append("g")
+    .attr("class", "slider")
+    .attr("transform", "translate(" + margin.left + "," + 100 / 2 + ")");
+
+
+slider.append("line")
+    .attr("class", "track")
+    .attr("x1", sx.range()[0])
+    .attr("x2", sx.range()[1])
+    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-inset")
+    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-overlay")
+    .call(d3.drag()
+        .on("start.interrupt", function() { slider.interrupt(); })
+        .on("start drag", function() { 
+            minDate = sx.invert(d3.event.x)
+            update(); 
+        }));
+
+slider.insert("g", ".track-overlay")
+    .attr("class", "ticks")
+    .attr("transform", "translate(0," + 18 + ")")
+    .selectAll("text")
+    .data(x.ticks(10))
+    .enter()
+    .append("text")
+    .attr("x", sx)
+    .attr("y", 10)
+    .attr("text-anchor", "middle")
+    .text(function(d) { return formatDateIntoYear(d); });
+    
+var handle = slider.insert("circle", ".track-overlay")
+    .attr("class", "handle")
+    .attr("r", 9);
+
+var label = slider.append("text")  
+    .attr("class", "label")
+    .attr("text-anchor", "middle")
+    .text(formatDate(startDate))
+    .attr("transform", "translate(0," + (-25) + ")")
 
 buildScatter()
-//buildHistogram()
+//buildHistogram();
 //buildScatterPlot();
 
 
@@ -35,7 +102,17 @@ d3.select(".filter-by-elevation").on("input", function() {
     update();
   });
 
+
+
+
 function update() {
+    handle.attr("cx", sx(minDate));
+    label
+      .attr("x", sx(minDate))
+      .text(formatDate(minDate));
+  
+    console.log(minDate)
+
     min_distance = d3.select(".filter-by-min").property("value");
     max_distance = d3.select(".filter-by-max").property("value");
     max_elevation_gain = d3.select(".filter-by-elevation").property("value");
@@ -74,6 +151,13 @@ function update() {
         });
     }
 
+    var newData = newData.filter(function(d) {
+         if (parseInt(d.year) >= parseInt(minDate.getFullYear())) {
+             //if (d.month >= h.getMonth()) {
+                 return d;
+             //}
+         }
+    })
 
     svg.selectAll("circle").remove();
     svg.selectAll("circle")
@@ -239,3 +323,19 @@ function buildScatterPlot() {
 
     dc.renderAll();
 }
+
+//taken from Jason Davies science library
+// https://github.com/jasondavies/science.js/
+function gaussian(x) {
+    var gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
+    console.log("Gausian constant: " + gaussianConstant)
+	var mean = 0;
+  var sigma = 1;
+  x = (x - mean) / sigma;
+  console.log("x: " + x);
+  var val = -0.5*x*x;
+  console.log(val);
+  console.log(Math.exp(val));
+  console.log(Math.exp(.5 * x * x) / sigma)
+  return gaussianConstant * Math.exp(0.5 * x) / sigma;
+};

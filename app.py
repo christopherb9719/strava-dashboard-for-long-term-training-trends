@@ -34,6 +34,8 @@ def rdr():
         summary['average_speed'] = run.average_speed.num
         summary['description'] = run.description
         summary['total_elevation_gain'] = run.total_elevation_gain.num
+        summary['year'] = run.start_date.year
+        summary['month'] = run.start_date.month
         summaries.append(summary.copy())
 
     return render_template("index.html", sample = summaries)
