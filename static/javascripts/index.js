@@ -1,18 +1,13 @@
 console.log(dataset);
-
+console.log(reg);
 
 var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
-dataset.forEach(function(d) {
-    console.log(d.month + "/" + d.year) ;
-})
 
-var startDate = new Date("2014-11-01"),
-    endDate = new Date("2019-04-01");
-
-var minDate = startDate;
+var startDate = new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0),
+    endDate = new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0);
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
 w = 1200 - margin.left - margin.right,
@@ -22,14 +17,25 @@ var x = d3.scaleLinear().range([0, w]);
 var y = d3.scaleLinear().range([h, 0]);
 
 var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }) - 5, d3.max(dataset, function(d) { return d.heart_rate; })+5]);
-var yAxis = y.domain([d3.max(dataset, function(d) { return d.average_speed; })+0.2, d3.min(dataset, function(d) {return d.average_speed; }) - 0.2]);
-        
-var svgContainer = d3.select('#graph_container').append("g");   
+var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) {return d.average_pace; }) + 0.02]);
+
+var svgContainer = d3.select('#graph_container').append("g");
 var svg;
 var barchart;
 var scatterPlot = dc.scatterPlot('#graph_container');
 var histPlot = dc.barChart('#hist_chart')
 
+var min_distance;
+var max_distance;
+var min_elevation_gain;
+var max_elevation_gain;
+var min_heart_rate;
+var max_heart_rate;
+var min_date = startDate;
+var max_date = endDate;
+
+
+/**
 ///////SLIDER///////
 var svgSlider = d3.select("#slider")
     .append('svg')
@@ -56,10 +62,10 @@ slider.append("line")
     .attr("class", "track-overlay")
     .call(d3.drag()
         .on("start.interrupt", function() { slider.interrupt(); })
-        .on("start drag", function() { 
-            minDate = sx.invert(d3.event.x)
-            update(); 
-        }));
+        .on("start drag", function() {
+              minDate = sx.invert(d3.event.x);
+              update();
+        }))
 
 slider.insert("g", ".track-overlay")
     .attr("class", "ticks")
@@ -72,56 +78,108 @@ slider.insert("g", ".track-overlay")
     .attr("y", 10)
     .attr("text-anchor", "middle")
     .text(function(d) { return formatDateIntoYear(d); });
-    
+
 var handle = slider.insert("circle", ".track-overlay")
     .attr("class", "handle")
     .attr("r", 9);
 
-var label = slider.append("text")  
+var maxHandle = slider.insert("circle", ".track-overlay")
+    .attr("class", "handle")
+    .attr("r", 9)
+
+var label = slider.append("text")
     .attr("class", "label")
     .attr("text-anchor", "middle")
     .text(formatDate(startDate))
     .attr("transform", "translate(0," + (-25) + ")")
-
+*/
 buildScatter()
 //buildHistogram();
 //buildScatterPlot();
 
 
+var lineFunction = d3.line()
+  .x(function(d) {
+    return xAxis(d.x);
+  })
+  .y(function(d) {
+    return yAxis(d.y);
+  })
+  .curve(d3.curveLinear);
 
-//d3.selectAll(".myCheckbox").on("change",update);
+
 update();
+var timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
+var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+var fromDate;
+var toDate;
 
-d3.select(".filter-by-min").on("input", function() {
-    update();
+svg.append("path")
+  .attr("d", lineFunction(reg))
+  .attr("stroke", "black")
+  .attr("stroke-fill", 1)
+
+
+$(function() {
+  $( "#slider" ).slider({
+    range: true,
+    min: new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000,
+    max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
+    values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
+    slide: function( event, ui ) {
+      min_date = new Date(ui.values[0] * 1000);
+      max_date = new Date(ui.values[1] * 1000);
+      update();
+    }
   });
-d3.select(".filter-by-max").on("input", function() {
-    update();
+});
+
+$(function() {
+  $( "#distanceSlider" ).slider({
+    range: true,
+    min: d3.min(dataset, function(d) { return d.distance }),
+    max: d3.max(dataset, function(d) { return d.distance }),
+    values: [0, d3.max(dataset, function(d) { return d.distance })],
+    slide: function( event, ui ) {
+      min_distance = ui.values[0];
+      max_distance = ui.values[1];
+      update();
+    }
   });
-d3.select(".filter-by-elevation").on("input", function() {
-    update();
+});
+
+$(function() {
+  $( "#elevationSlider" ).slider({
+    range: true,
+    min: d3.min(dataset, function(d) { return d.total_elevation_gain }),
+    max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
+    values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
+    slide: function( event, ui ) {
+      min_elevation_gain = ui.values[0];
+      max_elevation_gain = ui.values[1];
+      update();
+    }
   });
+});
 
-
-
+$(function() {
+  $( "#heartrateSlider" ).slider({
+    range: true,
+    min: d3.min(dataset, function(d) { return d.heart_rate }),
+    max: d3.max(dataset, function(d) { return d.heart_rate }),
+    values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
+    slide: function( event, ui ) {
+      min_heart_rate = ui.values[0];
+      max_heart_rate = ui.values[1];
+      update();
+    }
+  });
+});
 
 function update() {
-    handle.attr("cx", sx(minDate));
-    label
-      .attr("x", sx(minDate))
-      .text(formatDate(minDate));
-  
-    console.log(minDate)
-
-    min_distance = d3.select(".filter-by-min").property("value");
-    max_distance = d3.select(".filter-by-max").property("value");
-    max_elevation_gain = d3.select(".filter-by-elevation").property("value");
-    console.log("Min Distance: " + min_distance);
-    console.log("Max Distance: " + max_distance);
     newData = dataset;
-
     if (min_distance > 0 || max_distance > 0) {
-        newData = dataset.filter(function(d,i) {
+        newData = newData.filter(function(d,i) {
             //filter by distance
             if (!max_distance > 0) {
                 if (d.distance >= min_distance) {
@@ -140,68 +198,94 @@ function update() {
             }
         })
     }
-    if (max_elevation_gain > 0) {
-        //filter by elevation
-        newData = newData.filter(function(d, i) {
-            if (max_elevation_gain > 0) {
-                if (d.total_elevation_gain <= max_elevation_gain) {
+    if (min_elevation_gain > 0 || max_elevation_gain > 0) {
+        newData = newData.filter(function(d,i) {
+        //filter by distance
+          if (d.total_elevation_gain <= max_elevation_gain && d.total_elevation_gain >= min_elevation_gain) {
+            return d;
+          }
+        })
+      }
+
+    if (min_heart_rate > 0 || max_heart_rate > 0) {
+        newData = newData.filter(function(d,i) {
+            //filter by distance
+            if (!max_heart_rate > 0) {
+                if (d.heart_rate >= min_heart_rate) {
                     return d;
                 }
             }
-        });
+            else if (!min_heart_rate > 0) {
+                if (d.heart_rate <= max_heart_rate) {
+                    return d;
+                }
+            }
+            else {
+                if (d.heart_rate <= max_heart_rate && d.heart_rate >= min_heart_rate) {
+                    return d;
+                }
+            }
+        })
     }
-
-    var newData = newData.filter(function(d) {
-         if (parseInt(d.year) >= parseInt(minDate.getFullYear())) {
-             //if (d.month >= h.getMonth()) {
-                 return d;
-             //}
-         }
-    })
+    if (min_date > 0 || max_date > 0) {
+      console.log(min_date);
+      console.log(max_date);
+      newData = newData.filter(function(d) {
+        if (d.year > min_date.getFullYear() && d.year < max_date.getFullYear()) {
+          return d;
+        }
+        else if (d.year == min_date.getFullYear()) {
+            if (d.month >= min_date.getMonth()+1) return d;
+        }
+        else if (d.year == max_date.getFullYear()) {
+          if (d.month <= max_date.getMonth()-1) return d;
+        }
+      });
+    }
 
     svg.selectAll("circle").remove();
     svg.selectAll("circle")
-        .data(newData)
-        .enter()
-        .append("a")
-            .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
-            .append("circle")
-                .attr("cx", function(d) {return xAxis(d.heart_rate);})
-                .attr("cy", function(d) {return yAxis(d.average_speed);})
-                .attr("r", 5)
-                .attr("fill", "#ff471a")
-            .on('mouseover', function() {
-                d3.select(this)
-                    .transition()
-                    .attr("fill", "#000000")
-                    .attr("r", 7)
-            })
-            .on('mouseout', function() {
-                d3.select(this)
-                    .transition()
-                    .attr("fill", "#ff471a")
-                    .attr("r", 5)
-            }); 
+      .data(newData)
+      .enter()
+      .append("a")
+        .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
+        .append("circle")
+          .attr("cx", function(d) {return xAxis(d.heart_rate);})
+          .attr("cy", function(d) {return yAxis(d.average_pace);})
+          .attr("r", 5)
+          .attr("fill", "#ff471a")
+        .on('mouseover', function() {
+          d3.select(this)
+            .transition()
+            .attr("fill", "#000000")
+            .attr("r", 7)
+        })
+        .on('mouseout', function() {
+          d3.select(this)
+            .transition()
+            .attr("fill", "#ff471a")
+            .attr("r", 5)
+        });
 }
 
-function buildScatter() {                                                       
+function buildScatter() {
     //Create SVG variable to build the graph into
     svg = svgContainer.append('svg')
         .attr("width", w + margin.left + margin.right)
         .attr("height", h + margin.top + margin.bottom)
         .append("g")
-            .attr("transform", 
+            .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
-                
+
     //Append x-axis
     svg.append("g")
         .attr("transform", "translate(0, "+ h +")")
         .call(d3.axisBottom(xAxis));
 
     //Append label for x-axis
-    svg.append("text")             
+    svg.append("text")
         .attr("transform",
-            "translate(" + (w/2) + " ," + 
+            "translate(" + (w/2) + " ," +
                             (h + margin.top + 20) + ")")
         .style("text-anchor", "middle")
         .text("Average Heart Rate (BPM)");
@@ -217,8 +301,10 @@ function buildScatter() {
         .attr("x",0 - (h / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text("Average Speed (m/s)");  
+        .text("Average Pace (s/m)");
 }
+
+
 
 function buildHistogram() {
     var countObj = {};
@@ -243,7 +329,7 @@ function buildHistogram() {
         .attr('width', w + margin.left + margin.right)
         .attr("height", h + margin.top + margin.bottom)
         .append("g")
-            .attr("transform", 
+            .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
 
     //Append x axis
@@ -266,64 +352,6 @@ function buildHistogram() {
 }
 
 
-
-
-
-
-
-
-
-function buildScatterPlot() {
-    var ndx = crossfilter(dataset);
-    var scatterPlotDim = ndx.dimension( function(d) {
-        return [+d.heart_rate, +d.average_speed, d.id];
-    });
-    var histogramDim = ndx.dimension( function(d) {
-        return +(Math.ceil(d.distance/1000)*1000);
-    });
-    var scatterPlotGroup = scatterPlotDim.group();
-    var histogramGroup = histogramDim.group().reduceCount();
-
-    scatterPlot
-        .width(w + margin.left + margin.right)
-        .height(h + margin.top + margin.bottom)
-        .x(xAxis)
-        .y(yAxis)
-        .xAxisLabel("Average Heart Rate (bpm)")
-        .yAxisLabel("Average Speed (m/s)")
-        .clipPadding(10)
-        .dimension(scatterPlotDim)
-        .excludedColor('#ddd')
-        .group(scatterPlotGroup)
-        .brushOn(false)
-        .symbolSize([7])
-        .on('renderlet', function(chart) {
-            console.log("Renderlet entered");
-            var dots = chart.selectAll("path.symbol");
-            console.log(dots);
-            chart.selectAll('path.symbol')
-                .on('mouseover', function(d) {
-                    console.log("Renderlet mouseover detected");
-                    chart.symbolSize([10])
-                })
-                .on('click', function(d) {
-                    console.log("id: " + d[1]);
-                })
-        });
-
-    histPlot
-        .width(w + margin.left + margin.right)
-        .dimension(histogramDim)
-        .group(histogramGroup)
-        .x(d3.scaleLinear().domain([0, d3.max(dataset, function(d) { return +(Math.ceil(d.distance/1000)*1000)})]))
-        .controlsUseVisibility(false)
-        .elasticY(true)
-        .xUnits(function() {return 100})
-        .outerPadding([0.05]);
-
-    dc.renderAll();
-}
-
 //taken from Jason Davies science library
 // https://github.com/jasondavies/science.js/
 function gaussian(x) {
@@ -339,3 +367,12 @@ function gaussian(x) {
   console.log(Math.exp(.5 * x * x) / sigma)
   return gaussianConstant * Math.exp(0.5 * x) / sigma;
 };
+
+function getMonthFromString(mon){
+
+    var d = Date.parse(mon + "1, 2012");
+    if(!isNaN(d)){
+       return new Date(d).getMonth() + 1;
+    }
+    return -1;
+  }
