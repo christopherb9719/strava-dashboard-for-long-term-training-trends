@@ -13,27 +13,27 @@ a {
     stroke: #eee;
     shape-rendering: crispEdges;
 }
- 
+
 .axis text {
     font-family: sans-serif;
     font-size: 11px;
 }
- 
+
 .loading {
     font-family: sans-serif;
     font-size: 15px;
 }
- 
+
 .circle {
     fill: #222;
 }
 
-.tooltip {                                                        
+.tooltip {
     position: absolute;
     pointer-events: none;
-    background-color: #eee;                                                  
-  }        
-  
+    background-color: #eee;
+  }
+
   .ticks {
     font-size: 10px;
   }
@@ -68,3 +68,15 @@ a {
     stroke-opacity: 0.5;
     stroke-width: 1.25px;
   }
+
+.ui-slider {
+  width: 100%;
+}
+
+#slider label {
+  position: absolute;
+  width: 20px;
+  margin-top: 20px;
+  margin-left: -10px;
+  text-align: center;
+}

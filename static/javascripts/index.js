@@ -33,91 +33,23 @@ var min_heart_rate;
 var max_heart_rate;
 var min_date = startDate;
 var max_date = endDate;
-
-
-/**
-///////SLIDER///////
-var svgSlider = d3.select("#slider")
-    .append('svg')
-    .attr("width", w + margin.left + margin.right)
-    .attr("height", 100)
-
-var sx = d3.scaleTime()
-    .domain([startDate, endDate])
-    .range([0, w])
-    .clamp(true);
-
-var slider = svgSlider.append("g")
-    .attr("class", "slider")
-    .attr("transform", "translate(" + margin.left + "," + 100 / 2 + ")");
-
-
-slider.append("line")
-    .attr("class", "track")
-    .attr("x1", sx.range()[0])
-    .attr("x2", sx.range()[1])
-    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    .attr("class", "track-inset")
-    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    .attr("class", "track-overlay")
-    .call(d3.drag()
-        .on("start.interrupt", function() { slider.interrupt(); })
-        .on("start drag", function() {
-              minDate = sx.invert(d3.event.x);
-              update();
-        }))
-
-slider.insert("g", ".track-overlay")
-    .attr("class", "ticks")
-    .attr("transform", "translate(0," + 18 + ")")
-    .selectAll("text")
-    .data(x.ticks(10))
-    .enter()
-    .append("text")
-    .attr("x", sx)
-    .attr("y", 10)
-    .attr("text-anchor", "middle")
-    .text(function(d) { return formatDateIntoYear(d); });
-
-var handle = slider.insert("circle", ".track-overlay")
-    .attr("class", "handle")
-    .attr("r", 9);
-
-var maxHandle = slider.insert("circle", ".track-overlay")
-    .attr("class", "handle")
-    .attr("r", 9)
-
-var label = slider.append("text")
-    .attr("class", "label")
-    .attr("text-anchor", "middle")
-    .text(formatDate(startDate))
-    .attr("transform", "translate(0," + (-25) + ")")
-*/
-buildScatter()
-//buildHistogram();
-//buildScatterPlot();
-
-
 var lineFunction = d3.line()
   .x(function(d) {
-    return xAxis(d.x);
+    console.log(typeof d.x);
+    console.log(d.x);
+    return x(d.x);
   })
   .y(function(d) {
-    return yAxis(d.y);
+    console.log(typeof d.y);
+    console.log(d.y);
+    return y(d.y);
   })
-  .curve(d3.curveLinear);
 
+
+buildScatter()
+//buildHistogram();
 
 update();
-var timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
-var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-var fromDate;
-var toDate;
-
-svg.append("path")
-  .attr("d", lineFunction(reg))
-  .attr("stroke", "black")
-  .attr("stroke-fill", 1)
 
 
 $(function() {
@@ -145,7 +77,19 @@ $(function() {
       max_distance = ui.values[1];
       update();
     }
-  });
+  })
+  .each(function() {
+    var opt = $(this).data().slider.options;
+    // Get the number of possible values
+    var vals = opt.max - opt.min;
+    // Position the labels
+    for (var i = 0; i <= vals; i = i + 1000) {
+        // Create a new element and position it with percentages
+        var el = $('<label>' + (i + opt.min) + '</label>').css('left', (i/vals*100) + '%');
+        // Add the element inside #slider
+        $("#distanceSlider").append(el);
+    }
+  })
 });
 
 $(function() {
@@ -159,7 +103,19 @@ $(function() {
       max_elevation_gain = ui.values[1];
       update();
     }
-  });
+  })
+  .each(function() {
+    var opt = $(this).data().slider.options;
+    // Get the number of possible values
+    var vals = opt.max - opt.min;
+    // Position the labels
+    for (var i = 0; i <= vals; i = i + 100) {
+        // Create a new element and position it with percentages
+        var el = $('<label>' + (i + opt.min) + '</label>').css('left', (i/vals*100) + '%');
+        // Add the element inside #slider
+        $("#elevationSlider").append(el);
+    }
+  })
 });
 
 $(function() {
@@ -228,8 +184,6 @@ function update() {
         })
     }
     if (min_date > 0 || max_date > 0) {
-      console.log(min_date);
-      console.log(max_date);
       newData = newData.filter(function(d) {
         if (d.year > min_date.getFullYear() && d.year < max_date.getFullYear()) {
           return d;
@@ -266,6 +220,8 @@ function update() {
             .attr("fill", "#ff471a")
             .attr("r", 5)
         });
+    svg.append("path")
+     .attr("d", lineFunction(reg));
 }
 
 function buildScatter() {
@@ -276,6 +232,10 @@ function buildScatter() {
         .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
+    //Append regression line
+    svg.append("path")
+      .attr("d", lineFunction(reg))
+      .style("class", "line")
 
     //Append x-axis
     svg.append("g")
@@ -302,6 +262,7 @@ function buildScatter() {
         .attr("dy", "1em")
         .style("text-anchor", "middle")
         .text("Average Pace (s/m)");
+
 }
 
 
