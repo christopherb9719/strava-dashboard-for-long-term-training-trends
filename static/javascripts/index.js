@@ -20,20 +20,15 @@ var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }) - 5, 
 var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) {return d.average_pace; }) + 0.02]);
 
 var svgContainer = d3.select('#graph_container').append("g");
-var svg;
-var barchart;
-var scatterPlot = dc.scatterPlot('#graph_container');
-var histPlot = dc.barChart('#hist_chart')
 
-var min_distance;
-var max_distance;
-var min_elevation_gain;
-var max_elevation_gain;
-var min_heart_rate;
-var max_heart_rate;
+var min_distance = d3.min(dataset, function(d) { return d.distance });
+var max_distance = d3.max(dataset, function(d) { return d.distance });
+var min_elevation_gain = d3.min(dataset, function(d) { return d.total_elevation_gain });
+var max_elevation_gain = d3.max(dataset, function(d) { return d.total_elevation_gain });
+var min_heart_rate = d3.min(dataset, function(d) { return d.heart_rate });
+var max_heart_rate = d3.max(dataset, function(d) { return d.heart_rate });
 var min_date = startDate;
 var max_date = endDate;
-
 
 
 scatter = buildScatter();
@@ -124,55 +119,12 @@ $(function() {
 
 function update() {
     newData = dataset;
-    if (min_distance > 0 || max_distance > 0) {
-        newData = newData.filter(function(d,i) {
-            //filter by distance
-            if (!max_distance > 0) {
-                if (d.distance >= min_distance) {
-                    return d;
-                }
-            }
-            else if (!min_distance > 0) {
-                if (d.distance <= max_distance) {
-                    return d;
-                }
-            }
-            else {
-                if (d.distance <= max_distance && d.distance >= min_distance) {
-                    return d;
-                }
-            }
-        })
-    }
-    if (min_elevation_gain > 0 || max_elevation_gain > 0) {
-        newData = newData.filter(function(d,i) {
-        //filter by distance
-          if (d.total_elevation_gain <= max_elevation_gain && d.total_elevation_gain >= min_elevation_gain) {
-            return d;
-          }
-        })
+    newData = newData.filter(function(d,i) {
+      if ((d.distance <= max_distance && d.distance >= min_distance) && (d.total_elevation_gain <= max_elevation_gain && d.total_elevation_gain >= min_elevation_gain) && (d.heart_rate <= max_heart_rate && d.heart_rate >= min_heart_rate)) {
+        return d;
       }
+    })
 
-    if (min_heart_rate > 0 || max_heart_rate > 0) {
-        newData = newData.filter(function(d,i) {
-            //filter by distance
-            if (!max_heart_rate > 0) {
-                if (d.heart_rate >= min_heart_rate) {
-                    return d;
-                }
-            }
-            else if (!min_heart_rate > 0) {
-                if (d.heart_rate <= max_heart_rate) {
-                    return d;
-                }
-            }
-            else {
-                if (d.heart_rate <= max_heart_rate && d.heart_rate >= min_heart_rate) {
-                    return d;
-                }
-            }
-        })
-    }
     if (min_date > 0 || max_date > 0) {
       newData = newData.filter(function(d) {
         if (d.year > min_date.getFullYear() && d.year < max_date.getFullYear()) {
