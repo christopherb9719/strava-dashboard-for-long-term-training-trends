@@ -33,19 +33,12 @@ var min_heart_rate;
 var max_heart_rate;
 var min_date = startDate;
 var max_date = endDate;
-var lineFunction = d3.line()
-  .x(function(d) {
-    return x(d.x);
-  })
-  .y(function(d) {
-    return y(d.y);
-  })
-  .curve(d3.curveMonotoneX)
+
 
 
 scatter = buildScatter();
-
-update();
+appendPath(scatter);
+plotPoints(scatter, dataset);
 
 
 $(function() {

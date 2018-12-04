@@ -6,11 +6,6 @@ function buildScatter() {
         .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
-    //Append regression line
-    svg.append("path")
-        .datum(reg) // 10. Binds data to the line
-        .attr("class", "line") // Assign a class for styling
-        .attr("d", lineFunction); // 11. Calls the line generator
 
     //Append x-axis
     svg.append("g")
@@ -64,6 +59,4 @@ function plotPoints(svg, data) {
           .attr("fill", "#ff471a")
           .attr("r", 5)
       });
-  svg.append("path")
-   .attr("d", lineFunction(reg));
 }
