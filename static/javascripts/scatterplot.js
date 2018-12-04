@@ -36,6 +36,8 @@ function buildScatter() {
     return svg;
 }
 
+
+//Tooltip code taken from: http://bl.ocks.org/williaster/af5b855651ffe29bdca1
 function plotPoints(svg, data) {
   svg.selectAll("circle")
     .data(data)
@@ -47,16 +49,31 @@ function plotPoints(svg, data) {
         .attr("cy", function(d) {return yAxis(d.average_pace);})
         .attr("r", 5)
         .attr("fill", "#ff471a")
-      .on('mouseover', function() {
+      .on('mouseover', function(d) {
         d3.select(this)
           .transition()
           .attr("fill", "#000000")
           .attr("r", 7)
-      })
-      .on('mouseout', function() {
+        var html  = "Run ID: " + d.id + "<br/>" +
+                    "<span style='color:" + 'blue' + ";'>Distance: " + d.distance + "m</span><br/>" +
+                    "Average Heart Rate: <b>" + d.heart_rate + "</b>bpm" +
+                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
+
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", .9) // started as 0!
+        }
+      )
+      .on('mouseout', function(d) {
         d3.select(this)
           .transition()
           .attr("fill", "#ff471a")
           .attr("r", 5)
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
       });
 }

@@ -42,6 +42,7 @@ def rdr():
         summary['total_elevation_gain'] = run.total_elevation_gain.num
         summary['year'] = run.start_date.year
         summary['month'] = run.start_date.month
+        summary['day'] = run.start_date.day
         summaries.append(summary.copy())
 
 

@@ -5,18 +5,17 @@ var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
-
 var startDate = new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0),
     endDate = new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0);
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
-w = 1200 - margin.left - margin.right,
-h = 600 - margin.top - margin.bottom;
+    w = 1200 - margin.left - margin.right,
+    h = 600 - margin.top - margin.bottom;
 
 var x = d3.scaleLinear().range([0, w]);
 var y = d3.scaleLinear().range([h, 0]);
 
-var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }) - 5, d3.max(dataset, function(d) { return d.heart_rate; })+5]);
+var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }), d3.max(dataset, function(d) { return d.heart_rate; })]);
 var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) {return d.average_pace; }) + 0.02]);
 
 var svgContainer = d3.select('#graph_container').append("g");
@@ -31,7 +30,36 @@ var min_date = startDate;
 var max_date = endDate;
 
 
-scatter = buildScatter();
+// Add the tooltip container to the vis container
+// it's invisible and its position/contents are defined during mouseover
+var tooltip = d3.select("#graph_container").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+// tooltip mouseover event handler
+var tipMouseover = function(d) {
+    console.log("Mouseover");
+    var html  = d.id + "<br/>" +
+                "<span style='color:" + blue + ";'>" + d.distance + "</span><br/>" +
+                "<b>" + d.heart_rate + "</b> sugar, <b/>" + d.start_date + "</b> calories";
+
+    tooltip.html(html)
+        .style("left", (d3.event.pageX + 15) + "px")
+        .style("top", (d3.event.pageY - 28) + "px")
+      .transition()
+        .duration(200) // ms
+        .style("opacity", .9) // started as 0!
+
+};
+// tooltip mouseout event handler
+var tipMouseout = function(d) {
+  console.log("Mouseout");
+    tooltip.transition()
+        .duration(300) // ms
+        .style("opacity", 0); // don't care about position!
+};
+
+var scatter = buildScatter();
 appendPath(scatter);
 plotPoints(scatter, dataset);
 
@@ -139,7 +167,7 @@ function update() {
       });
     }
 
-    svg.selectAll("circle").remove();
+    scatter.selectAll("circle").remove();
     plotPoints(svg, newData);
 }
 
