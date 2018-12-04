@@ -56,7 +56,7 @@ def rdr():
     f, u = m.predict(pred_x[:,None])
     line_coords = []
     i = 0
-    print(u)
+    print(pred_x)
     while i < len(u):
         coords = {}
         coords['x'] = pred_x[i]
