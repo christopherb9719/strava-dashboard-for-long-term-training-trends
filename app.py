@@ -65,6 +65,8 @@ def rdr():
         line_coords.append(coords.copy())
         i += 1
 
+    print(line_coords)
+
     return render_template("index.html", sample = summaries, regression = line_coords)
 
 

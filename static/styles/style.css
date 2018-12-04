@@ -7,10 +7,10 @@ a {
   color: #00B7FF;
 }
 
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #eee;
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
 }
 
 .axis text {
@@ -36,40 +36,40 @@ a {
     background-color: white;
 }
 
-  .ticks {
-    font-size: 10px;
-  }
+.ticks {
+  font-size: 10px;
+}
 
-  .track,
-  .track-inset,
-  .track-overlay {
-    stroke-linecap: round;
-  }
+.track,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
 
-  .track {
-    stroke: #000;
-    stroke-opacity: 0.3;
-    stroke-width: 10px;
-  }
+.track {
+  stroke: #000;
+  stroke-opacity: 0.3;
+  stroke-width: 10px;
+}
 
-  .track-inset {
-    stroke: #dcdcdc;
-    stroke-width: 8px;
-  }
+.track-inset {
+  stroke: #dcdcdc;
+  stroke-width: 8px;
+}
 
-  .track-overlay {
-    pointer-events: stroke;
-    stroke-width: 50px;
-    stroke: transparent;
-    cursor: crosshair;
-  }
+.track-overlay {
+  pointer-events: stroke;
+  stroke-width: 50px;
+  stroke: transparent;
+  cursor: crosshair;
+}
 
-  .handle {
-    fill: #fff;
-    stroke: #000;
-    stroke-opacity: 0.5;
-    stroke-width: 1.25px;
-  }
+.handle {
+  fill: #fff;
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25px;
+}
 
 .ui-slider {
   width: 100%;

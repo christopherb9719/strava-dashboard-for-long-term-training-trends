@@ -54,9 +54,10 @@ function plotPoints(svg, data) {
           .transition()
           .attr("fill", "#000000")
           .attr("r", 7)
-        var html  = "Run ID: " + d.id + "<br/>" +
-                    "<span style='color:" + 'blue' + ";'>Distance: " + d.distance + "m</span><br/>" +
-                    "Average Heart Rate: <b>" + d.heart_rate + "</b>bpm" +
+        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
+                    "Distance: <b> " + d.distance + "m </b><br/>" +
+                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
+                    "<br/> Average Pace: <b/>" + d.average_pace + " s/m</b>" +
                     "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
 
         tooltip.html(html)

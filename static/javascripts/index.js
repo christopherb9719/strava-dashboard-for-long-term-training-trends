@@ -36,32 +36,9 @@ var tooltip = d3.select("#graph_container").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-// tooltip mouseover event handler
-var tipMouseover = function(d) {
-    console.log("Mouseover");
-    var html  = d.id + "<br/>" +
-                "<span style='color:" + blue + ";'>" + d.distance + "</span><br/>" +
-                "<b>" + d.heart_rate + "</b> sugar, <b/>" + d.start_date + "</b> calories";
-
-    tooltip.html(html)
-        .style("left", (d3.event.pageX + 15) + "px")
-        .style("top", (d3.event.pageY - 28) + "px")
-      .transition()
-        .duration(200) // ms
-        .style("opacity", .9) // started as 0!
-
-};
-// tooltip mouseout event handler
-var tipMouseout = function(d) {
-  console.log("Mouseout");
-    tooltip.transition()
-        .duration(300) // ms
-        .style("opacity", 0); // don't care about position!
-};
-
 var scatter = buildScatter();
-appendPath(scatter);
 plotPoints(scatter, dataset);
+appendPath(scatter);
 
 
 $(function() {
@@ -168,7 +145,9 @@ function update() {
     }
 
     scatter.selectAll("circle").remove();
+    scatter.selectAll("line").remove();
     plotPoints(svg, newData);
+    appendPath(scatter);
 }
 
 /**

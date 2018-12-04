@@ -5,9 +5,10 @@ var lineFunction = d3.line()
   .y(function(d) {
     return y(d.y);
   })
-  .curve(d3.curveMonotoneX)
 
 function appendPath(svg) {
   svg.append("path")
-   .attr("d", lineFunction(reg));
+    .attr("class", "line")
+    .attr("id", function(d) {return "trendline";})
+    .attr("d", lineFunction(reg));
  }
