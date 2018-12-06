@@ -44,7 +44,6 @@ def rdr():
         summary['year'] = run.start_date.year
         summary['month'] = run.start_date.month
         summary['day'] = run.start_date.day
-        summary['date'] = run.start_date
         summaries.append(summary.copy())
 
 
