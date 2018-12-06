@@ -44,6 +44,9 @@ def rdr():
         summary['year'] = run.start_date.year
         summary['month'] = run.start_date.month
         summary['day'] = run.start_date.day
+        summary['hour'] = run.start_date.hour
+        summary['minute'] = run.start_date.minute
+        summary['second'] = run.start_date.second
         summaries.append(summary.copy())
 
 

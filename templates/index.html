@@ -12,20 +12,13 @@
         <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
     </head>
     <body>
-        <input id="addChart" type="button" value="addChart" onclick="buildScatter();"/>
+        <input id="addChart" type="button" value="Add Chart"/>
         <div id="graph_container"></div>
-        <p><label for="age">Date:</label><p id="slider" title="Min: "+minDate></p></p>
-        <p><label for="age">Distance:</label><div id="distanceSlider"></div></p>
-        <p><label for="age">Elevation:</label><div id="elevationSlider"></div></p>
-        <p><label for="age">Heart Rate:</label><div id="heartrateSlider"></div></p>
-
-        <!--
-        <div id="hist_chart" style="width:300px; height:300px">
-            <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
-              <a href="javascript:spendHistChart.filterAll();dc.redrawAll();">reset</a>
-            </div>
-        </div>
-      -->
+        <p><label>Date:</label><div id="slider"></div></p>
+        <p><label>Time:</label><p id="timeSlider"></div></p>
+        <p><label>Distance:</label><div id="distanceSlider"></div></p>
+        <p><label>Elevation:</label><div id="elevationSlider"></div></p>
+        <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
         <script>
             var dataset = {{ sample|tojson }};
             var reg = {{regression|tojson }};

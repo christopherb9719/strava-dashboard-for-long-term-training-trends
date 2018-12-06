@@ -28,6 +28,8 @@ var min_heart_rate = d3.min(dataset, function(d) { return d.heart_rate });
 var max_heart_rate = d3.max(dataset, function(d) { return d.heart_rate });
 var min_date = startDate;
 var max_date = endDate;
+var min_time = new Date(0, 0, 0, 0, 0, 0).getTime()/1000;
+var max_time = new Date(0, 0, 0, 23, 59, 59).getTime()/1000;
 
 
 // Add the tooltip container to the vis container
@@ -40,6 +42,13 @@ var scatter = buildScatter();
 plotPoints(scatter, dataset);
 appendPath(scatter);
 
+document.getElementById("addChart").onClick = function() {
+  if (typeof scatter2 == 'undefined') {
+    var scatter2 = buildScatter();
+    plotPoints(scatter2, dataset);
+    appendPath(scatter2);
+  }
+}
 
 $(function() {
   $( "#slider" ).slider({
@@ -54,6 +63,21 @@ $(function() {
     }
   });
 });
+
+$(function() {
+  $( "#timeSlider" ).slider({
+    range: true,
+    min: new Date(0, 0, 0, 0, 0, 0).getTime()/1000,
+    max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
+    values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
+    slide: function( event, ui ) {
+      min_time = new Date(ui.values[0] * 1000);
+      max_time = new Date(ui.values[1] * 1000);
+      update();
+    }
+  });
+});
+
 
 $(function() {
   $( "#distanceSlider" ).slider({
@@ -136,10 +160,24 @@ function update() {
           return d;
         }
         else if (d.year == min_date.getFullYear()) {
-            if (d.month >= min_date.getMonth()+1) return d;
+            if (d.month >= min_date.getMonth()) return d;
         }
         else if (d.year == max_date.getFullYear()) {
-          if (d.month <= max_date.getMonth()-1) return d;
+          if (d.month <= max_date.getMonth()) return d;
+        }
+      });
+    }
+    if (min_time != 0 || max_time != 0) {
+      console.log(max_time);
+      newData = newData.filter(function(d) {
+        if (d.hour > min_time.getHours() && d.hour < max_time.getHours()) {
+          return d;
+        }
+        else if (d.hour == min_time.getHours()) {
+          if (d.minute >= min_time.getMinutes()) return d;
+        }
+        else if (d.year == max_time.getHours()) {
+          if (d.minute <= max_time.getMinutes()) return d;
         }
       });
     }
