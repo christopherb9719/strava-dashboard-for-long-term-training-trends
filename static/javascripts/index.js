@@ -5,8 +5,8 @@ var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
-var startDate = new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0),
-    endDate = new Date(d3.max(dataset, function(d) {return d.year; }), 11, 30, 0, 0, 0);
+var startDate = new Date(d3.min(dataset, function(d) {return d.year; }), d3.min(dataset, function(d) {return d.month; }), d3.min(dataset, function(d) {return d.day; }), 0, 0, 0),
+    endDate = new Date(d3.max(dataset, function(d) {return d.year; }), d3.max(dataset, function(d) {return d.month; }), d3.max(dataset, function(d) {return d.day; }), 0, 0, 0);
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1200 - margin.left - margin.right,
@@ -15,8 +15,8 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
 var x = d3.scaleLinear().range([0, w]);
 var y = d3.scaleLinear().range([h, 0]);
 
-var xAxis = x.domain([d3.min(dataset, function(d) {return d.heart_rate; }), d3.max(dataset, function(d) { return d.heart_rate; })]);
-var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) {return d.average_pace; }) + 0.02]);
+var xAxis = x.domain([d3.min(dataset, function(d) { return d.heart_rate; }), d3.max(dataset, function(d) { return d.heart_rate; })]);
+var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) { return d.average_pace; }) + 0.02]);
 
 var svgContainer = d3.select('#graph_container').append("g");
 
@@ -145,8 +145,8 @@ function update() {
     }
 
     scatter.selectAll("circle").remove();
-    scatter.selectAll("line").remove();
-    plotPoints(svg, newData);
+    scatter.selectAll("path").remove();
+    plotPoints(scatter, newData);
     appendPath(scatter);
 }
 
