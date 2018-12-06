@@ -53,11 +53,11 @@ function plotPoints(svg, data) {
         d3.select(this)
           .transition()
           .attr("fill", "#000000")
-          .attr("r", 7)
+          .attr("r", 9)
         var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                     "Distance: <b> " + d.distance + "m </b><br/>" +
                     "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                    "<br/> Average Pace: <b/>" + d.average_pace + " s/m</b>" +
+                    "<br/> Average Pace: <b/>" + d.average_pace.toFixed(3) + " s/m</b>" +
                     "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
 
         tooltip.html(html)
@@ -84,12 +84,10 @@ function getRadius(d) {
       min = min_date.getTime()/1000,
       date = new Date(d.year, d.month, d.day, 0, 0, 0),
       size = (max-min)/(max-(date.getTime()/1000));
-  console.log(date);
-  //console.log(size);
   if (size == 'infinity') {
-    return 15;
+    return 20;
   }
   else {
-    return Math.min(15, size);
+    return Math.min(20, size);
   }
 }
