@@ -6,7 +6,7 @@ var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
 var startDate = new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0),
-    endDate = new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0);
+    endDate = new Date(d3.max(dataset, function(d) {return d.year; }), 11, 30, 0, 0, 0);
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1200 - margin.left - margin.right,

@@ -32,6 +32,7 @@ def rdr():
     gr = {'heart_rates': [], 'average_pace': []}
 
     for run in runs:
+        print(type(run.start_date))
         summary = {}
         summary['id'] = run.id
         summary['distance'] = run.distance.num
@@ -43,6 +44,7 @@ def rdr():
         summary['year'] = run.start_date.year
         summary['month'] = run.start_date.month
         summary['day'] = run.start_date.day
+        summary['date'] = run.start_date
         summaries.append(summary.copy())
 
 
@@ -57,15 +59,12 @@ def rdr():
     f, u = m.predict(pred_x[:,None])
     line_coords = []
     i = 0
-    print(pred_x)
     while i < len(u):
         coords = {}
         coords['x'] = pred_x[i]
         coords['y'] = f[i][0]
         line_coords.append(coords.copy())
         i += 1
-
-    print(line_coords)
 
     return render_template("index.html", sample = summaries, regression = line_coords)
 

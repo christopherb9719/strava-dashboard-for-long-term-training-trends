@@ -47,7 +47,7 @@ function plotPoints(svg, data) {
       .append("circle")
         .attr("cx", function(d) {return xAxis(d.heart_rate);})
         .attr("cy", function(d) {return yAxis(d.average_pace);})
-        .attr("r", 5)
+        .attr("r", function(d) { return getRadius(d);})
         .attr("fill", "#ff471a")
       .on('mouseover', function(d) {
         d3.select(this)
@@ -72,9 +72,24 @@ function plotPoints(svg, data) {
         d3.select(this)
           .transition()
           .attr("fill", "#ff471a")
-          .attr("r", 5)
+          .attr("r", getRadius(d))
         tooltip.transition()
             .duration(300) // ms
             .style("opacity", 0); // don't care about position!
       });
+}
+
+function getRadius(d) {
+  var max = max_date.getTime()/1000,
+      min = min_date.getTime()/1000,
+      date = new Date(d.year, d.month, d.day, 0, 0, 0),
+      size = (max-min)/(max-(date.getTime()/1000));
+  console.log(date);
+  //console.log(size);
+  if (size == 'infinity') {
+    return 15;
+  }
+  else {
+    return Math.min(15, size);
+  }
 }
