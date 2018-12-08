@@ -30,7 +30,7 @@ function buildHistogram() {
   //Append x axis
   barchart.append("g")
     .attr("transform", "translate(0, "+ h/2 +")")
-    .call(d3.axisBottom(xAxisHist));
+    .call(d3.axisBottom(xAxisHist).tickValues(tod).tickFormat(d => (d + ":00")));
 
   //Append y axis
   barchart.append("g")

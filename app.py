@@ -54,7 +54,8 @@ def rdr():
     #print avs
     end = len(summaries)
     #m = GPy.models.GPRegression(gr['heart_rates'], gr['average_pace'])
-    m = GPy.models.GPRegression(np.array(hr)[:end,None],np.array(avs)[:end,None])
+    kernel = GPy.kern.RBF(input_dim=1, variance=.2, lengthscale=0.5)
+    m = GPy.models.GPRegression(np.array(hr)[:end,None],np.array(avs)[:end,None], kernel)
     m.optimize('bfgs')
     pred_x = np.arange(min(hr),max(hr),0.1)
     f, u = m.predict(pred_x[:,None])
