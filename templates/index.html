@@ -13,6 +13,7 @@
     </head>
     <body>
         <input id="addChart" type="button" value="Add Chart"/>
+        <div id="hist_container"></div>
         <div id="graph_container"></div>
         <p><label>Date:</label><div id="slider"></div></p>
         <p><label>Time:</label><p id="timeSlider"></div></p>
@@ -25,6 +26,7 @@
         </script>
         <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
         <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
+        <script src="{{url_for('static', filename='javascripts/lineplot.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/scatterplot.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/index.js')}}"></script>

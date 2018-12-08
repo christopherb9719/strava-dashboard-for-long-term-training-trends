@@ -31,7 +31,7 @@ function buildScatter() {
         .attr("x",0 - (h / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text("Average Pace (s/m)");
+        .text("Average Pace (/km)");
 
     return svg;
 }
@@ -45,10 +45,11 @@ function plotPoints(svg, data) {
     .append("a")
       .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
       .append("circle")
-        .attr("cx", function(d) {return xAxis(d.heart_rate);})
-        .attr("cy", function(d) {return yAxis(d.average_pace);})
+        .attr("cx", function(d) {return x(d.heart_rate);})
+        .attr("cy", function(d) {return y(d.average_pace);})
         .attr("r", function(d) { return getRadius(d);})
         .attr("fill", "#ff471a")
+        .style("opacity", 0.5)
       .on('mouseover', function(d) {
         d3.select(this)
           .transition()
@@ -57,7 +58,7 @@ function plotPoints(svg, data) {
         var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                     "Distance: <b> " + d.distance + "m </b><br/>" +
                     "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                    "<br/> Average Pace: <b/>" + d.average_pace.toFixed(3) + " s/m</b>" +
+                    "<br/> Average Pace: <b/>" + d.average_pace.toFixed(3) + "/km</b>" +
                     "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
 
         tooltip.html(html)
@@ -65,7 +66,7 @@ function plotPoints(svg, data) {
             .style("top", (d3.event.pageY - 28) + "px")
           .transition()
             .duration(200) // ms
-            .style("opacity", .9) // started as 0!
+            .style("opacity", .7) // started as 0!
         }
       )
       .on('mouseout', function(d) {

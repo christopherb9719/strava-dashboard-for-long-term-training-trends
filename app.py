@@ -32,13 +32,12 @@ def rdr():
     gr = {'heart_rates': [], 'average_pace': []}
 
     for run in runs:
-        print(type(run.start_date))
         summary = {}
         summary['id'] = run.id
         summary['distance'] = run.distance.num
         summary['heart_rate'] = run.average_heartrate
-        summary['average_speed'] = run.average_speed.num
-        summary['average_pace'] = 1/run.average_speed.num
+        summary['average_speed'] = (run.average_speed.num*60*60)/1000
+        summary['average_pace'] = 60/summary['average_speed']
         summary['description'] = run.description
         summary['total_elevation_gain'] = run.total_elevation_gain.num
         summary['year'] = run.start_date.year

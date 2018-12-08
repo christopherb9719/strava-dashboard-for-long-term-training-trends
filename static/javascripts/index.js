@@ -28,8 +28,8 @@ var min_heart_rate = d3.min(dataset, function(d) { return d.heart_rate });
 var max_heart_rate = d3.max(dataset, function(d) { return d.heart_rate });
 var min_date = startDate;
 var max_date = endDate;
-var min_time = new Date(0, 0, 0, 0, 0, 0).getTime()/1000;
-var max_time = new Date(0, 0, 0, 23, 59, 59).getTime()/1000;
+var min_time = new Date(0, 0, 0, 0, 0, 0);
+var max_time = new Date(0, 0, 0, 23, 59, 59);
 
 
 // Add the tooltip container to the vis container
@@ -39,10 +39,11 @@ var tooltip = d3.select("#graph_container").append("div")
     .style("opacity", 0);
 
 var scatter = buildScatter();
+var hist = buildHistogram();
 plotPoints(scatter, dataset);
 appendPath(scatter);
 
-document.getElementById("addChart").onClick = function() {
+document.getElementById("addChart").onclick = function() {
   if (typeof scatter2 == 'undefined') {
     var scatter2 = buildScatter();
     plotPoints(scatter2, dataset);
