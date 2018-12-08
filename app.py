@@ -1,4 +1,7 @@
 from flask import Flask, render_template, redirect, request, session
+import sys
+sys.path.append('./static/lib/python/')
+from gaussianregression import calculateRegression
 import json
 import numpy as np
 import stravalib
@@ -48,26 +51,8 @@ def rdr():
         summary['second'] = run.start_date.second
         summaries.append(summary.copy())
 
-
-    hr = [run['heart_rate'] for run in summaries]
-    avs = [run['average_pace'] for run in summaries]
-    #print avs
-    end = len(summaries)
-    #m = GPy.models.GPRegression(gr['heart_rates'], gr['average_pace'])
-    kernel = GPy.kern.RBF(input_dim=1, variance=.2, lengthscale=0.5)
-    m = GPy.models.GPRegression(np.array(hr)[:end,None],np.array(avs)[:end,None], kernel)
-    m.optimize('bfgs')
-    pred_x = np.arange(min(hr),max(hr),0.1)
-    f, u = m.predict(pred_x[:,None])
-    line_coords = []
-    i = 0
-    while i < len(u):
-        coords = {}
-        coords['x'] = pred_x[i]
-        coords['y'] = f[i][0]
-        line_coords.append(coords.copy())
-        i += 1
-
+    line_coords = calculateRegression(summaries)
+    
     return render_template("index.html", sample = summaries, regression = line_coords)
 
 
