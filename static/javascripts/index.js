@@ -41,7 +41,7 @@ var tooltip = d3.select("#graph_container").append("div")
 var scatter = buildScatter();
 var hist = buildHistogram();
 plotPoints(scatter, dataset);
-appendPath(scatter);
+appendPath(scatter, reg);
 
 document.getElementById("addChart").onclick = function() {
   if (typeof scatter2 == 'undefined') {
@@ -169,7 +169,6 @@ function update() {
       });
     }
     if (min_time != 0 || max_time != 0) {
-      console.log(max_time);
       newData = newData.filter(function(d) {
         if (d.hour > min_time.getHours() && d.hour < max_time.getHours()) {
           return d;
@@ -183,10 +182,34 @@ function update() {
       });
     }
 
+    $(function(){
+  		$.ajax({
+  			url: '/_gaussian_calculation',
+  			data: JSON.stringify(newData),
+        contentType: 'application/json;charset=UTF-8',
+  			type: 'POST',
+  			success: function(response){
+          scatter.selectAll("path").remove();
+          appendPath(scatter, response);
+  			},
+  			error: function(error){
+  				console.log(error);
+  			}
+  		});
+    });
+    /**
+    $.ajax({
+      type: 'POST',
+      url: "/_gaussian_calculation",
+      data: newData,
+      success: function(data) {
+        alert(data);
+        alert("AJAX completed");
+      }
+    });
+    */
     scatter.selectAll("circle").remove();
-    scatter.selectAll("path").remove();
     plotPoints(scatter, newData);
-    appendPath(scatter);
 }
 
 /**

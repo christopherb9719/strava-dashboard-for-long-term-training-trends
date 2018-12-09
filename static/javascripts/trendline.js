@@ -6,9 +6,9 @@ var lineFunction = d3.line()
     return y(d.y);
   })
 
-function appendPath(svg) {
+function appendPath(svg, pts) {
   svg.append("path")
     .attr("class", "line")
     .attr("id", function(d) {return "trendline";})
-    .attr("d", lineFunction(reg));
+    .attr("d", lineFunction(pts));
  }

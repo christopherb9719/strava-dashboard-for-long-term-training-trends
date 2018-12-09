@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, jsonify
 import sys
 sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
@@ -52,10 +52,16 @@ def rdr():
         summaries.append(summary.copy())
 
     line_coords = calculateRegression(summaries)
-    
+
     return render_template("index.html", sample = summaries, regression = line_coords)
 
-
+@app.route("/_gaussian_calculation", methods=['POST'])
+def getGaussian():
+    print("AJAX recieved")
+    activities=None
+    if request.method == "POST":
+        activities = request.json
+        return jsonify(calculateRegression(activities))
 
 @app.route("/index")
 def index():

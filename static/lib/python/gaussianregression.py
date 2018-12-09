@@ -22,4 +22,5 @@ def calculateRegression(activities):
         line_coords.append(coords.copy())
         i += 1
 
+    print("Line coords calculated")
     return line_coords

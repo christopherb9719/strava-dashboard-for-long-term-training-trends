@@ -39,8 +39,8 @@ function buildHistogram() {
   barchart.selectAll("rect")
     .data(tod)
     .enter().append("rect")
-      .attr("x", function(d, i) { console.log(i); return x_hist(i-0.5); })
-      .attr("y", function(d, i) { console.log(d); return y_hist(d); })
+      .attr("x", function(d, i) { return x_hist(i-0.5); })
+      .attr("y", function(d, i) { return y_hist(d); })
       .attr('width', 30)
       .attr('height', function(d) { return (h/2) - y_hist(d); })
     .on('mouseover', function(d, i) {
