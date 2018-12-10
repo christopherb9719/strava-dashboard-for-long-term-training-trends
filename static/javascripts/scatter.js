@@ -65,7 +65,12 @@ class Scatter {
 
   plotPoints() {
     this.circles = this.plot.selectAll("circle")
-        .data(this.data);
+        .data(this.data.filter(d => ((d.distance <= this.max_distance && d.distance >= this.min_distance)
+          && (d.total_elevation_gain <= this.max_elevation_gain && d.total_elevation_gain >= this.min_elevation_gain)
+          && (d.heart_rate <= this.max_heart_rate && d.heart_rate >= this.min_heart_rate)
+          && this.dataInDate(d)
+          && this.dataInTime(d)
+        )));
 
     this.circles.enter()
       .append("a")
@@ -73,14 +78,14 @@ class Scatter {
         .append("circle")
           .attr("cx", (d => this.x(d.heart_rate)))
           .attr("cy", (d => this.y(d.average_pace)))
-          .attr("r", function(d) { return getRadius(d);})
+          .attr("r", (d => this.getRadius(d)))
           .attr("fill", "#ff471a")
           .style("opacity", 0.5)
         .on('mouseover', function(d) {
           d3.select(this)
             .transition()
             .attr("fill", "#000000")
-            .attr("r", 9)
+            //.attr("r", 9)
           var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                       "Distance: <b> " + d.distance + "m </b><br/>" +
                       "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
@@ -95,11 +100,10 @@ class Scatter {
               .style("opacity", .9) // started as 0!
           }
         )
-        .on('mouseout', function(d) {
+        .on('mouseout', function() {
           d3.select(this)
             .transition()
             .attr("fill", "#ff471a")
-            .attr("r", getRadius(d))
           tooltip.transition()
               .duration(300) // ms
               .style("opacity", 0); // don't care about position!
@@ -118,21 +122,97 @@ class Scatter {
     this.xAxis.call(this.xAxisCall);
     this.yAxis.call(this.yAxisCall);
 
+    this.plot.selectAll("circle").remove();
     // Update our circles
-    this.circles = this.plot.selectAll("circle")
-        .data(this.data);
+    this.plotPoints();
+  }
 
-    this.circles.exit().remove()
+  dataInDate(d) {
+    if (d.year > this.min_date.getFullYear() && d.year < this.max_date.getFullYear()) {
+      return true;
+    }
+    else if (d.year == this.min_date.getFullYear()) {
+        if (d.month >= this.min_date.getMonth()) return true;
+    }
+    else if (d.year == this.max_date.getFullYear()) {
+      if (d.month <= this.max_date.getMonth()) return true;
+    }
+    /**
+    $(function(){
+  		$.ajax({
+  			url: '/_gaussian_calculation',
+  			data: JSON.stringify(newData),
+        contentType: 'application/json;charset=UTF-8',
+  			type: 'POST',
+  			success: function(response){
+          graph.selectAll("path").remove();
+          appendPath(graph, response);
+  			},
+  			error: function(error){
+  				console.log(error);
+  			}
+  		});
+    });
+    */
+  }
 
-    this.circles
-        .attr("cx", (d => this.x(d.heart_rate)))
-        .attr("cy", (d => this.y(d.average_pace)))
+  dataInTime(d) {
+    if (d.hour > this.min_time.getHours() && d.hour < this.max_time.getHours()) {
+      return true;
+    }
+    else if (d.hour == this.min_time.getHours()) {
+      if (d.minute >= this.min_time.getMinutes()) return true;
+    }
+    else if (d.year == this.max_time.getHours()) {
+      if (d.minute <= this.max_time.getMinutes()) return true;
+    }
+  }
 
-    this.circles.enter()
-        .append("circle")
-            .attr("cx", (d => this.x(d.heart_rate)))
-            .attr("cy", (d => this.y(d.average_pace)))
-            .attr("r", 5)
-            .attr("fill", "grey");
+  getRadius(d) {
+    var max = this.max_date.getTime()/1000,
+        min = this.min_date.getTime()/1000,
+        date = new Date(d.year, d.month, d.day, 0, 0, 0),
+        size = (max-min)/(max-(date.getTime()/1000));
+    if (size == 'infinity') {
+      return 20;
+    }
+    else {
+      return Math.min(20, size);
+    }
+  }
+
+
+  setMinDistance(min_distance) {
+    this.min_distance = min_distance;
+  }
+
+  setMaxDistance(max_distance) {
+    this.max_distance = max_distance;
+  }
+
+  setMinElevation(min_elevation_gain) {
+    this.min_elevation_gain = min_elevation_gain;
+  }
+
+  setMaxElevation(max_elevation_gain) {
+    this.max_elevation_gain = max_elevation_gain;
+  }
+
+  setMaxHeartRate(max_heart_rate) {
+    this.max_heart_rate = max_heart_rate;
+  }
+
+  setMinHeartRate(min_heart_rate) {
+    this.min_heart_rate = min_heart_rate;
+  }
+
+  setDates(min_date, max_date) {
+    this.min_date = new Date(min_date);
+    this.max_date = new Date(max_date);
+  }
+
+  setTimes(min_time, max_time) {
+    this.min_time = new Date(min_time);
+    this.max_time = new Date(max_time);
   }
 }

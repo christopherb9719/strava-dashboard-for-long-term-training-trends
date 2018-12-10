@@ -41,7 +41,7 @@ function plotPoints(g, data) {
             .style("opacity", 0); // don't care about position!
       });
 }
-
+/**
 function getRadius(d) {
   var max = max_date.getTime()/1000,
       min = min_date.getTime()/1000,
@@ -54,7 +54,7 @@ function getRadius(d) {
     return Math.min(20, size);
   }
 }
-
+*/
 function buildAxes(graph, width, height) {
   xAxis = graph.append("g")
       .attr("transform", "translate(0," + h + ")")

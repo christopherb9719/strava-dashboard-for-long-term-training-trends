@@ -37,8 +37,9 @@ var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
 
 document.getElementById("addChart").onclick = function() {
   if (typeof scatterGraph2 == "undefined") {
-    scatterGraph1.update(w/2, h);
-    var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h);
+    w = w/2
+    scatterGraph1.update(w, h);
+    var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
   }
 }
 
@@ -49,9 +50,8 @@ $(function() {
     max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
-      min_date = new Date(ui.values[0] * 1000);
-      max_date = new Date(ui.values[1] * 1000);
-      update(scatterGraph1);
+      scatterGraph1.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+      scatterGraph1.update(w, h);
     }
   });
 });
@@ -63,9 +63,8 @@ $(function() {
     max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
     values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
     slide: function( event, ui ) {
-      min_time = new Date(ui.values[0] * 1000);
-      max_time = new Date(ui.values[1] * 1000);
-      update(scatterGraph1);
+      scatterGraph1.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+      scatterGraph1.update(w, h);
     }
   });
 });
@@ -78,21 +77,9 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.distance }),
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
-      min_distance = ui.values[0];
-      max_distance = ui.values[1];
-      update(scatterGraph1);
-    }
-  })
-  .each(function() {
-    var opt = $(this).data().slider.options;
-    // Get the number of possible values
-    var vals = opt.max - opt.min;
-    // Position the labels
-    for (var i = 0; i <= vals; i = i + 1000) {
-        // Create a new element and position it with percentages
-        var el = $('<label>' + (i + opt.min) + '</label>').css('left', (i/vals*100) + '%');
-        // Add the element inside #slider
-        $("#distanceSlider").append(el);
+      scatterGraph1.setMinDistance(ui.values[0]);
+      scatterGraph1.setMaxDistance(ui.values[1]);
+      scatterGraph1.update(w, h);
     }
   })
 });
@@ -104,21 +91,9 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
-      min_elevation_gain = ui.values[0];
-      max_elevation_gain = ui.values[1];
-      update(scatterGraph1);
-    }
-  })
-  .each(function() {
-    var opt = $(this).data().slider.options;
-    // Get the number of possible values
-    var vals = opt.max - opt.min;
-    // Position the labels
-    for (var i = 0; i <= vals; i = i + 100) {
-        // Create a new element and position it with percentages
-        var el = $('<label>' + (i + opt.min) + '</label>').css('left', (i/vals*100) + '%');
-        // Add the element inside #slider
-        $("#elevationSlider").append(el);
+      scatterGraph1.setMinElevation(ui.values[0]);
+      scatterGraph1.setMaxElevation(ui.values[1]);
+      scatterGraph1.update(w, h);
     }
   })
 });
@@ -130,9 +105,9 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.heart_rate }),
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
-      min_heart_rate = ui.values[0];
-      max_heart_rate = ui.values[1];
-      update(scatterGraph1);
+      scatterGraph1.setMinHeartRate(ui.values[0]);
+      scatterGraph1.setMaxHeartRate(ui.values[1]);
+      scatterGraph1.update(w, h);
     }
   });
 });
