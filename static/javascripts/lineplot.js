@@ -1,4 +1,4 @@
-function buildHistogram() {
+function buildHistogram(width, height) {
   var tod = [];
   var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   var p = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -13,8 +13,8 @@ function buildHistogram() {
   }
   console.log(tod);
 
-  var x_hist = d3.scaleLinear().range([0, w]);
-  var y_hist = d3.scaleLinear().range([h/2, 0]);
+  var x_hist = d3.scaleLinear().range([0, width]);
+  var y_hist = d3.scaleLinear().range([height, 0]);
 
   var xAxisHist = x_hist.domain([0, 23]);
   var yAxisHist = y_hist.domain([0, d3.max(tod)]);

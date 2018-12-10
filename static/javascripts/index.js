@@ -12,13 +12,7 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1200 - margin.left - margin.right,
     h = 600 - margin.top - margin.bottom;
 
-var x = d3.scaleLinear().range([0, w]);
-var y = d3.scaleLinear().range([h, 0]);
 
-var xAxis = x.domain([d3.min(dataset, function(d) { return d.heart_rate; }), d3.max(dataset, function(d) { return d.heart_rate; })]);
-var yAxis = y.domain([d3.min(dataset, function(d) { return d.average_pace; })-0.02, d3.max(dataset, function(d) { return d.average_pace; }) + 0.02]);
-
-var svgContainer = d3.select('#graph_container').append("g");
 
 var min_distance = d3.min(dataset, function(d) { return d.distance });
 var max_distance = d3.max(dataset, function(d) { return d.distance });
@@ -38,16 +32,19 @@ var tooltip = d3.select("#graph_container").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-var scatter = buildScatter();
-var hist = buildHistogram();
-plotPoints(scatter, dataset);
-appendPath(scatter, reg);
+var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
+
+/**
+buildAxes(scatterGraph1);
+plotPoints(scatterGraph1, dataset);
+appendPath(scatterGraph1, reg);
+*/
+
+//var hist = buildHistogram(w, h/2);
 
 document.getElementById("addChart").onclick = function() {
-  if (typeof scatter2 == 'undefined') {
-    var scatter2 = buildScatter();
-    plotPoints(scatter2, dataset);
-    appendPath(scatter2);
+  if (typeof scatterGraph2 == "undefined") {
+    var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h);
   }
 }
 
@@ -60,7 +57,7 @@ $(function() {
     slide: function( event, ui ) {
       min_date = new Date(ui.values[0] * 1000);
       max_date = new Date(ui.values[1] * 1000);
-      update();
+      update(scatterGraph1);
     }
   });
 });
@@ -74,7 +71,7 @@ $(function() {
     slide: function( event, ui ) {
       min_time = new Date(ui.values[0] * 1000);
       max_time = new Date(ui.values[1] * 1000);
-      update();
+      update(scatterGraph1);
     }
   });
 });
@@ -89,7 +86,7 @@ $(function() {
     slide: function( event, ui ) {
       min_distance = ui.values[0];
       max_distance = ui.values[1];
-      update();
+      update(scatterGraph1);
     }
   })
   .each(function() {
@@ -115,7 +112,7 @@ $(function() {
     slide: function( event, ui ) {
       min_elevation_gain = ui.values[0];
       max_elevation_gain = ui.values[1];
-      update();
+      update(scatterGraph1);
     }
   })
   .each(function() {
@@ -141,13 +138,13 @@ $(function() {
     slide: function( event, ui ) {
       min_heart_rate = ui.values[0];
       max_heart_rate = ui.values[1];
-      update();
+      update(scatterGraph1);
     }
   });
 });
 
 
-function update() {
+function update(graph) {
     newData = dataset;
     newData = newData.filter(function(d,i) {
       if ((d.distance <= max_distance && d.distance >= min_distance) && (d.total_elevation_gain <= max_elevation_gain && d.total_elevation_gain >= min_elevation_gain) && (d.heart_rate <= max_heart_rate && d.heart_rate >= min_heart_rate)) {
@@ -189,27 +186,16 @@ function update() {
         contentType: 'application/json;charset=UTF-8',
   			type: 'POST',
   			success: function(response){
-          scatter.selectAll("path").remove();
-          appendPath(scatter, response);
+          graph.selectAll("path").remove();
+          appendPath(graph, response);
   			},
   			error: function(error){
   				console.log(error);
   			}
   		});
     });
-    /**
-    $.ajax({
-      type: 'POST',
-      url: "/_gaussian_calculation",
-      data: newData,
-      success: function(data) {
-        alert(data);
-        alert("AJAX completed");
-      }
-    });
-    */
-    scatter.selectAll("circle").remove();
-    plotPoints(scatter, newData);
+    graph.selectAll("circle").remove();
+    plotPoints(graph, newData);
 }
 
 /**
@@ -276,3 +262,8 @@ function gaussian(x) {
   return gaussianConstant * Math.exp(0.5 * x) / sigma;
 };
 */
+function updateXandY(width, height) {
+  x.range([0, width]);
+  y.range([height, 0]);
+
+}

@@ -23,6 +23,7 @@
             var dataset = {{ sample|tojson }};
             var reg = {{regression|tojson }};
         </script>
+        <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
         <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
         <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/lineplot.js')}}"></script>

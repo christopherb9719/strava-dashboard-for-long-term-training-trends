@@ -1,47 +1,9 @@
-function buildScatter() {
-    //Create SVG variable to build the graph into
-    svg = svgContainer.append('svg')
-        .attr("width", w + margin.left + margin.right)
-        .attr("height", h + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
-
-    //Append x-axis
-    svg.append("g")
-        .attr("transform", "translate(0, "+ h +")")
-        .call(d3.axisBottom(xAxis));
-
-    //Append label for x-axis
-    svg.append("text")
-        .attr("transform",
-            "translate(" + (w/2) + " ," +
-                            (h + margin.top + 20) + ")")
-        .style("text-anchor", "middle")
-        .text("Average Heart Rate (BPM)");
-
-    //Append y-axis
-    svg.append("g")
-        .call(d3.axisLeft(yAxis));
-
-    //Append label for y-axis
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x",0 - (h / 2))
-        .attr("dy", "1em")
-        .style("text-anchor", "middle")
-        .text("Average Pace (/km)");
-
-    return svg;
-}
-
-
 //Tooltip code taken from: http://bl.ocks.org/williaster/af5b855651ffe29bdca1
-function plotPoints(svg, data) {
-  svg.selectAll("circle")
-    .data(data)
-    .enter()
+function plotPoints(g, data) {
+  var circles = g.selectAll("circle")
+      .data(data);
+
+  circles.enter()
     .append("a")
       .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
       .append("circle")
@@ -66,7 +28,7 @@ function plotPoints(svg, data) {
             .style("top", (d3.event.pageY - 28) + "px")
           .transition()
             .duration(200) // ms
-            .style("opacity", .7) // started as 0!
+            .style("opacity", .9) // started as 0!
         }
       )
       .on('mouseout', function(d) {
@@ -91,4 +53,31 @@ function getRadius(d) {
   else {
     return Math.min(20, size);
   }
+}
+
+function buildAxes(graph, width, height) {
+  xAxis = graph.append("g")
+      .attr("transform", "translate(0," + h + ")")
+      .call(xAxisCall);
+
+  yAxis = graph.append("g")
+      .call(yAxisCall)
+
+  // Labels
+  xAxis.append("text")
+      .attr("transform", "translate(" + w + ", 0)")
+      .attr("y", -6)
+      .text("Average Heart Rate (BPM)")
+  yAxis.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 16)
+      .text("Average Pace (/km)");
+}
+
+function resize() {
+  xAxis.call(xAxisCall);
+  yAxis.call(yAxisCall);
+  circles
+    .attr("cx", function(d){ return x(d.gpa) })
+    .attr("cy", function(d){ return y(d.height) })
 }
