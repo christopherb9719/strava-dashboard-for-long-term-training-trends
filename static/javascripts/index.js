@@ -13,7 +13,6 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     h = 600 - margin.top - margin.bottom;
 
 
-
 var min_distance = d3.min(dataset, function(d) { return d.distance });
 var max_distance = d3.max(dataset, function(d) { return d.distance });
 var min_elevation_gain = d3.min(dataset, function(d) { return d.total_elevation_gain });
@@ -34,16 +33,11 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
 
-/**
-buildAxes(scatterGraph1);
-plotPoints(scatterGraph1, dataset);
-appendPath(scatterGraph1, reg);
-*/
-
 //var hist = buildHistogram(w, h/2);
 
 document.getElementById("addChart").onclick = function() {
   if (typeof scatterGraph2 == "undefined") {
+    scatterGraph1.update(w/2, h);
     var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h);
   }
 }
@@ -262,8 +256,3 @@ function gaussian(x) {
   return gaussianConstant * Math.exp(0.5 * x) / sigma;
 };
 */
-function updateXandY(width, height) {
-  x.range([0, width]);
-  y.range([height, 0]);
-
-}

@@ -33,10 +33,10 @@ class Scatter {
         d3.max(this.data, function(d) { return d.average_pace; }) + 0.02])
       .range([this.height, 0]);
     this.svg = d3.select(this.container).append('svg')
-      .attr("width", w + margin.left + margin.right)
-      .attr("height", h + margin.top + margin.bottom)
-      .append('g')
-        .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
+      .attr("width", this.width + this.margin.left + this.margin.right)
+      .attr("height", this.height + this.margin.top + this.margin.bottom);
+    this.plot = this.svg.append('g')
+      .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
     this.plotPoints();
@@ -44,12 +44,12 @@ class Scatter {
 
   createAxes() {
     this.xAxisCall = d3.axisBottom(this.x)
-    this.xAxis = this.svg.append("g")
+    this.xAxis = this.plot.append("g")
         .attr("transform", "translate(0," + this.height + ")")
         .call(this.xAxisCall);
 
     this.yAxisCall = d3.axisLeft(this.y)
-    this.yAxis = this.svg.append("g")
+    this.yAxis = this.plot.append("g")
         .call(this.yAxisCall)
 
     // Labels
@@ -64,7 +64,7 @@ class Scatter {
   }
 
   plotPoints() {
-    this.circles = this.svg.selectAll("circle")
+    this.circles = this.plot.selectAll("circle")
         .data(this.data);
 
     this.circles.enter()
@@ -104,5 +104,35 @@ class Scatter {
               .duration(300) // ms
               .style("opacity", 0); // don't care about position!
         });
+  }
+
+
+  update(w, h){
+    // Update our scales
+    this.x.range([0, w]);
+    this.y.range([h, 0]);
+
+    this.svg.attr("width", w + this.margin.left + this.margin.right);
+
+    // Update our axes
+    this.xAxis.call(this.xAxisCall);
+    this.yAxis.call(this.yAxisCall);
+
+    // Update our circles
+    this.circles = this.plot.selectAll("circle")
+        .data(this.data);
+
+    this.circles.exit().remove()
+
+    this.circles
+        .attr("cx", (d => this.x(d.heart_rate)))
+        .attr("cy", (d => this.y(d.average_pace)))
+
+    this.circles.enter()
+        .append("circle")
+            .attr("cx", (d => this.x(d.heart_rate)))
+            .attr("cy", (d => this.y(d.average_pace)))
+            .attr("r", 5)
+            .attr("fill", "grey");
   }
 }

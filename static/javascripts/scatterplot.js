@@ -73,11 +73,3 @@ function buildAxes(graph, width, height) {
       .attr("y", 16)
       .text("Average Pace (/km)");
 }
-
-function resize() {
-  xAxis.call(xAxisCall);
-  yAxis.call(yAxisCall);
-  circles
-    .attr("cx", function(d){ return x(d.gpa) })
-    .attr("cy", function(d){ return y(d.height) })
-}
