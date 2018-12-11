@@ -11,11 +11,8 @@ import GPy
 
 def convertDecimalToMinutes(num):
     decimal = num%1
-    print(decimal)
     decimal = decimal*.6
-    print(decimal)
     integer = int(num)
-    print(integer)
     return (integer + decimal)
 
 app = Flask(__name__)

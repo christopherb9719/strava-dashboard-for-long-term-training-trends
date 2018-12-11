@@ -89,7 +89,7 @@ class Scatter {
           var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                       "Distance: <b> " + d.distance + "m </b><br/>" +
                       "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                      "<br/> Average Pace: <b/>" + d.average_pace.toFixed(3) + "/km</b>" +
+                      "<br/> Average Pace: <b/>" + d.average_pace.toFixed(2) + "/km</b>" +
                       "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
 
           tooltip.html(html)
