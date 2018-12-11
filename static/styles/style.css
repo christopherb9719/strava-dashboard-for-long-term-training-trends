@@ -75,8 +75,9 @@ a {
   stroke-width: 1.25px;
 }
 
-.ui-slider {
+.ui-slider .ui-slider-handle {
   width: 100%;
+  padding-left: 5px; //add this
 }
 
 #slider label {
@@ -85,4 +86,16 @@ a {
   margin-top: 20px;
   margin-left: -10px;
   text-align: center;
+}
+
+#wrapper {
+    width: 100%;
+    overflow: hidden; /* add this to contain floated children */
+}
+#sliders {
+    width: 90%;
+    float:left; /* add this */
+}
+#graph2sliders {
+    float: left; /* add this */
 }

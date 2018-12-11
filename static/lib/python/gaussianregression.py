@@ -6,7 +6,7 @@ def calculateRegression(activities):
     print("Values calculated")
     end = len(activities)
     #m = GPy.models.GPRegression(gr['heart_rates'], gr['average_pace'])
-    kernel = GPy.kern.RBF(input_dim=1, variance=.2, lengthscale=0.5)
+    kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
     m = GPy.models.GPRegression(np.array(hr)[:end,None],np.array(avs)[:end,None], kernel)
     print("m Calculted")
     m.optimize('bfgs')

@@ -14,19 +14,21 @@
         <input id="addChart" type="button" value="Add Chart"/>
         <div id="hist_container"></div>
         <div id="graph_container"></div>
-        <div id="sliders">
-          <p><label>Date:</label><div id="slider"></div></p>
-          <p><label>Time:</label><div id="timeSlider"></div></p>
-          <p><label>Distance:</label><div id="distanceSlider"></div></p>
-          <p><label>Elevation:</label><div id="elevationSlider"></div></p>
-          <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
-        </div>
-        <div id="graph2sliders">
-          <p><label>Date:</label><div id="graph2slider"></div></p>
-          <p><label>Time:</label><div id="graph2timeSlider"></div></p>
-          <p><label>Distance:</label><div id="graph2distanceSlider"></div></p>
-          <p><label>Elevation:</label><div id="graph2elevationSlider"></div></p>
-          <p><label>Heart Rate:</label><div id="graph2heartrateSlider"></div></p>
+        <div id="wrapper">
+          <div id="sliders">
+            <p><label>Date:</label><div id="slider"></div></p>
+            <p><label>Time:</label><div id="timeSlider"></div></p>
+            <p><label>Distance:</label><div id="distanceSlider"></div></p>
+            <p><label>Elevation:</label><div id="elevationSlider"></div></p>
+            <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
+          </div>
+          <div id="graph2sliders">
+            <p><label>Date:</label><div id="graph2slider"></div></p>
+            <p><label>Time:</label><div id="graph2timeSlider"></div></p>
+            <p><label>Distance:</label><div id="graph2distanceSlider"></div></p>
+            <p><label>Elevation:</label><div id="graph2elevationSlider"></div></p>
+            <p><label>Heart Rate:</label><div id="graph2heartrateSlider"></div></p>
+          </div>
         </div>
         <script>
             var dataset = {{ sample|tojson }};

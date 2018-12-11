@@ -50,8 +50,9 @@ document.getElementById("addChart").onclick = function() {
     scatterGraph1.update(w, h);
     var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
     appendPath(scatterGraph2, reg);
-    document.getElementById('sliders').setAttribute("style","width:" + w);
-    document.getElementById('graph2sliders').setAttribute("style","width:" + w);
+    document.getElementById('sliders').setAttribute("style","width: 50%");
+    document.getElementById('graph2sliders').setAttribute("style","width: 50%");
+
 
     $(function() {
       $( "#graph2slider" ).slider({
