@@ -206,61 +206,6 @@ $(function() {
   });
 });
 
-
-function update(graph) {
-    newData = dataset;
-    newData = newData.filter(function(d,i) {
-      if ((d.distance <= max_distance && d.distance >= min_distance) && (d.total_elevation_gain <= max_elevation_gain && d.total_elevation_gain >= min_elevation_gain) && (d.heart_rate <= max_heart_rate && d.heart_rate >= min_heart_rate)) {
-        return d;
-      }
-    })
-
-    if (min_date > 0 || max_date > 0) {
-      newData = newData.filter(function(d) {
-        if (d.year > min_date.getFullYear() && d.year < max_date.getFullYear()) {
-          return d;
-        }
-        else if (d.year == min_date.getFullYear()) {
-            if (d.month >= min_date.getMonth()) return d;
-        }
-        else if (d.year == max_date.getFullYear()) {
-          if (d.month <= max_date.getMonth()) return d;
-        }
-      });
-    }
-    if (min_time != 0 || max_time != 0) {
-      newData = newData.filter(function(d) {
-        if (d.hour > min_time.getHours() && d.hour < max_time.getHours()) {
-          return d;
-        }
-        else if (d.hour == min_time.getHours()) {
-          if (d.minute >= min_time.getMinutes()) return d;
-        }
-        else if (d.year == max_time.getHours()) {
-          if (d.minute <= max_time.getMinutes()) return d;
-        }
-      });
-    }
-
-    $(function(){
-  		$.ajax({
-  			url: '/_gaussian_calculation',
-  			data: JSON.stringify(newData),
-        contentType: 'application/json;charset=UTF-8',
-  			type: 'POST',
-  			success: function(response){
-          graph.selectAll("path").remove();
-          appendPath(graph, response);
-  			},
-  			error: function(error){
-  				console.log(error);
-  			}
-  		});
-    });
-    graph.selectAll("circle").remove();
-    plotPoints(graph, newData);
-}
-
 /**
 function buildHistogram() {
     var countObj = {};
