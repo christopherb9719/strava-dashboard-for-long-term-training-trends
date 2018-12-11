@@ -9,6 +9,15 @@ from stravalib.client import Client
 import GPy
 
 
+def convertDecimalToMinutes(num):
+    decimal = num%1
+    print(decimal)
+    decimal = decimal*.6
+    print(decimal)
+    integer = int(num)
+    print(integer)
+    return (integer + decimal)
+
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
 app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
@@ -40,7 +49,7 @@ def rdr():
         summary['distance'] = run.distance.num
         summary['heart_rate'] = run.average_heartrate
         summary['average_speed'] = (run.average_speed.num*60*60)/1000
-        summary['average_pace'] = 60/summary['average_speed']
+        summary['average_pace'] = convertDecimalToMinutes(60/summary['average_speed'])
         summary['description'] = run.description
         summary['total_elevation_gain'] = run.total_elevation_gain.num
         summary['year'] = run.start_date.year
