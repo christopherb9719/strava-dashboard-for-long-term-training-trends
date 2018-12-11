@@ -125,6 +125,8 @@ class Scatter {
     this.plot.selectAll("circle").remove();
     // Update our circles
     this.plotPoints();
+
+		updateTrendline(this);
   }
 
   dataInDate(d) {
@@ -137,23 +139,6 @@ class Scatter {
     else if (d.year == this.max_date.getFullYear()) {
       if (d.month <= this.max_date.getMonth()) return true;
     }
-    /**
-    $(function(){
-  		$.ajax({
-  			url: '/_gaussian_calculation',
-  			data: JSON.stringify(newData),
-        contentType: 'application/json;charset=UTF-8',
-  			type: 'POST',
-  			success: function(response){
-          graph.selectAll("path").remove();
-          appendPath(graph, response);
-  			},
-  			error: function(error){
-  				console.log(error);
-  			}
-  		});
-    });
-    */
   }
 
   dataInTime(d) {
@@ -214,5 +199,21 @@ class Scatter {
   setTimes(min_time, max_time) {
     this.min_time = new Date(min_time);
     this.max_time = new Date(max_time);
+  }
+
+  getX() {
+    return this.x;
+  }
+
+  getY() {
+    return this.y;
+  }
+
+  getPlot() {
+    return this.plot;
+  }
+
+  getData() {
+    return this.data;
   }
 }

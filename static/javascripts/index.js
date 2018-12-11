@@ -32,14 +32,108 @@ var tooltip = d3.select("#graph_container").append("div")
     .style("opacity", 0);
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
+appendPath(scatterGraph1, reg);
 
 //var hist = buildHistogram(w, h/2);
+
+function updateTrendline(graph) {
+  $.ajax({
+    url: '/_gaussian_calculation',
+    data: JSON.stringify(graph.getData().filter(d => ((d.distance <= graph.max_distance && d.distance >= graph.min_distance)
+      && (d.total_elevation_gain <= graph.max_elevation_gain && d.total_elevation_gain >= graph.min_elevation_gain)
+      && (d.heart_rate <= graph.max_heart_rate && d.heart_rate >= graph.min_heart_rate)
+      && graph.dataInDate(d)
+      && graph.dataInTime(d)))),
+    contentType: 'application/json;charset=UTF-8',
+    type: 'POST',
+    success: function(response){
+      graph.getPlot().selectAll("path").remove();
+      appendPath(graph, response);
+    },
+    error: function(error){
+      console.log(error);
+    }
+  });
+}
 
 document.getElementById("addChart").onclick = function() {
   if (typeof scatterGraph2 == "undefined") {
     w = w/2
     scatterGraph1.update(w, h);
     var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
+    appendPath(scatterGraph2, reg);
+    document.getElementById('sliders').setAttribute("style","width:" + w);
+    document.getElementById('graph2sliders').setAttribute("style","width:" + w);
+
+    $(function() {
+      $( "#graph2slider" ).slider({
+        range: true,
+        min: new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000,
+        max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
+        values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
+        slide: function( event, ui ) {
+          scatterGraph2.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+          scatterGraph2.update(w, h);
+        }
+      });
+    });
+
+    $(function() {
+      $( "#graph2timeSlider" ).slider({
+        range: true,
+        min: new Date(0, 0, 0, 0, 0, 0).getTime()/1000,
+        max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
+        values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
+        slide: function( event, ui ) {
+          scatterGraph2.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+          scatterGraph2.update(w, h);
+        }
+      });
+    });
+
+
+    $(function() {
+      $( "#graph2distanceSlider" ).slider({
+        range: true,
+        min: d3.min(dataset, function(d) { return d.distance }),
+        max: d3.max(dataset, function(d) { return d.distance }),
+        values: [0, d3.max(dataset, function(d) { return d.distance })],
+        slide: function( event, ui ) {
+          scatterGraph2.setMinDistance(ui.values[0]);
+          scatterGraph2.setMaxDistance(ui.values[1]);
+          scatterGraph2.update(w, h);
+        }
+      })
+    });
+
+    $(function() {
+      $( "#graph2elevationSlider" ).slider({
+        range: true,
+        min: d3.min(dataset, function(d) { return d.total_elevation_gain }),
+        max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
+        values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
+        slide: function( event, ui ) {
+          scatterGraph2.setMinElevation(ui.values[0]);
+          scatterGraph2.setMaxElevation(ui.values[1]);
+          scatterGraph2.update(w, h);
+        }
+      })
+    });
+
+    $(function() {
+      $( "#graph2heartrateSlider" ).slider({
+        range: true,
+        min: d3.min(dataset, function(d) { return d.heart_rate }),
+        max: d3.max(dataset, function(d) { return d.heart_rate }),
+        values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
+        slide: function( event, ui ) {
+          scatterGraph2.setMinHeartRate(ui.values[0]);
+          scatterGraph2.setMaxHeartRate(ui.values[1]);
+          scatterGraph2.update(w, h);
+        }
+      });
+    });
+
   }
 }
 
