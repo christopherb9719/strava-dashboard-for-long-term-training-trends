@@ -13,18 +13,6 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     h = 600 - margin.top - margin.bottom;
 
 
-var min_distance = d3.min(dataset, function(d) { return d.distance });
-var max_distance = d3.max(dataset, function(d) { return d.distance });
-var min_elevation_gain = d3.min(dataset, function(d) { return d.total_elevation_gain });
-var max_elevation_gain = d3.max(dataset, function(d) { return d.total_elevation_gain });
-var min_heart_rate = d3.min(dataset, function(d) { return d.heart_rate });
-var max_heart_rate = d3.max(dataset, function(d) { return d.heart_rate });
-var min_date = startDate;
-var max_date = endDate;
-var min_time = new Date(0, 0, 0, 0, 0, 0);
-var max_time = new Date(0, 0, 0, 23, 59, 59);
-
-
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
 var tooltip = d3.select("#graph_container").append("div")
