@@ -1,10 +1,11 @@
 class Scatter {
-  constructor(container, data, margin, width, height) {
+  constructor(container, data, margin, width, height, id) {
     this.data = data;
     this.container = container;
     this.margin = margin;
     this.width = width;
     this.height = height;
+    this.id = id;
     this.initialiseValues();
     this.draw();
   }
@@ -33,6 +34,7 @@ class Scatter {
         d3.max(this.data, function(d) { return d.average_pace; }) + 0.02])
       .range([this.height, 0]);
     this.svg = d3.select(this.container).append('svg')
+      .attr("id", this.id)
       .attr("width", this.width + this.margin.left + this.margin.right)
       .attr("height", this.height + this.margin.top + this.margin.bottom);
     this.plot = this.svg.append('g')

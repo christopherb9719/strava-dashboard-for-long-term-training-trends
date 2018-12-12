@@ -20,7 +20,7 @@ var tooltip = d3.select("#graph_container").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
+var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h, "scatter1");
 appendPath(scatterGraph1, reg);
 var hist = buildHistogram(w, h/2);
 
@@ -48,7 +48,7 @@ document.getElementById("addChart").onclick = function() {
   if (!clicked) {
     w = w/2
     scatterGraph1.update(w, h);
-    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
+    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h, "scatter2");
     appendPath(scatterGraph2, reg);
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
@@ -120,14 +120,12 @@ document.getElementById("addChart").onclick = function() {
         }
       });
     });
-
     clicked=true;
   }
-
   else {
     w = w*2;
     console.log("Removing graph");
-    d3.select('svg').remove();
+    d3.select('#scatter2').remove();
     clicked=false;
     scatterGraph1.update(w, h);
     document.getElementById('sliders').setAttribute("style","width: 100%");
