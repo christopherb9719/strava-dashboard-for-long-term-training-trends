@@ -12,7 +12,8 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1200 - margin.left - margin.right,
     h = 600 - margin.top - margin.bottom;
 
-
+var clicked = false;
+var scatterGraph2;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
 var tooltip = d3.select("#graph_container").append("div")
@@ -21,8 +22,7 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h);
 appendPath(scatterGraph1, reg);
-
-//var hist = buildHistogram(w, h/2);
+var hist = buildHistogram(w, h/2);
 
 function updateTrendline(graph) {
   $.ajax({
@@ -45,14 +45,13 @@ function updateTrendline(graph) {
 }
 
 document.getElementById("addChart").onclick = function() {
-  if (typeof scatterGraph2 == "undefined") {
+  if (!clicked) {
     w = w/2
     scatterGraph1.update(w, h);
-    var scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
+    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h);
     appendPath(scatterGraph2, reg);
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
-
 
     $(function() {
       $( "#graph2slider" ).slider({
@@ -79,7 +78,6 @@ document.getElementById("addChart").onclick = function() {
         }
       });
     });
-
 
     $(function() {
       $( "#graph2distanceSlider" ).slider({
@@ -123,6 +121,17 @@ document.getElementById("addChart").onclick = function() {
       });
     });
 
+    clicked=true;
+  }
+
+  else {
+    w = w*2;
+    console.log("Removing graph");
+    d3.select('svg').remove();
+    clicked=false;
+    scatterGraph1.update(w, h);
+    document.getElementById('sliders').setAttribute("style","width: 100%");
+    document.getElementById('graph2sliders').setAttribute("style","width: 0%");
   }
 }
 

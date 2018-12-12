@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, request, session, jsonify
+from flask_pymongo import PyMongo as pm
 import sys
 sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
@@ -18,6 +19,8 @@ def convertDecimalToMinutes(num):
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
 app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
+app.config["MONGO_URI"] = "mongodb://localhost:27017/UserDatabase"
+mongo = pm(app)
 
 
 @app.route("/")
