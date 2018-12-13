@@ -35,6 +35,7 @@ def rdr():
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
+
     client.access_token = '7c1612c0ce6d71f093402f23ab3d20e8a2be4c87'
     session['access_token'] = access_token
     athlete = client.get_athlete()
@@ -49,7 +50,7 @@ def rdr():
         summary['distance'] = run.distance.num
         summary['heart_rate'] = run.average_heartrate
         summary['average_speed'] = (run.average_speed.num*60*60)/1000
-        summary['average_pace'] = convertDecimalToMinutes(60/summary['average_speed'])
+        summary['average_pace'] = 60/summary['average_speed']
         summary['description'] = run.description
         summary['total_elevation_gain'] = run.total_elevation_gain.num
         summary['year'] = run.start_date.year
@@ -61,7 +62,6 @@ def rdr():
         summaries.append(summary.copy())
 
     line_coords = calculateRegression(summaries)
-
     return render_template("index.html", sample = summaries, regression = line_coords)
 
 @app.route("/_gaussian_calculation", methods=['POST'])

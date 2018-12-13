@@ -30,8 +30,8 @@ class Scatter {
         d3.max(this.data, function(d) { return d.heart_rate; })])
       .range([0, this.width]);
     this.y = d3.scaleLinear()
-      .domain([d3.min(this.data, function(d) { return d.average_pace; }) - 0.02,
-        d3.max(this.data, function(d) { return d.average_pace; }) + 0.02])
+      .domain([d3.min(this.data, function(d) { return d.average_pace; }),
+        d3.max(this.data, function(d) { return d.average_pace; })])
       .range([this.height, 0]);
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
@@ -46,23 +46,40 @@ class Scatter {
 
   createAxes() {
     this.xAxisCall = d3.axisBottom(this.x)
+
     this.xAxis = this.plot.append("g")
         .attr("transform", "translate(0," + this.height + ")")
         .call(this.xAxisCall);
 
     this.yAxisCall = d3.axisLeft(this.y)
+      .tickFormat(function(d) {
+        var seconds = Math.round((d % 1) * 60);
+        if (seconds < 10) {
+          seconds = "0" + seconds;
+        }
+        var minutes = Math.floor(d - (d % 1));
+        console.log("Mins: " + minutes)
+        return (minutes + ":" + seconds);
+      })
     this.yAxis = this.plot.append("g")
         .call(this.yAxisCall)
 
+
     // Labels
     this.xAxis.append("text")
-        .attr("transform", "translate(" + this.width + ", 0)")
-        .attr("y", -6)
-        .text("Average Heart Rate (BPM)");
+        .attr("transform",
+            "translate(" + (w/2) + " ," +
+                      (h + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .text("Mean Heart Rate (beats per minute)");
+
     this.yAxis.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", 16)
-        .text("Average Pace (/km)");
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (h / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Mean Pace (minutes per km)");
   }
 
   plotPoints() {
@@ -88,10 +105,17 @@ class Scatter {
             .transition()
             .attr("fill", "#000000")
             //.attr("r", 9)
+          var seconds = Math.round((d.average_pace % 1) * 60);
+          if (seconds < 10) {
+            seconds = "0" + seconds;
+          }
+          var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
+          console.log(seconds);
+          //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
           var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                       "Distance: <b> " + d.distance + "m </b><br/>" +
                       "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                      "<br/> Average Pace: <b/>" + d.average_pace.toFixed(2) + "/km</b>" +
+                      "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
                       "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
 
           tooltip.html(html)
