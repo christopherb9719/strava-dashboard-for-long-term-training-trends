@@ -30,8 +30,10 @@ function buildHistogram(width, height) {
   //Append x axis
   barchart.append("g")
     .attr("transform", "translate(0, "+ h/2 +")")
-    .call(d3.axisBottom(xAxisHist).tickValues(tod).tickFormat(d => (d + ":00")));
-
+    .call(d3.axisBottom(xAxisHist).ticks(23).tickFormat(function(d) {
+      if (d < 10) d = "0" + d;
+      return d + ":00";
+    }));
   //Append y axis
   barchart.append("g")
     .call(d3.axisLeft(yAxisHist));
@@ -39,7 +41,7 @@ function buildHistogram(width, height) {
   barchart.selectAll("rect")
     .data(tod)
     .enter().append("rect")
-      .attr("x", function(d, i) { return x_hist(i-0.5); })
+      .attr("x", function(d, i) { return x_hist(i-0.25); })
       .attr("y", function(d, i) { return y_hist(d); })
       .attr('width', 30)
       .attr('height', function(d) { return (h/2) - y_hist(d); })

@@ -22,6 +22,7 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h, "scatter1");
 appendPath(scatterGraph1, reg);
+window.setInterval(updateTrendline(scatterGraph1, 10000));
 var hist = buildHistogram(w, h/2);
 
 function updateTrendline(graph) {
@@ -50,6 +51,7 @@ document.getElementById("addChart").onclick = function() {
     scatterGraph1.update(w, h);
     scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h, "scatter2");
     appendPath(scatterGraph2, reg);
+    window.setInterval(updateTrendline(scatterGraph2, 10000));
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
