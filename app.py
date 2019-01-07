@@ -4,7 +4,6 @@ from flask_pymongo import PyMongo as pm
 import sys
 sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
-from form import LoginForm
 import json
 import numpy as np
 import stravalib
@@ -19,31 +18,15 @@ app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
 app.config["MONGO_URI"] = "mongodb://localhost:27017/UserDatabase"
 mongo = pm(app)
 
-"""login_manager = LoginManager()
-login_manager.init_app(app)
-# NB: Make sure to add flask_user UserMixin !!!
-class User(db.Model):
-    active = db.BooleanField(default=True)
-
-    # User authentication information
-    username = db.StringField(default='')
-    password = db.StringField()
-
-    # User information
-    first_name = db.StringField(default='')
-    last_name = db.StringField(default='')
-
-# Setup Flask-User and specify the User data-model
-user_manager = UserManager(app, db, User)"""
 
 @app.route("/")
 def index():
     if 'username' in session:
-        return redirect(url_for('authenticate'))
+        return redirect(url_for('parse_data'))
     return render_template('login.html')
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["POST"])
 def login():
     users = mongo.db.users
     login_user = users.find_one({'name' : request.form['username']})
@@ -56,16 +39,6 @@ def login():
     return 'Invalid username/password combination'
 
 
-"""    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.get(form.email.data)
-        flask.flash('Logged in successfully')
-        next = flask.request.args.get('next')
-        if not is_safe_url(next):
-            return flask.abort(400)
-        return flask.redirect(next or flask.url_for('index'))
-    return flask.render_template('login.html', form=form)"""
-
 @app.route("/register", methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
@@ -76,7 +49,7 @@ def register():
             hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
             users.insert({'name' : request.form['username'], 'password' : hashpass})
             session['username'] = request.form['username']
-            return redirect(url_for('index'))
+            return redirect(url_for('authenticate', user = request.form['username']))
 
         return 'Username already exists'
 
@@ -90,14 +63,19 @@ def authenticate():
     return redirect(authorize_url)
 
 @app.route("/redirect")
-def rdr():
+def redir():
     import requests
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    doc = mongo.db.user.insert({'access_token':code})
-    client.access_token = '7c1612c0ce6d71f093402f23ab3d20e8a2be4c87'
-    session['access_token'] = access_token
+    mongo.db.users.update_one({'name': session['username'] }, {'$push': {'token' : '7c1612c0ce6d71f093402f23ab3d20e8a2be4c87' }}, upsert = True)
+    return redirect(url_for('parse_data'))
+
+@app.route("/parse_data")
+def parse_data():
+    client=Client()
+    current_user = mongo.db.users.find_one({'name' : session['username']})
+    client.access_token = current_user['token']
     athlete = client.get_athlete()
     activities = client.get_activities()
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None,activities)
