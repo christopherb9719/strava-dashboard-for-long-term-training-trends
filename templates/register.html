@@ -5,18 +5,22 @@
     <link href="static/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 col-md-offset-4">
-          <form action="{{url_for('register')}}" method=POST>
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Username" name="username">
-            </div>
-            <div class="form-group">
-              <input type="password" class="form-control" placeholder="Password" name="pass">
-            </div>
-            <button class="btn btn-primary btn-block" type="submit">Register</button>
-          </form>
-    </div>
+    <form method="POST" action="">
+              {{ form.hidden_tag() if form.hidden_tag }}
+              {% for f in form if f.type != 'CSRFTokenField' %}
+              <div>
+              {{ f.label }}
+              {{ f }}
+              {% if f.errors %}
+              <ul>
+                  {% for e in f.errors %}
+                  <li>{{ e }}</li>
+                  {% endfor %}
+              </ul>
+              {% endif %}
+              </div>
+              {% endfor %}
+              <input type="submit" />
+      </form>
   </body>
 </html>

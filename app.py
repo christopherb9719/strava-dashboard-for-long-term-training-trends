@@ -9,73 +9,117 @@ import numpy as np
 import stravalib
 from stravalib.client import Client
 import GPy
-from flask_login import LoginManager
-import bcrypt
+from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
+from flask_mongoengine import MongoEngine
+from wtforms import fields, validators
+from flask_wtf import FlaskForm
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
 app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
-app.config["MONGO_URI"] = "mongodb://localhost:27017/UserDatabase"
-mongo = pm(app)
+#app.config["MONGO_URI"] = "mongodb://localhost:27017/UserDatabase"
+app.config["MONGODB_CONFIG"] = {
+    'db': 'UserDatabase',
+    'host': 'mongodb://localhost:27017/UserDatabase'
+}
+db = MongoEngine()
+db.init_app(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
+class User(db.Document, UserMixin):
+    username = db.StringField()
+    email = db.EmailField()
+    password = db.StringField()
+    token = db.StringField()
+
+class RegistrationForm(FlaskForm):
+    username = fields.TextField(validators=[validators.required()])
+    email = fields.TextField()
+    password = fields.PasswordField(validators=[validators.required()])
+
+    def validate_login(self, field):
+        if User.objects(username=self.username.data):
+            raise validators.ValidationError('Duplicate username')
+
+class LoginForm(FlaskForm):
+    email = fields.TextField('Email')
+    password = fields.PasswordField('Password')
+    remember_me = fields.BooleanField('Keep me logged in')
+    submit = fields.SubmitField('Log In')
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.objects(id=user_id).first()
 
 @app.route("/")
 def index():
-    if 'username' in session:
-        return redirect(url_for('parse_data'))
-    return render_template('login.html')
+    return redirect(url_for('login'))
 
-
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    users = mongo.db.users
-    login_user = users.find_one({'name' : request.form['username']})
+    form = LoginForm(request.form)
+    #print(form.validate())
+    if request.method == 'POST' and form.validate():
+        #print("POST")
+        check_user = User.objects(email = form.email.data).first()
+        if check_user:
+            if bcrypt.check_password_hash(check_user.password, str(form.password.data)):
+                print("Hash matched")
+                login_user(check_user)
 
-    if login_user:
-        if bcrypt.hashpw(request.form['pass'].encode('utf-8'), login_user['password']) == login_user['password']:
-            session['username'] = request.form['username']
-            return redirect(url_for('index'))
+                flask.flash('Logged in successfully.')
 
-    return 'Invalid username/password combination'
+                next = flask.request.args.get('next')
+                # is_safe_url should check if the url is safe for redirects.
+                # See http://flask.pocoo.org/snippets/62/ for an example.
+                #if not is_safe_url(next):
+                #    return flask.abort(400)
+
+                return flask.redirect(next or flask.url_for('parse_data'))
+    return flask.render_template('login.html', form=form)
 
 
 @app.route("/register", methods=['POST', 'GET'])
 def register():
-    if request.method == 'POST':
-        users = mongo.db.users
-        existing_user = users.find_one({'name' : request.form['username']})
-
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        existing_user = User.objects(username=form.username.data).first()
         if existing_user is None:
-            hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
-            users.insert({'name' : request.form['username'], 'password' : hashpass})
-            session['username'] = request.form['username']
-            return redirect(url_for('authenticate', user = request.form['username']))
+            user = User(username=form.username.data, email=form.email.data, password=bcrypt.generate_password_hash(form.password.data)).save()
+            login_user(user)
+            client = Client()
+            authorize_url = client.authorization_url(client_id=29429, redirect_uri='http://localhost:5000/redirect')
+            return redirect(authorize_url)
 
-        return 'Username already exists'
+    return render_template('register.html', form=form)
 
-    return render_template("register.html")
-
-
-@app.route("/authenticate")
-def authenticate():
-    client = Client()
-    authorize_url = client.authorization_url(client_id=29429, redirect_uri='http://localhost:5000/redirect')
-    return redirect(authorize_url)
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 @app.route("/redirect")
+@login_required
 def redir():
     import requests
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    mongo.db.users.update_one({'name': session['username'] }, {'$push': {'token' : '7c1612c0ce6d71f093402f23ab3d20e8a2be4c87' }}, upsert = True)
-    return redirect(url_for('parse_data'))
+    current_user.update(token = access_token['access_token'], upsert = True)
+    return redirect(url_for('login'))
 
-@app.route("/parse_data")
+@app.route("/dashboard")
+@login_required
 def parse_data():
     client=Client()
-    current_user = mongo.db.users.find_one({'name' : session['username']})
-    client.access_token = current_user['token']
+    access_token = current_user['token']
+    client.access_token = access_token
     athlete = client.get_athlete()
     activities = client.get_activities()
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None,activities)
@@ -103,6 +147,7 @@ def parse_data():
     return render_template("index.html", sample = summaries, regression = line_coords)
 
 @app.route("/_gaussian_calculation", methods=['POST'])
+@login_required
 def getGaussian():
     activities=None
     if request.method == "POST":

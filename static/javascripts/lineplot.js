@@ -1,3 +1,11 @@
+function Mean(numbers) {
+    var total = 0, i;
+    for (i = 0; i < numbers.length; i += 1) {
+        total += numbers[i];
+    }
+    return total / numbers.length;
+}
+
 function buildHistogram(width, height) {
   var tod = [];
   var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -7,17 +15,26 @@ function buildHistogram(width, height) {
     hr[d.hour] += d.heart_rate;
     p[d.hour] += d.average_pace;
   });
+  var mean = Mean(hr)/Mean(p);
   for (i = 0; i < 24; i++) {
-    if (p[i] == 0) tod.push(0);
-    else tod.push(hr[i]/p[i]);
+    tod.push(mean - (hr[i]/p[i]));
   }
+
   console.log(tod);
 
-  var x_hist = d3.scaleLinear().range([0, width]);
-  var y_hist = d3.scaleLinear().range([height, 0]);
+  var x = d3.scaleBand().range([0, width]).round(.2).domain([0, 23]);
+  var y = d3.scaleLinear().range([height, 0]).domain(d3.extent(tod)).nice();
 
-  var xAxisHist = x_hist.domain([0, 23]);
-  var yAxisHist = y_hist.domain([0, d3.max(tod)]);
+  var xAxisScale = d3.scaleLinear().domain([0, 23]).range([0, width]);
+
+  var xAxisHist = d3.axisBottom(xAxisScale)
+      .tickFormat(function(d) {
+          if (d == 0) return "";
+          else if (d < 10) d = "0" + d;
+          return d + ":00";
+        });
+
+  var yAxisHist = d3.axisLeft(y);
 
 
   barchart = d3.select('#hist_container').append('svg')
@@ -29,22 +46,36 @@ function buildHistogram(width, height) {
 
   //Append x axis
   barchart.append("g")
-    .attr("transform", "translate(0, "+ h/2 +")")
-    .call(d3.axisBottom(xAxisHist).ticks(23).tickFormat(function(d) {
-      if (d < 10) d = "0" + d;
-      return d + ":00";
-    }));
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + y(0) + ")")
+    .call(xAxisHist)
+
+  barchart.append("g")
+    .attr("class", "x axis")
+    .append("line")
+    .attr("y1", y(0))
+    .attr("y2", y(0))
+    .attr("x2", w);
+    //"""{
+      //if (d < 10) d = "0" + d;
+      //return d + ":00";
+    //}));
   //Append y axis
   barchart.append("g")
-    .call(d3.axisLeft(yAxisHist));
+    .call(yAxisHist);
 
   barchart.selectAll("rect")
     .data(tod)
     .enter().append("rect")
-      .attr("x", function(d, i) { return x_hist(i-0.25); })
-      .attr("y", function(d, i) { return y_hist(d); })
+      .attr("x", function(d, i) { console.log(xAxisScale(i)); return xAxisScale(i); })
+      .attr("y", function(d, i) {  if (d > 0){
+                return y(d);
+            } else {
+                return y(0);
+            } })
       .attr('width', 30)
-      .attr('height', function(d) { return (h/2) - y_hist(d); })
+      .attr("fill", "#ff471a")
+      .attr('height', function(d) { return Math.abs(y(d) - y(0)) })
     .on('mouseover', function(d, i) {
       if (i < 10) { var time = "0" + i + ":00" }
       else { var time = i + ":00" }
