@@ -23,6 +23,7 @@
             <p><label>Elevation:</label><div id="elevationSlider"></div></p>
             <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
             <p><input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/></p>
+            <p><input type="button" value="Refresh Trend Line" onclick="updateTrendline(scatterGraph1)"/></p>
           </div>
           <div id="graph2sliders">
             <p><label>Date:</label><div id="graph2slider"></div></p>
@@ -30,6 +31,8 @@
             <p><label>Distance:</label><div id="graph2distanceSlider"></div></p>
             <p><label>Elevation:</label><div id="graph2elevationSlider"></div></p>
             <p><label>Heart Rate:</label><div id="graph2heartrateSlider"></div></p>
+            <p><input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/></p>
+            <p><input type="button" value="Refresh Trend Line" onclick="updateTrendline(scatterGraph2)"/></p>
           </div>
         </div>
         <script>
