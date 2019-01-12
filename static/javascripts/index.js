@@ -48,7 +48,7 @@ document.getElementById("addChart").onclick = function() {
     updateTrendline(scatterGraph1)
     scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h, "scatter2");
     appendPath(scatterGraph2, reg);
-    barChart2.update(w/2, h/2);
+    barChart1.update(w/2, h/2);
     var barChart2 = new BarChart('#hist_container', dataset, margin, w/2, h/2, "barChart2");
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");

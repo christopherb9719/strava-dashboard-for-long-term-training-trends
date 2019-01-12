@@ -30,6 +30,7 @@ class BarChart {
     this.y = d3.scaleLinear().range([this.height, 0]).domain(d3.extent(this.barVals)).nice();
 
     this.svg = d3.select(this.container).append('svg')
+      .attr("id", this.id)
       .attr('width', w + this.margin.left + this.margin.right)
       .attr("height", h/2 + this.margin.top + this.margin.bottom)
 
@@ -95,7 +96,7 @@ class BarChart {
       for (i = 0; i < numbers.length; i += 1) {
           total += numbers[i];
       }
-      return total / numbers.length;
+      return total/numbers.length;
   }
 
   buildBarValues() {
@@ -107,7 +108,6 @@ class BarChart {
         && this.containsTags(d)
       ));
 
-    console.log(activities);
     var tod = [];
     var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     var p = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -125,7 +125,7 @@ class BarChart {
 
   update(w, h){
     // Update our scales
-    this.x.range([0, w]);
+    this.xAxisScale.range([0, w]);
     this.y.range([h, 0]);
 
     this.svg.attr("width", w + this.margin.left + this.margin.right);
