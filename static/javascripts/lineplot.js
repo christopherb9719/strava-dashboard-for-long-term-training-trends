@@ -67,8 +67,8 @@ function buildHistogram(width, height) {
   barchart.selectAll("rect")
     .data(tod)
     .enter().append("rect")
-      .attr("x", function(d, i) { console.log(xAxisScale(i)); return xAxisScale(i); })
-      .attr("y", function(d, i) {  if (d > 0){
+      .attr("x", function(d, i) { return xAxisScale(i); })
+      .attr("y", function(d, i) { if (d > 0){
                 return y(d);
             } else {
                 return y(0);

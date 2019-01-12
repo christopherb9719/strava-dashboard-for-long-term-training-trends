@@ -22,7 +22,8 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h, "scatter1");
 appendPath(scatterGraph1, reg);
-window.setInterval(updateTrendline(scatterGraph1, 10000));
+window.setInterval(function() {
+  updateTrendline(scatterGraph1)}, 3000);
 var hist = buildHistogram(w, h/2);
 
 function updateTrendline(graph) {
@@ -36,6 +37,7 @@ function updateTrendline(graph) {
     contentType: 'application/json;charset=UTF-8',
     type: 'POST',
     success: function(response){
+      console.log("Updating trend line");
       graph.getPlot().selectAll("path").remove();
       appendPath(graph, response);
     },
@@ -51,7 +53,8 @@ document.getElementById("addChart").onclick = function() {
     scatterGraph1.update(w, h);
     scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h, "scatter2");
     appendPath(scatterGraph2, reg);
-    window.setInterval(updateTrendline(scatterGraph2, 10000));
+    window.setInterval(function() {
+      updateTrendline(scatterGraph2)}, 3000);
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
@@ -203,6 +206,11 @@ $(function() {
     }
   });
 });
+
+function filterTags(tags) {
+  scatterGraph1.setTags(tags.split(' '));
+  scatterGraph1.update(w, h);
+}
 
 /**
 function buildHistogram() {

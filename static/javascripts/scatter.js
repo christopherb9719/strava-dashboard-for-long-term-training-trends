@@ -21,6 +21,7 @@ class Scatter {
     this.max_date = endDate;
     this.min_time = new Date(0, 0, 0, 0, 0, 0);
     this.max_time = new Date(0, 0, 0, 23, 59, 59);
+    this.tags = [];
   }
 
   draw() {
@@ -58,7 +59,6 @@ class Scatter {
           seconds = "0" + seconds;
         }
         var minutes = Math.floor(d - (d % 1));
-        console.log("Mins: " + minutes)
         return (minutes + ":" + seconds);
       })
     this.yAxis = this.plot.append("g")
@@ -89,6 +89,7 @@ class Scatter {
           && (d.heart_rate <= this.max_heart_rate && d.heart_rate >= this.min_heart_rate)
           && this.dataInDate(d)
           && this.dataInTime(d)
+          && this.containsTags(d)
         )));
 
     this.circles.enter()
@@ -110,7 +111,6 @@ class Scatter {
             seconds = "0" + seconds;
           }
           var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
-          console.log(seconds);
           //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
           var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
                       "Distance: <b> " + d.distance + "m </b><br/>" +
@@ -151,8 +151,6 @@ class Scatter {
     this.plot.selectAll("circle").remove();
     // Update our circles
     this.plotPoints();
-
-		updateTrendline(this);
   }
 
   dataInDate(d) {
@@ -177,6 +175,17 @@ class Scatter {
     else if (d.year == this.max_time.getHours()) {
       if (d.minute <= this.max_time.getMinutes()) return true;
     }
+  }
+
+  containsTags(d) {
+    this.tags.forEach(function(tag) {
+      if (d.description != null && d.description.contains(tag)) {
+        console.log(tag);
+        console.log(d.description)
+        return false;
+      }
+    })
+    return true;
   }
 
   getRadius(d) {
@@ -241,5 +250,13 @@ class Scatter {
 
   getData() {
     return this.data;
+  }
+
+  setTags(tags) {
+    this.tags = tags;
+  }
+
+  getTags() {
+    return this.tags;
   }
 }
