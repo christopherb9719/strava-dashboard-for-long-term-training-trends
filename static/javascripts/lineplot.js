@@ -1,12 +1,14 @@
 class BarChart {
   constructor(container, data, margin, width, height, id) {
-    this.data = this.buildBarValues(data);
+    this.data = data;
+    this.initialiseValues();
+    this.barVals = this.buildBarValues();
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
     this.id = id;
-    this.draw()
+    this.draw();
   }
 
   initialiseValues() {
@@ -25,12 +27,13 @@ class BarChart {
 
   draw() {
     this.x = d3.scaleBand().range([0, this.width]).round(.2).domain([0, 23]);
-    this.y = d3.scaleLinear().range([this.height, 0]).domain(d3.extent(this.data)).nice();
+    this.y = d3.scaleLinear().range([this.height, 0]).domain(d3.extent(this.barVals)).nice();
 
-    this.plot = d3.select(this.container).append('svg')
+    this.svg = d3.select(this.container).append('svg')
       .attr('width', w + this.margin.left + this.margin.right)
       .attr("height", h/2 + this.margin.top + this.margin.bottom)
-      .append("g")
+
+    this.plot = this.svg.append("g")
           .attr("transform",
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
@@ -40,30 +43,30 @@ class BarChart {
 
   createAxes() {
     this.xAxisScale = d3.scaleLinear().domain([0, 23]).range([0, this.width]);
-    this.xAxis = d3.axisBottom(this.xAxisScale)
+    this.xAxisCall = d3.axisBottom(this.xAxisScale)
           .tickFormat(function(d) {
               if (d == 0) return "";
               else if (d < 10) d = "0" + d;
               return d + ":00";
             });
 
-    this.yAxis = d3.axisLeft(this.y);
+    this.yAxisCall = d3.axisLeft(this.y);
 
-    this.plot.append("g")
+    this.xAxis = this.plot.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + this.y(0) + ")")
-      .call(this.xAxis)
+      .call(this.xAxisCall)
 
-    this.plot.append("g")
-      .call(this.yAxis);
+    this.yAxis = this.plot.append("g")
+      .call(this.yAxisCall);
   }
 
   plotBars() {
-    this.plot.selectAll("rect")
-      .data(this.data)
-      .enter().append("rect")
-        .attr("x", d => this.xAxisScale(this.data.indexOf(d)))
-        .attr("y", d => this.getY(d))
+    this.rects = this.plot.selectAll("rect").data(this.barVals);
+    this.rects.enter()
+      .append("rect")
+        .attr("x", d => this.xAxisScale(this.barVals.indexOf(d)))
+        .attr("y", d => Math.min(this.y(0), this.y(d)))
         .attr('width', 30)
         .attr("fill", "#ff471a")
         .attr('height', d => Math.abs(this.y(d) - this.y(0)))
@@ -87,14 +90,6 @@ class BarChart {
       });
   }
 
-  getY(d) {
-    if (d > 0){
-        return this.y(d);
-    } else {
-        return this.y(0);
-    }
-  }
-
   Mean(numbers) {
       var total = 0, i;
       for (i = 0; i < numbers.length; i += 1) {
@@ -103,12 +98,21 @@ class BarChart {
       return total / numbers.length;
   }
 
-  buildBarValues(data) {
+  buildBarValues() {
+    var activities = this.data.filter(d => ((d.distance <= this.max_distance && d.distance >= this.min_distance)
+        && (d.total_elevation_gain <= this.max_elevation_gain && d.total_elevation_gain >= this.min_elevation_gain)
+        && (d.heart_rate <= this.max_heart_rate && d.heart_rate >= this.min_heart_rate)
+        && this.dataInDate(d)
+        && this.dataInTime(d)
+        && this.containsTags(d)
+      ));
+
+    console.log(activities);
     var tod = [];
     var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     var p = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     // count how much each city occurs in list and store in countObj
-    data.forEach(function(d) {
+    activities.forEach(function(d) {
       hr[d.hour] += d.heart_rate;
       p[d.hour] += d.average_pace;
     });
@@ -117,6 +121,130 @@ class BarChart {
       tod.push(mean - (hr[i]/p[i]));
     }
     return tod;
+  }
+
+  update(w, h){
+    // Update our scales
+    this.x.range([0, w]);
+    this.y.range([h, 0]);
+
+    this.svg.attr("width", w + this.margin.left + this.margin.right);
+
+    // Update our axes
+    this.xAxis.call(this.xAxisCall);
+    this.yAxis.call(this.yAxisCall);
+
+    this.plot.selectAll("rect").remove();
+    // Update our circles
+    this.barVals = this.buildBarValues();
+    this.plotBars();
+  }
+
+  dataInDate(d) {
+    if (d.year > this.min_date.getFullYear() && d.year < this.max_date.getFullYear()) {
+      return true;
+    }
+    else if (d.year == this.min_date.getFullYear()) {
+        if (d.month >= this.min_date.getMonth()) return true;
+    }
+    else if (d.year == this.max_date.getFullYear()) {
+      if (d.month <= this.max_date.getMonth()) return true;
+    }
+  }
+
+  dataInTime(d) {
+    if (d.hour > this.min_time.getHours() && d.hour < this.max_time.getHours()) {
+      return true;
+    }
+    else if (d.hour == this.min_time.getHours()) {
+      if (d.minute >= this.min_time.getMinutes()) return true;
+    }
+    else if (d.year == this.max_time.getHours()) {
+      if (d.minute <= this.max_time.getMinutes()) return true;
+    }
+  }
+
+  containsTags(d) {
+    this.tags.forEach(function(tag) {
+      if (d.description != null && d.description.contains(tag)) {
+        console.log(tag);
+        console.log(d.description)
+        return false;
+      }
+    })
+    return true;
+  }
+
+  getRadius(d) {
+    var max = this.max_date.getTime()/1000,
+        min = this.min_date.getTime()/1000,
+        date = new Date(d.year, d.month, d.day, 0, 0, 0),
+        size = (max-min)/(max-(date.getTime()/1000));
+    if (size == 'infinity') {
+      return 20;
+    }
+    else {
+      return Math.min(20, size);
+    }
+  }
+
+
+  setMinDistance(min_distance) {
+    this.min_distance = min_distance;
+  }
+
+  setMaxDistance(max_distance) {
+    this.max_distance = max_distance;
+  }
+
+  setMinElevation(min_elevation_gain) {
+    this.min_elevation_gain = min_elevation_gain;
+  }
+
+  setMaxElevation(max_elevation_gain) {
+    this.max_elevation_gain = max_elevation_gain;
+  }
+
+  setMaxHeartRate(max_heart_rate) {
+    this.max_heart_rate = max_heart_rate;
+  }
+
+  setMinHeartRate(min_heart_rate) {
+    this.min_heart_rate = min_heart_rate;
+  }
+
+  setDates(min_date, max_date) {
+    this.min_date = new Date(min_date);
+    this.max_date = new Date(max_date);
+  }
+
+  setTimes(min_time, max_time) {
+    this.min_time = new Date(min_time);
+    this.max_time = new Date(max_time);
+  }
+
+  getX() {
+    return this.x;
+  }
+
+  getY() {
+    return this.y;
+  }
+
+  getPlot() {
+    return this.plot;
+  }
+
+  getData() {
+    return this.data;
+  }
+
+  setTags(tags) {
+    this.tags = tags;
+  }
+
+  getTags() {
+    return this.tags;
   }
 
 }

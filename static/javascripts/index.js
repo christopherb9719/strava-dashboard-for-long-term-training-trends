@@ -19,7 +19,7 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h, "scatter1");
 appendPath(scatterGraph1, reg);
-var hist = new BarChart('#hist_container', dataset, margin, w, h/2, "barChart1");
+var barChart1 = new BarChart('#hist_container', dataset, margin, w, h/2, "barChart1");
 
 function updateTrendline(graph) {
   $.ajax({
@@ -44,11 +44,12 @@ function updateTrendline(graph) {
 
 document.getElementById("addChart").onclick = function() {
   if (!clicked) {
-    w = w/2
-    scatterGraph1.update(w, h);
+    scatterGraph1.update(w/2, h);
     updateTrendline(scatterGraph1)
-    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h, "scatter2");
+    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h, "scatter2");
     appendPath(scatterGraph2, reg);
+    barChart2.update(w/2, h/2);
+    var barChart2 = new BarChart('#hist_container', dataset, margin, w/2, h/2, "barChart2");
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
@@ -122,11 +123,13 @@ document.getElementById("addChart").onclick = function() {
     clicked=true;
   }
   else {
-    w = w*2;
     console.log("Removing graph");
     d3.select('#scatter2').remove();
+    d3.select('#barChart2').remove();
     clicked=false;
     scatterGraph1.update(w, h);
+    updateTrendline(scatterGraph1);
+    barChart1.update(w, h/2);
     document.getElementById('sliders').setAttribute("style","width: 100%");
     document.getElementById('graph2sliders').setAttribute("style","width: 0%");
   }
@@ -141,6 +144,8 @@ $(function() {
     slide: function( event, ui ) {
       scatterGraph1.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
       scatterGraph1.update(w, h);
+      barChart1.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+      barChart1.update(w, h/2);
     }
   });
 });
@@ -154,6 +159,8 @@ $(function() {
     slide: function( event, ui ) {
       scatterGraph1.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
       scatterGraph1.update(w, h);
+      barChart1.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+      barChart1.update(w, h/2);
     }
   });
 });
@@ -169,6 +176,9 @@ $(function() {
       scatterGraph1.setMinDistance(ui.values[0]);
       scatterGraph1.setMaxDistance(ui.values[1]);
       scatterGraph1.update(w, h);
+      barChart1.setMinDistance(ui.values[0]);
+      barChart1.setMaxDistance(ui.values[1]);
+      barChart1.update(w, h/2);
     }
   })
 });
@@ -183,6 +193,9 @@ $(function() {
       scatterGraph1.setMinElevation(ui.values[0]);
       scatterGraph1.setMaxElevation(ui.values[1]);
       scatterGraph1.update(w, h);
+      barChart1.setMinElevation(ui.values[0]);
+      barChart1.setMaxElevation(ui.values[1]);
+      barChart1.update(w, h/2);
     }
   })
 });
@@ -197,6 +210,9 @@ $(function() {
       scatterGraph1.setMinHeartRate(ui.values[0]);
       scatterGraph1.setMaxHeartRate(ui.values[1]);
       scatterGraph1.update(w, h);
+      barChart1.setMinHeartRate(ui.values[0]);
+      barChart1.setMaxHeartRate(ui.values[1]);
+      barChart1.update(w, h/2);
     }
   });
 });
@@ -204,6 +220,8 @@ $(function() {
 function filterTags(tags) {
   scatterGraph1.setTags(tags.split(' '));
   scatterGraph1.update(w, h);
+  barChart1.setTags(tags.split(' '));
+  barChart1.update(w, h/2);
 }
 
 /**
