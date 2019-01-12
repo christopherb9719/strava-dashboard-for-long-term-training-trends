@@ -25,7 +25,6 @@ class Scatter {
   }
 
   draw() {
-    console.log(this.container);
     this.x = d3.scaleLinear()
       .domain([d3.min(this.data, function(d) { return d.heart_rate; }),
         d3.max(this.data, function(d) { return d.heart_rate; })])

@@ -1,6 +1,3 @@
-console.log(dataset);
-console.log(reg);
-
 var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
@@ -22,7 +19,7 @@ var tooltip = d3.select("#graph_container").append("div")
 
 var scatterGraph1 = new Scatter('#graph_container', dataset, margin, w, h, "scatter1");
 appendPath(scatterGraph1, reg);
-var hist = buildHistogram(w, h/2);
+var hist = new BarChart('#hist_container', dataset, margin, w, h/2, "barChart1");
 
 function updateTrendline(graph) {
   $.ajax({
