@@ -44,7 +44,12 @@ def isAllUpperCase(form, field):
     if (field.data.upper() == field.data):
         raise ValidationError('Password must contain at least one lower case character')
 
-
+def hasNumber(form, field):
+    allChars = True
+    if (any(char.isdigit() for char in field.data)):
+        allChars = False
+    if allChars:
+        raise ValidationError('Password must contain at least one number')
 
 class RegistrationForm(FlaskForm):
     username = fields.TextField(validators=[validators.required()])
@@ -54,7 +59,8 @@ class RegistrationForm(FlaskForm):
         validators.Length(min=10, message='Password must be at least 10 characters long'),
         validators.EqualTo('confirm', message='Passwords must match'),
         isAllLowerCase,
-        isAllUpperCase
+        isAllUpperCase,
+        hasNumber
     ])
     confirm = fields.PasswordField('Repeat Password')
 
