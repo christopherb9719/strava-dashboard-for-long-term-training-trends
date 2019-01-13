@@ -38,7 +38,7 @@ class User(db.Document, UserMixin):
 
 class RegistrationForm(FlaskForm):
     username = fields.TextField(validators=[validators.required()])
-    email = fields.TextField([validators.Email(message='Not a valid email')])
+    email = fields.TextField('Email', [validators.Email(message='Not a valid email')])
     password = fields.PasswordField('New Password', [
         validators.DataRequired(),
         validators.Length(min=10, message='Password must be at least 10 characters long'),
