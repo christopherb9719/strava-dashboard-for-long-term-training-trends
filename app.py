@@ -120,12 +120,12 @@ def parse_data():
     client=Client()
     access_token = current_user['token']
     client.access_token = access_token
-    athlete = client.get_athlete()
+    #athlete = client.get_athlete()
     activities = client.get_activities()
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None,activities)
+    print(runs)
     summaries = []
     gr = {'heart_rates': [], 'average_pace': []}
-
     for run in runs:
         summary = {}
         summary['id'] = run.id

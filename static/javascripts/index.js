@@ -44,12 +44,13 @@ function updateTrendline(graph) {
 
 document.getElementById("addChart").onclick = function() {
   if (!clicked) {
-    scatterGraph1.update(w/2, h);
+    w = w/2;
+    scatterGraph1.update(w, h);
     updateTrendline(scatterGraph1)
-    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w/2, h, "scatter2");
+    scatterGraph2 = new Scatter('#graph_container', dataset, margin, w, h, "scatter2");
     appendPath(scatterGraph2, reg);
-    barChart1.update(w/2, h/2);
-    var barChart2 = new BarChart('#hist_container', dataset, margin, w/2, h/2, "barChart2");
+    barChart1.update(w, h/2);
+    var barChart2 = new BarChart('#hist_container', dataset, margin, w, h/2, "barChart2");
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
@@ -62,6 +63,8 @@ document.getElementById("addChart").onclick = function() {
         slide: function( event, ui ) {
           scatterGraph2.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
           scatterGraph2.update(w, h);
+          barChart2.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+          barChart2.update(w, h/2);
         }
       });
     });
@@ -75,6 +78,8 @@ document.getElementById("addChart").onclick = function() {
         slide: function( event, ui ) {
           scatterGraph2.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
           scatterGraph2.update(w, h);
+          barChart2.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+          barChart2.update(w, h/2);
         }
       });
     });
@@ -89,6 +94,10 @@ document.getElementById("addChart").onclick = function() {
           scatterGraph2.setMinDistance(ui.values[0]);
           scatterGraph2.setMaxDistance(ui.values[1]);
           scatterGraph2.update(w, h);
+          barChart2.setMinDistance(ui.values[0]);
+          barChart2.setMaxDistance(ui.values[1]);
+          barChart2.update(w, h/2);
+
         }
       })
     });
@@ -103,6 +112,9 @@ document.getElementById("addChart").onclick = function() {
           scatterGraph2.setMinElevation(ui.values[0]);
           scatterGraph2.setMaxElevation(ui.values[1]);
           scatterGraph2.update(w, h);
+          barChart2.setMinElevation(ui.values[0]);
+          barChart2.setMaxElevation(ui.values[1]);
+          barChart2.update(w, h/2);
         }
       })
     });
@@ -117,12 +129,16 @@ document.getElementById("addChart").onclick = function() {
           scatterGraph2.setMinHeartRate(ui.values[0]);
           scatterGraph2.setMaxHeartRate(ui.values[1]);
           scatterGraph2.update(w, h);
+          barChart2.setMinHeartRate(ui.values[0]);
+          barChart2.setMaxHeartRate(ui.values[1]);
+          barChart2.update(w, h/2);
         }
       });
     });
     clicked=true;
   }
   else {
+    w = w*2;
     console.log("Removing graph");
     d3.select('#scatter2').remove();
     d3.select('#barChart2').remove();
