@@ -38,8 +38,13 @@ class User(db.Document, UserMixin):
 
 class RegistrationForm(FlaskForm):
     username = fields.TextField(validators=[validators.required()])
-    email = fields.TextField()
-    password = fields.PasswordField(validators=[validators.required()])
+    email = fields.TextField([validators.Email(message='Not a valid email')])
+    password = fields.PasswordField('New Password', [
+        validators.DataRequired(),
+        validators.Length(min=10, message='Password must be at least 10 characters long'),
+        validators.EqualTo('confirm', message='Passwords must match')
+    ])
+    confirm = fields.PasswordField('Repeat Password')
 
     def validate_login(self, field):
         if User.objects(username=self.username.data):
