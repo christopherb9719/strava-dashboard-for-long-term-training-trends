@@ -11,7 +11,7 @@ from stravalib.client import Client
 import GPy
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_mongoengine import MongoEngine
-from wtforms import fields, validators
+from wtforms import fields, validators, ValidationError
 from flask_wtf import FlaskForm
 from flask_bcrypt import Bcrypt
 
@@ -36,13 +36,25 @@ class User(db.Document, UserMixin):
     password = db.StringField()
     token = db.StringField()
 
+def isAllLowerCase(form, field):
+    if (field.data.lower() == field.data):
+        raise ValidationError('Password must contain at least one upper case character')
+
+def isAllUpperCase(form, field):
+    if (field.data.upper() == field.data):
+        raise ValidationError('Password must contain at least one lower case character')
+
+
+
 class RegistrationForm(FlaskForm):
     username = fields.TextField(validators=[validators.required()])
     email = fields.TextField('Email', [validators.Email(message='Not a valid email')])
     password = fields.PasswordField('New Password', [
         validators.DataRequired(),
         validators.Length(min=10, message='Password must be at least 10 characters long'),
-        validators.EqualTo('confirm', message='Passwords must match')
+        validators.EqualTo('confirm', message='Passwords must match'),
+        isAllLowerCase,
+        isAllUpperCase
     ])
     confirm = fields.PasswordField('Repeat Password')
 
