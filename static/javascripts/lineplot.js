@@ -27,7 +27,10 @@ class BarChart {
 
   draw() {
     this.x = d3.scaleBand().range([0, this.width]).round(.2).domain([0, 23]);
-    this.y = d3.scaleLinear().range([this.height, 0]).domain(d3.extent(this.barVals)).nice();
+    this.y = d3.scaleLinear().range([this.height, 0]).domain([
+      Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })),
+      (-1 * Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })))
+    ]).nice();
 
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
@@ -54,6 +57,7 @@ class BarChart {
     this.yAxisCall = d3.axisLeft(this.y);
 
     this.xAxis = this.plot.append("g")
+      .attr("id", "x axis")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + this.y(0) + ")")
       .call(this.xAxisCall)
@@ -124,21 +128,26 @@ class BarChart {
   }
 
   update(w, h){
-    // Update our scales
+    // Re-calculate the bar values
+    this.barVals = this.buildBarValues();
+
+    // Update the scales
+    this.y.domain([
+      Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })),
+      (-1 * Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })))
+    ]).nice();
     this.xAxisScale.range([0, w]);
-    this.y.range([h, 0]);
     this.width = w;
     this.height = h;
 
     this.svg.attr("width", w + this.margin.left + this.margin.right);
 
-    // Update our axes
+    // Update the axes
     this.xAxis.call(this.xAxisCall);
     this.yAxis.call(this.yAxisCall);
 
+    // Update the bars
     this.plot.selectAll("rect").remove();
-    // Update our circles
-    this.barVals = this.buildBarValues();
     this.plotBars();
   }
 
