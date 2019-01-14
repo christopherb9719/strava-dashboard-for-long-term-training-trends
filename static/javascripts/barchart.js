@@ -79,7 +79,7 @@ class BarChart {
         if (i < 10) { var time = "0" + i + ":00" }
         else { var time = i + ":00" }
         var html  = "Time of run: <b> " + time + "</b><br/>" +
-                    "y: <b>" + d + "</b>";
+                    "Variance from mean bpkm: <b>" + d.toFixed(3) + "bpkm</b>";
 
         tooltip.html(html)
             .style("left", (d3.event.pageX + 15) + "px")
