@@ -4,21 +4,17 @@ from flask_pymongo import PyMongo as pm
 import sys
 sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
+from forms import RegistrationForm, LoginForm
 import json
-import numpy as np
 import stravalib
 from stravalib.client import Client
-import GPy
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_mongoengine import MongoEngine
-from wtforms import fields, validators, ValidationError
-from flask_wtf import FlaskForm
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
 app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
-#app.config["MONGO_URI"] = "mongodb://localhost:27017/UserDatabase"
 app.config["MONGODB_CONFIG"] = {
     'db': 'UserDatabase',
     'host': 'mongodb://localhost:27017/UserDatabase'
@@ -36,44 +32,6 @@ class User(db.Document, UserMixin):
     password = db.StringField()
     token = db.StringField()
 
-def isAllLowerCase(form, field):
-    if (field.data.lower() == field.data):
-        raise ValidationError('Password must contain at least one upper case character')
-
-def isAllUpperCase(form, field):
-    if (field.data.upper() == field.data):
-        raise ValidationError('Password must contain at least one lower case character')
-
-def hasNumber(form, field):
-    allChars = True
-    if (any(char.isdigit() for char in field.data)):
-        allChars = False
-    if allChars:
-        raise ValidationError('Password must contain at least one number')
-
-class RegistrationForm(FlaskForm):
-    username = fields.TextField(validators=[validators.required()])
-    email = fields.TextField('Email', [validators.Email(message='Not a valid email')])
-    password = fields.PasswordField('New Password', [
-        validators.DataRequired(),
-        validators.Length(min=10, message='Password must be at least 10 characters long'),
-        validators.EqualTo('confirm', message='Passwords must match'),
-        isAllLowerCase,
-        isAllUpperCase,
-        hasNumber
-    ])
-    confirm = fields.PasswordField('Repeat Password')
-
-    def validate_login(self, field):
-        if User.objects(username=self.username.data):
-            raise validators.ValidationError('Duplicate username')
-
-class LoginForm(FlaskForm):
-    email = fields.TextField('Email')
-    password = fields.PasswordField('Password')
-    remember_me = fields.BooleanField('Keep me logged in')
-    submit = fields.SubmitField('Log In')
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -86,9 +44,7 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm(request.form)
-    #print(form.validate())
     if request.method == 'POST' and form.validate():
-        #print("POST")
         check_user = User.objects(email = form.email.data).first()
         if check_user:
             if bcrypt.check_password_hash(check_user.password, str(form.password.data)):

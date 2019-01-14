@@ -1,5 +1,6 @@
 import GPy
 import numpy as np
+
 def calculateRegression(activities):
     hr = [run['heart_rate'] for run in activities]
     avs = [run['average_pace'] for run in activities]

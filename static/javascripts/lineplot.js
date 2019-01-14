@@ -68,7 +68,7 @@ class BarChart {
       .append("rect")
         .attr("x", d => this.xAxisScale(this.barVals.indexOf(d)))
         .attr("y", d => Math.min(this.y(0), this.y(d)))
-        .attr('width', 30)
+        .attr('width', this.width/24)
         .attr("fill", "#ff471a")
         .attr('height', d => Math.abs(this.y(d) - this.y(0)))
       .on('mouseover', function(d, i) {
@@ -127,6 +127,8 @@ class BarChart {
     // Update our scales
     this.xAxisScale.range([0, w]);
     this.y.range([h, 0]);
+    this.width = w;
+    this.height = h;
 
     this.svg.attr("width", w + this.margin.left + this.margin.right);
 
