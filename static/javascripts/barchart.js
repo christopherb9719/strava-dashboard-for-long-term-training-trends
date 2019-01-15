@@ -1,28 +1,15 @@
 class BarChart {
-  constructor(container, data, margin, width, height, id) {
+  constructor(container, data, filters, margin, width, height, id) {
     this.data = data;
-    this.initialiseValues();
+    this.filters = filters;
     this.barVals = this.buildBarValues();
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
+    this.filters = filters;
     this.id = id;
     this.draw();
-  }
-
-  initialiseValues() {
-    this.min_distance = d3.min(this.data, function(d) { return d.distance });
-    this.max_distance = d3.max(this.data, function(d) { return d.distance });
-    this.min_elevation_gain = d3.min(this.data, function(d) { return d.total_elevation_gain });
-    this.max_elevation_gain = d3.max(this.data, function(d) { return d.total_elevation_gain });
-    this.min_heart_rate = d3.min(this.data, function(d) { return d.heart_rate });
-    this.max_heart_rate = d3.max(this.data, function(d) { return d.heart_rate });
-    this.min_date = startDate;
-    this.max_date = endDate;
-    this.min_time = new Date(0, 0, 0, 0, 0, 0);
-    this.max_time = new Date(0, 0, 0, 23, 59, 59);
-    this.tags = [];
   }
 
   draw() {
@@ -104,13 +91,13 @@ class BarChart {
   }
 
   buildBarValues() {
-    var activities = this.data.filter(d => ((d.distance <= this.max_distance && d.distance >= this.min_distance)
-        && (d.total_elevation_gain <= this.max_elevation_gain && d.total_elevation_gain >= this.min_elevation_gain)
-        && (d.heart_rate <= this.max_heart_rate && d.heart_rate >= this.min_heart_rate)
-        && this.dataInDate(d)
-        && this.dataInTime(d)
-        && this.containsTags(d)
-      ));
+    var activities = this.data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
+      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
+      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
+      && this.dataInDate(d)
+      && this.dataInTime(d)
+      && this.containsTags(d)
+    ));
 
     var tod = [];
     var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -152,86 +139,36 @@ class BarChart {
   }
 
   dataInDate(d) {
-    if (d.year > this.min_date.getFullYear() && d.year < this.max_date.getFullYear()) {
+    if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
       return true;
     }
-    else if (d.year == this.min_date.getFullYear()) {
-        if (d.month >= this.min_date.getMonth()) return true;
+    else if (d.year == this.filters.getEarliestDate().getFullYear()) {
+        if (d.month >= this.filters.getEarliestDate().getMonth()) return true;
     }
-    else if (d.year == this.max_date.getFullYear()) {
-      if (d.month <= this.max_date.getMonth()) return true;
+    else if (d.year == this.filters.getLatestDate().getFullYear()) {
+      if (d.month <= this.filters.getLatestDate().getMonth()) return true;
     }
   }
 
   dataInTime(d) {
-    if (d.hour > this.min_time.getHours() && d.hour < this.max_time.getHours()) {
+    if (d.hour > this.filters.getEarliestTime().getHours() && d.hour < this.filters.getLatestTime().getHours()) {
       return true;
     }
-    else if (d.hour == this.min_time.getHours()) {
-      if (d.minute >= this.min_time.getMinutes()) return true;
+    else if (d.hour == this.filters.getEarliestTime().getHours()) {
+      if (d.minute >= this.filters.getEarliestTime().getMinutes()) return true;
     }
-    else if (d.year == this.max_time.getHours()) {
-      if (d.minute <= this.max_time.getMinutes()) return true;
+    else if (d.year == this.filters.getLatestTime().getHours()) {
+      if (d.minute <= this.filters.getLatestTime().getMinutes()) return true;
     }
   }
 
   containsTags(d) {
-    this.tags.forEach(function(tag) {
+    this.filters.getTags().forEach(function(tag) {
       if (d.description != null && d.description.contains(tag)) {
-        console.log(tag);
-        console.log(d.description)
         return false;
       }
     })
     return true;
-  }
-
-  getRadius(d) {
-    var max = this.max_date.getTime()/1000,
-        min = this.min_date.getTime()/1000,
-        date = new Date(d.year, d.month, d.day, 0, 0, 0),
-        size = (max-min)/(max-(date.getTime()/1000));
-    if (size == 'infinity') {
-      return 20;
-    }
-    else {
-      return Math.min(20, size);
-    }
-  }
-
-
-  setMinDistance(min_distance) {
-    this.min_distance = min_distance;
-  }
-
-  setMaxDistance(max_distance) {
-    this.max_distance = max_distance;
-  }
-
-  setMinElevation(min_elevation_gain) {
-    this.min_elevation_gain = min_elevation_gain;
-  }
-
-  setMaxElevation(max_elevation_gain) {
-    this.max_elevation_gain = max_elevation_gain;
-  }
-
-  setMaxHeartRate(max_heart_rate) {
-    this.max_heart_rate = max_heart_rate;
-  }
-
-  setMinHeartRate(min_heart_rate) {
-    this.min_heart_rate = min_heart_rate;
-  }
-
-  setDates(min_date, max_date) {
-    this.min_date = new Date(min_date);
-    this.max_date = new Date(max_date);
-  }
-
-  setTimes(min_time, max_time) {
-    this.min_time = new Date(min_time);
-    this.max_time = new Date(max_time);
   }
 
   getX() {
@@ -249,13 +186,4 @@ class BarChart {
   getData() {
     return this.data;
   }
-
-  setTags(tags) {
-    this.tags = tags;
-  }
-
-  getTags() {
-    return this.tags;
-  }
-
 }
