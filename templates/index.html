@@ -9,15 +9,24 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
         <script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
         <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+        <script>
+            var dataset = {{ sample|tojson }};
+            var reg = {{regression|tojson }};
+        </script>
     </head>
     <body>
         <a href="{{url_for('logout')}}">Log Out</a>
         <input id="addChart" type="button" value="Add Chart"/>
+        <input id="mergeGraphs" type="button" value="Merge Graphs"/>
+        <div id="userSearch">
+          <input id="findUsers" list="dropdown">
+          <select id="dropdown" onclick="plotGraphs(this.value)"></select>
+        </div>
         <div id="hist_container"></div>
         <div id="graph_container"></div>
         <div id="wrapper">
           <div id="sliders">
-            <p><label>Date:</label><div id="slider"></div></p>
+            <p><label>Date:</label><div id="slider"></div>
             <p><label>Time:</label><div id="timeSlider"></div></p>
             <p><label>Distance:</label><div id="distanceSlider"></div></p>
             <p><label>Elevation:</label><div id="elevationSlider"></div></p>
@@ -35,10 +44,6 @@
             <p><input type="button" value="Refresh Trend Line" onclick="updateTrendline(scatterGraph2)"/></p>
           </div>
         </div>
-        <script>
-            var dataset = {{ sample|tojson }};
-            var reg = {{regression|tojson }};
-        </script>
         <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
         <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>

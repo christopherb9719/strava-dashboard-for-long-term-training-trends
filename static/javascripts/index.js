@@ -7,8 +7,7 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     h = 600 - margin.top - margin.bottom;
 
 var clicked = false;
-var scatterGraph2;
-
+var  scatterGraph2;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
 var tooltip = d3.select("#graph_container").append("div")
@@ -17,9 +16,18 @@ var tooltip = d3.select("#graph_container").append("div")
 
 //Build Graphs
 var graph1Filters = new Filters(dataset)
-var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1");
+var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1", "#ff471a");
 appendPath(scatterGraph1, reg);
-var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1");
+var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
+
+document.getElementById("addChart").onclick = function() {
+  createGraphs(dataset, reg, "#ff471a");
+};
+
+document.getElementById("mergeGraphs").onclick = function() {
+  console.log("Merging graphs");
+  mergeGraphs();
+};
 
 function updateTrendline(graph) {
   $.ajax({
@@ -43,16 +51,66 @@ function updateTrendline(graph) {
   });
 }
 
-document.getElementById("addChart").onclick = function() {
-  if (!clicked) {
+$('#findUsers').change(function() {
+  console.log("Change");
+  $.ajax({
+    url: '/find_users',
+    data: document.getElementById("findUsers").value,
+    contentType: 'text',
+    type: 'POST',
+    success: function(response) {
+      JSON.parse(response).forEach(function(elem) {
+        var option = document.createElement("option");
+        option.text = elem.username;
+        option.value = elem.token;
+        console.log(option.value);
+        $("#dropdown").append(option);
+      })
+    },
+    error: function(error) {
+      console.log(error);
+    }
+  })
+})
+
+function plotGraphs(access_token) {
+  console.log("Get user data");
+  $.ajax({
+    url: '/get_user_data',
+    data: access_token,
+    contentType: 'text',
+    type: 'POST',
+    success: function(response) {
+      console.log(response);
+      var activities = response[0];
+      var line_coords = response[1];
+      createGraphs(activities, line_coords, "#00e600");
+      },
+    error: function(error) {
+      console.log(error);
+    }
+  })
+}
+
+function createGraphs(d, line_points, colour) {
+  console.log(clicked);
+  if (clicked == false) {
+    document.getElementById('addChart').value = "Remove Graph";
+    console.log("Adding graph")
+    clicked = true;
     w = w/2;
+    //Update 1st set of graphs
     scatterGraph1.update(w, h);
-    updateTrendline(scatterGraph1)
-    graph2Filters = new Filters(dataset);
-    scatterGraph2 = new Scatter('#graph_container', dataset, graph2Filters, margin, w, h, "scatter2");
-    appendPath(scatterGraph2, reg);
+    updateTrendline(scatterGraph1);
     barChart1.update(w, h/2);
-    var barChart2 = new BarChart('#hist_container', dataset, graph2Filters, margin, w, h/2, "barChart2");
+
+    //Create second set of graphs
+    graph2Filters = new Filters(d);
+    scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
+    appendPath(scatterGraph2, line_points);
+    var barChart2 = new BarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
+
+    //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
@@ -126,17 +184,22 @@ document.getElementById("addChart").onclick = function() {
         }
       });
     });
-    clicked=true;
   }
   else {
+    document.getElementById('addChart').value = "Add Graph";
+    clicked = false;
     w = w*2;
     console.log("Removing graph");
+    //Remove second set of graphs
     d3.select('#scatter2').remove();
     d3.select('#barChart2').remove();
-    clicked=false;
+
+    //Update first set of graphs
     scatterGraph1.update(w, h);
     updateTrendline(scatterGraph1);
     barChart1.update(w, h/2);
+
+    //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
     document.getElementById('graph2sliders').setAttribute("style","width: 0%");
   }
@@ -217,4 +280,139 @@ function filterTags(tags) {
   graph1Filters.getFilters().setTags(tags.split(' '));
   scatterGraph1.update(w, h);
   barChart1.update(w, h/2);
+}
+
+function mergeGraphs() {
+  w = w*2;
+  data1 = scatterGraph1.getData();
+  data2 = scatterGraph2.getData();
+  d3.select('#scatter1').remove();
+  d3.select('#scatter2').remove();
+  var xmin1 = d3.min(data1, function(d) { return d.heart_rate; });
+  var xmin2 = d3.min(data2, function(d) { return d.heart_rate; });
+  var xmax1 = d3.max(data1, function(d) { return d.heart_rate; });
+  var xmax2 = d3.max(data2, function(d) { return d.heart_rate; });
+  var ymin1 = d3.min(data1, function(d) { return d.average_pace; })
+  var ymin2 = d3.min(data2, function(d) { return d.average_pace; });
+  var ymax1 = d3.max(data1, function(d) { return d.average_pace; });
+  var ymax2 = d3.max(data2, function(d) { return d.average_pace; });
+  console.log(Math.min(xmin1, xmin2));
+  console.log(Math.max(xmax1, xmax2));
+  var merge_x = d3.scaleLinear()
+    .domain([Math.min(xmin1, xmin2), Math.max(xmax1, xmax2)])
+    .range([0, w]);
+  var merge_y = d3.scaleLinear()
+    .domain([Math.min(ymin1, ymin2), Math.max(ymax1, ymax2)])
+    .range([h, 0]);
+  var scatter3 = d3.select('#graph_container').append('svg')
+    .attr("id", 'scatter3')
+    .attr("width", w + margin.left + margin.right)
+    .attr("height", h + margin.top + margin.bottom)
+      .append('g').attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+  var merge_xAxisCall = d3.axisBottom(merge_x)
+
+  var merge_xAxis = scatter3.append("g")
+      .attr("transform", "translate(0," + h + ")")
+      .call(merge_xAxisCall);
+
+  var merge_yAxisCall = d3.axisLeft(merge_y)
+    .tickFormat(function(d) {
+      var seconds = Math.round((d % 1) * 60);
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      var minutes = Math.floor(d - (d % 1));
+      return (minutes + ":" + seconds);
+    })
+
+  var merge_yAxis = scatter3.append("g")
+      .call(merge_yAxisCall)
+
+  var circles = scatter3.selectAll("circles");
+
+  circles.data(data1).enter()
+    .append("a")
+      .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
+      .append("circle")
+        .attr("cx", (d => merge_x(d.heart_rate)))
+        .attr("cy", (d => merge_y(d.average_pace)))
+        .attr("r", "10")
+        .attr("fill", "#ff471a")
+        .style("opacity", 0.5)
+      .on('mouseover', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
+          //.attr("r", 9)
+        var seconds = Math.round((d.average_pace % 1) * 60);
+        if (seconds < 10) {
+          seconds = "0" + seconds;
+        }
+        var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
+        //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
+        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
+                    "Distance: <b> " + d.distance + "m </b><br/>" +
+                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
+                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
+                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
+
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", .9) // started as 0!
+        }
+      )
+      .on('mouseout', function() {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#ff471a")
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
+      });
+
+  circles.data(data2).enter()
+    .append("a")
+      .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
+      .append("circle")
+        .attr("cx", (d => merge_x(d.heart_rate)))
+        .attr("cy", (d => merge_y(d.average_pace)))
+        .attr("r", "10")
+        .attr("fill", "#00ff00")
+        .style("opacity", 0.5)
+      .on('mouseover', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
+          //.attr("r", 9)
+        var seconds = Math.round((d.average_pace % 1) * 60);
+        if (seconds < 10) {
+          seconds = "0" + seconds;
+        }
+        var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
+        //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
+        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
+                    "Distance: <b> " + d.distance + "m </b><br/>" +
+                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
+                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
+                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
+
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", .9) // started as 0!
+        }
+      )
+      .on('mouseout', function(d) {
+        d3.select(this) .transition()
+          .attr("fill", "#00ff00")
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
+      });
 }

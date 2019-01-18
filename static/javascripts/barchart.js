@@ -1,5 +1,5 @@
 class BarChart {
-  constructor(container, data, filters, margin, width, height, id) {
+  constructor(container, data, filters, margin, width, height, id, colour) {
     this.data = data;
     this.filters = filters;
     this.barVals = this.buildBarValues();
@@ -9,6 +9,7 @@ class BarChart {
     this.height = height;
     this.filters = filters;
     this.id = id;
+    this.colour = colour;
     this.draw();
   }
 
@@ -60,9 +61,12 @@ class BarChart {
         .attr("x", d => this.xAxisScale(this.barVals.indexOf(d)))
         .attr("y", d => Math.min(this.y(0), this.y(d)))
         .attr('width', this.width/24)
-        .attr("fill", "#ff471a")
+        .attr("fill", this.colour)
         .attr('height', d => Math.abs(this.y(d) - this.y(0)))
       .on('mouseover', function(d, i) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
         if (i < 10) { var time = "0" + i + ":00" }
         else { var time = i + ":00" }
         var html  = "Time of run: <b> " + time + "</b><br/>" +
@@ -76,6 +80,9 @@ class BarChart {
             .style("opacity", .7) // started as 0!
       })
       .on('mouseout', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", this.colour)
         tooltip.transition()
             .duration(300) // ms
             .style("opacity", 0); // don't care about position!

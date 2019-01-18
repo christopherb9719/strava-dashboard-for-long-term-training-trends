@@ -1,12 +1,10 @@
 import flask
 from flask import Flask, render_template, redirect, request, session, jsonify, url_for
-from flask_pymongo import PyMongo as pm
 import sys
 sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
 from forms import RegistrationForm, LoginForm
 import json
-import stravalib
 from stravalib.client import Client
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_mongoengine import MongoEngine
@@ -59,7 +57,7 @@ def login():
                 #if not is_safe_url(next):
                 #    return flask.abort(400)
 
-                return flask.redirect(next or flask.url_for('parse_data'))
+                return flask.redirect(next or flask.url_for('loadDashboard'))
     return flask.render_template('login.html', form=form)
 
 
@@ -95,9 +93,42 @@ def redir():
 
 @app.route("/dashboard")
 @login_required
-def parse_data():
+def loadDashboard():
+    print("Loading dashboard")
+    activities = parse_data(current_user['token'])
+    line_coords = calculateRegression(activities)
+    return render_template("index.html", sample = activities, regression = line_coords)
+
+@app.route("/get_user_data", methods=['POST'])
+@login_required
+def getUserData():
+    print(request.data.decode('utf-8'))
+    activities = parse_data(request.data.decode('utf-8'))
+    line_coords = calculateRegression(activities)
+    response = [activities, line_coords]
+    return jsonify(response)
+
+@app.route("/_gaussian_calculation", methods=['POST'])
+@login_required
+def getGaussian():
+    activities=None
+    if request.method == "POST":
+        activities = request.json
+        return jsonify(calculateRegression(activities))
+
+@app.route("/find_users", methods = ["POST"])
+@login_required
+def findUsers():
+    query = request.data.decode('utf-8')
+    print(query)
+    users = User.objects(username__contains=query)
+    print(users)
+    return users.to_json()
+
+
+
+def parse_data(access_token):
     client=Client()
-    access_token = current_user['token']
     client.access_token = access_token
     #athlete = client.get_athlete()
     activities = client.get_activities()
@@ -122,18 +153,7 @@ def parse_data():
         summary['second'] = run.start_date.second
         summaries.append(summary.copy())
 
-    line_coords = calculateRegression(summaries)
-    return render_template("index.html", sample = summaries, regression = line_coords)
-
-@app.route("/_gaussian_calculation", methods=['POST'])
-@login_required
-def getGaussian():
-    activities=None
-    if request.method == "POST":
-        activities = request.json
-        return jsonify(calculateRegression(activities))
-
-
+    return summaries
 
 if __name__ == "__main__":
     app.run(debug=True)
