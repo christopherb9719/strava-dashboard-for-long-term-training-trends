@@ -285,25 +285,24 @@ function filterTags(tags) {
 function mergeGraphs() {
   w = w*2;
   data1 = scatterGraph1.getData();
+  console.log(data1)
   data2 = scatterGraph2.getData();
+  console.log(data2);
+  var all_data = data1.concat(data2);
+  console.log(all_data);
+  merge_filters = new Filters(all_data);
+
   d3.select('#scatter1').remove();
   d3.select('#scatter2').remove();
-  var xmin1 = d3.min(data1, function(d) { return d.heart_rate; });
-  var xmin2 = d3.min(data2, function(d) { return d.heart_rate; });
-  var xmax1 = d3.max(data1, function(d) { return d.heart_rate; });
-  var xmax2 = d3.max(data2, function(d) { return d.heart_rate; });
-  var ymin1 = d3.min(data1, function(d) { return d.average_pace; })
-  var ymin2 = d3.min(data2, function(d) { return d.average_pace; });
-  var ymax1 = d3.max(data1, function(d) { return d.average_pace; });
-  var ymax2 = d3.max(data2, function(d) { return d.average_pace; });
-  console.log(Math.min(xmin1, xmin2));
-  console.log(Math.max(xmax1, xmax2));
+
   var merge_x = d3.scaleLinear()
-    .domain([Math.min(xmin1, xmin2), Math.max(xmax1, xmax2)])
+    .domain([Math.min(scatterGraph1.getFilters().getMinHeartRate(), scatterGraph2.getFilters().getMinHeartRate()), Math.max(scatterGraph1.getFilters().getMaxHeartRate(), scatterGraph2.getFilters().getMaxHeartRate())])
     .range([0, w]);
+
   var merge_y = d3.scaleLinear()
-    .domain([Math.min(ymin1, ymin2), Math.max(ymax1, ymax2)])
+    .domain([Math.min(d3.min(data1, function(d) { return d.average_pace; }), d3.min(data2, function(d) { return d.average_pace; })), Math.max(d3.max(data1, function(d) { return d.average_pace; }), d3.max(data2, function(d) { return d.average_pace; }))])
     .range([h, 0]);
+
   var scatter3 = d3.select('#graph_container').append('svg')
     .attr("id", 'scatter3')
     .attr("width", w + margin.left + margin.right)
@@ -329,90 +328,7 @@ function mergeGraphs() {
   var merge_yAxis = scatter3.append("g")
       .call(merge_yAxisCall)
 
-  var circles = scatter3.selectAll("circles");
+  plotScatterPoints(scatter3, data1, "#ff471a", merge_x, merge_y, merge_filters);
+  plotScatterPoints(scatter3, data2, "#00ff00", merge_x, merge_y, merge_filters);
 
-  circles.data(data1).enter()
-    .append("a")
-      .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
-      .append("circle")
-        .attr("cx", (d => merge_x(d.heart_rate)))
-        .attr("cy", (d => merge_y(d.average_pace)))
-        .attr("r", "10")
-        .attr("fill", "#ff471a")
-        .style("opacity", 0.5)
-      .on('mouseover', function(d) {
-        d3.select(this)
-          .transition()
-          .attr("fill", "#000000")
-          //.attr("r", 9)
-        var seconds = Math.round((d.average_pace % 1) * 60);
-        if (seconds < 10) {
-          seconds = "0" + seconds;
-        }
-        var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
-        //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
-        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
-                    "Distance: <b> " + d.distance + "m </b><br/>" +
-                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
-                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
-
-        tooltip.html(html)
-            .style("left", (d3.event.pageX + 15) + "px")
-            .style("top", (d3.event.pageY - 28) + "px")
-          .transition()
-            .duration(200) // ms
-            .style("opacity", .9) // started as 0!
-        }
-      )
-      .on('mouseout', function() {
-        d3.select(this)
-          .transition()
-          .attr("fill", "#ff471a")
-        tooltip.transition()
-            .duration(300) // ms
-            .style("opacity", 0); // don't care about position!
-      });
-
-  circles.data(data2).enter()
-    .append("a")
-      .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
-      .append("circle")
-        .attr("cx", (d => merge_x(d.heart_rate)))
-        .attr("cy", (d => merge_y(d.average_pace)))
-        .attr("r", "10")
-        .attr("fill", "#00ff00")
-        .style("opacity", 0.5)
-      .on('mouseover', function(d) {
-        d3.select(this)
-          .transition()
-          .attr("fill", "#000000")
-          //.attr("r", 9)
-        var seconds = Math.round((d.average_pace % 1) * 60);
-        if (seconds < 10) {
-          seconds = "0" + seconds;
-        }
-        var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
-        //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
-        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
-                    "Distance: <b> " + d.distance + "m </b><br/>" +
-                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
-                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
-
-        tooltip.html(html)
-            .style("left", (d3.event.pageX + 15) + "px")
-            .style("top", (d3.event.pageY - 28) + "px")
-          .transition()
-            .duration(200) // ms
-            .style("opacity", .9) // started as 0!
-        }
-      )
-      .on('mouseout', function(d) {
-        d3.select(this) .transition()
-          .attr("fill", "#00ff00")
-        tooltip.transition()
-            .duration(300) // ms
-            .style("opacity", 0); // don't care about position!
-      });
 }

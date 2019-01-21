@@ -3,7 +3,9 @@ import numpy as np
 
 def calculateRegression(activities):
     hr = [run['heart_rate'] for run in activities]
+    print(len(hr))
     avs = [run['average_pace'] for run in activities]
+    print(len(avs))
     end = len(activities)
     kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
     m = GPy.models.GPRegression(np.array(hr)[:end,None],np.array(avs)[:end,None], kernel)

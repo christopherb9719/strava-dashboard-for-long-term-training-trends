@@ -28,7 +28,7 @@ class User(db.Document, UserMixin):
     username = db.StringField()
     email = db.EmailField()
     password = db.StringField()
-    token = db.StringField()
+    token = db.ListField()
 
 
 @login_manager.user_loader
@@ -70,7 +70,7 @@ def register():
             user = User(username=form.username.data, email=form.email.data, password=bcrypt.generate_password_hash(form.password.data)).save()
             login_user(user)
             client = Client()
-            authorize_url = client.authorization_url(client_id=29429, redirect_uri='http://localhost:5000/redirect')
+            authorize_url = client.authorization_url(client_id='29429', redirect_uri='http://localhost:5000/redirect')
             return redirect(authorize_url)
 
     return render_template('register.html', form=form)
@@ -87,9 +87,10 @@ def redir():
     import requests
     client=Client()
     code = request.args.get('code')
-    access_token = client.exchange_code_for_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    current_user.update(token = access_token['access_token'], upsert = True)
-    return redirect(url_for('login'))
+    access_token = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
+    print(access_token)
+    current_user.update(token = access_token, upsert = True)
+    return redirect(url_for('loadDashboard'))
 
 @app.route("/dashboard")
 @login_required
@@ -102,7 +103,7 @@ def loadDashboard():
 @app.route("/get_user_data", methods=['POST'])
 @login_required
 def getUserData():
-    print(request.data.decode('utf-8'))
+    #print(request.data.decode('utf-8'))
     activities = parse_data(request.data.decode('utf-8'))
     line_coords = calculateRegression(activities)
     response = [activities, line_coords]
@@ -127,15 +128,16 @@ def findUsers():
 
 
 
-def parse_data(access_token):
-    client=Client()
-    client.access_token = access_token
-    #athlete = client.get_athlete()
+def parse_data(token):
+    #'3c2e651e3382f3f391bbabe33d8df7b097bbc9fa'
+    client=Client(access_token = token)
+    print(client.access_token)
+    #print(type(client.access_token))
+    athlete = client.get_athlete()
+    print(athlete.firstname);
     activities = client.get_activities()
-    runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None,activities)
-    print(runs)
+    runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None, activities)
     summaries = []
-    gr = {'heart_rates': [], 'average_pace': []}
     for run in runs:
         summary = {}
         summary['id'] = run.id

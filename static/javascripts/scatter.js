@@ -1,12 +1,13 @@
 class Scatter {
   constructor(container, data, filters, margin, width, height, id) {
     this.data = data;
+    this.filters = filters;
+    this.filtered_data = this.filterData(this.data);
     this.container = container;
     this.margin = margin;
     this.width = width;
     this.height = height;
     this.id = id;
-    this.filters = filters;
     this.draw();
   }
 
@@ -27,7 +28,7 @@ class Scatter {
       .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    this.plotPoints();
+    plotScatterPoints(this.plot, this.filtered_data, "#ff471a", this.x, this.y, this.filters);
   }
 
   createAxes() {
@@ -67,78 +68,20 @@ class Scatter {
         .text("Mean Pace (minutes per km)");
   }
 
-  plotPoints() {
-    this.circles = this.plot.selectAll("circle")
-        .data(this.data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
-          && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
-          && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
-          && this.dataInDate(d)
-          && this.dataInTime(d)
-          && this.containsTags(d)
-        )));
+  filterData(data) {
+    var filtered = data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
+      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
+      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
+      && this.dataInDate(d)
+      && this.dataInTime(d)
+      && this.containsTags(d)
+    ));
 
-    this.circles.enter()
-      .append("a")
-        .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
-        .append("circle")
-          .attr("cx", (d => this.x(d.heart_rate)))
-          .attr("cy", (d => this.y(d.average_pace)))
-          .attr("r", (d => this.getRadius(d)))
-          .attr("fill", "#ff471a")
-          .style("opacity", 0.5)
-        .on('mouseover', function(d) {
-          d3.select(this)
-            .transition()
-            .attr("fill", "#000000")
-            //.attr("r", 9)
-          var seconds = Math.round((d.average_pace % 1) * 60);
-          if (seconds < 10) {
-            seconds = "0" + seconds;
-          }
-          var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
-          //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
-          var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
-                      "Distance: <b> " + d.distance + "m </b><br/>" +
-                      "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                      "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
-                      "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
-
-          tooltip.html(html)
-              .style("left", (d3.event.pageX + 15) + "px")
-              .style("top", (d3.event.pageY - 28) + "px")
-            .transition()
-              .duration(200) // ms
-              .style("opacity", .9) // started as 0!
-          }
-        )
-        .on('mouseout', function() {
-          d3.select(this)
-            .transition()
-            .attr("fill", "#ff471a")
-          tooltip.transition()
-              .duration(300) // ms
-              .style("opacity", 0); // don't care about position!
-        });
+    return filtered
   }
 
 
-  update(w, h){
-    // Update our scales
-    this.x.range([0, w]);
-    this.y.range([h, 0]);
-
-    this.svg.attr("width", w + this.margin.left + this.margin.right);
-
-    // Update our axes
-    this.xAxis.call(this.xAxisCall);
-    this.yAxis.call(this.yAxisCall);
-
-    this.plot.selectAll("circle").remove();
-    // Update our circles
-    this.plotPoints();
-  }
-
-  dataInDate(d) {
+  dataInDate(d, filters) {
     if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
       return true;
     }
@@ -171,9 +114,9 @@ class Scatter {
     return true;
   }
 
-  getRadius(d) {
-    var max = this.filters.getLatestDate().getTime()/1000,
-        min = this.filters.getEarliestDate().getTime()/1000,
+  getRadius(d, filters) {
+    var max = filters.getLatestDate().getTime()/1000,
+        min = filters.getEarliestDate().getTime()/1000,
         date = new Date(d.year, d.month, d.day, 0, 0, 0),
         size = (max-min)/(max-(date.getTime()/1000));
     if (size == 'infinity') {
@@ -182,6 +125,23 @@ class Scatter {
     else {
       return Math.min(20, size);
     }
+  }
+
+  update(w, h){
+    // Update our scales
+    this.x.range([0, w]);
+    this.y.range([h, 0]);
+
+    this.svg.attr("width", w + this.margin.left + this.margin.right);
+
+    // Update our axes
+    this.xAxis.call(this.xAxisCall);
+    this.yAxis.call(this.yAxisCall);
+
+    this.plot.selectAll("circle").remove();
+    // Update our circles
+    this.filtered_data = this.filterData(this.data);
+    plotScatterPoints(this.plot, this.filtered_data, "#ff471a", this.x, this.y, this.filters);
   }
 
   getX() {
@@ -204,4 +164,67 @@ class Scatter {
     return this.filters;
   }
 
+}
+
+function getRadius(d, filters) {
+  //console.log(filters.getLatestDate());
+  //console.log(filters.getEarliestDate());
+  var max = filters.getLatestDate().getTime()/1000,
+      min = filters.getEarliestDate().getTime()/1000,
+      date = new Date(d.year, d.month, d.day, 0, 0, 0),
+      size = (max-min)/(max-(date.getTime()/1000));
+  if (size == 'infinity') {
+    return 20;
+  }
+  else {
+    return Math.min(20, size);
+  }
+}
+
+
+function plotScatterPoints(plot, data, colour, x, y, filters) {
+  var circles = plot.selectAll("circles");
+
+  circles.data(data).enter()
+    .append("a")
+      .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
+      .append("circle")
+        .attr("cx", (d => x(d.heart_rate)))
+        .attr("cy", (d => y(d.average_pace)))
+        .attr("r", function(d) { return getRadius(d, filters); })
+        .attr("fill", colour)
+        .style("opacity", 0.5)
+      .on('mouseover', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
+          //.attr("r", 9)
+        var seconds = Math.round((d.average_pace % 1) * 60);
+        if (seconds < 10) {
+          seconds = "0" + seconds;
+        }
+        var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
+        //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
+        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
+                    "Distance: <b> " + d.distance + "m </b><br/>" +
+                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
+                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
+                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
+
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", .9) // started as 0!
+        }
+      )
+      .on('mouseout', function() {
+        d3.select(this)
+          .transition()
+          .attr("fill", colour)
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
+      });
 }
