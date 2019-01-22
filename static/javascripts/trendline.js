@@ -1,13 +1,14 @@
-function appendPath(svg, pts) {
+function appendPath(graph, pts, x, y) {
   var lineFunction = d3.line()
     .x(function(d) {
-      return svg.getX()(d.x);
+      return x(d.x);
     })
     .y(function(d) {
-      return svg.getY()(d.y);
+      return y(d.y);
     })
 
-  svg.getPlot().append("path")
+
+  graph.append("path")
     .attr("class", "line")
     .attr("id", function(d) {return "trendline";})
     .attr("d", lineFunction(pts));

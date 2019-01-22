@@ -17,11 +17,11 @@ var tooltip = d3.select("#graph_container").append("div")
 //Build Graphs
 var graph1Filters = new Filters(dataset)
 var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1", "#ff471a");
-appendPath(scatterGraph1, reg);
+appendPath(scatterGraph1.getSvg(), reg, scatterGraph1.getX(), scatterGraph1.getY());
 var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
 
 document.getElementById("addChart").onclick = function() {
-  createGraphs(dataset, reg, "#ff471a");
+  createGraphs(dataset, reg, "#00e600");
 };
 
 document.getElementById("mergeGraphs").onclick = function() {
@@ -29,21 +29,16 @@ document.getElementById("mergeGraphs").onclick = function() {
   mergeGraphs();
 };
 
-function updateTrendline(graph) {
+function updateTrendline(filtered_data, graph, x, y) {
   $.ajax({
     url: '/_gaussian_calculation',
-    data: JSON.stringify(graph.getData().filter(d => ((d.distance <= graph.getFilters().getMaxDistance() && d.distance >= graph.getFilters().getMinDistance())
-      && (d.total_elevation_gain <= graph.getFilters().getMaxElevationGain() && d.total_elevation_gain >= graph.getFilters().getMinElevationGain())
-      && (d.heart_rate <= graph.getFilters().getMaxHeartRate() && d.heart_rate >= graph.getFilters().getMinHeartRate())
-      && graph.dataInDate(d)
-      && graph.dataInTime(d)
-      && graph.containsTags(d)))),
+    data: JSON.stringify(filtered_data),
     contentType: 'application/json;charset=UTF-8',
     type: 'POST',
     success: function(response){
       console.log("Updating trend line");
-      graph.getPlot().selectAll("path").remove();
-      appendPath(graph, response);
+      graph.selectAll("path").remove();
+      appendPath(graph, response, x, y);
     },
     error: function(error){
       console.log(error);
@@ -101,13 +96,13 @@ function createGraphs(d, line_points, colour) {
     w = w/2;
     //Update 1st set of graphs
     scatterGraph1.update(w, h);
-    updateTrendline(scatterGraph1);
+    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getSvg(), scatterGraph1.getX(), scatterGraph1.getY());
     barChart1.update(w, h/2);
 
     //Create second set of graphs
     graph2Filters = new Filters(d);
     scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
-    appendPath(scatterGraph2, line_points);
+    appendPath(scatterGraph2.getSvg(), line_points, scatterGraph2.getX(), scatterGraph2.getY());
     var barChart2 = new BarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
 
     //Set up sliders for second set of graphs
@@ -196,7 +191,7 @@ function createGraphs(d, line_points, colour) {
 
     //Update first set of graphs
     scatterGraph1.update(w, h);
-    updateTrendline(scatterGraph1);
+    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getPlot());
     barChart1.update(w, h/2);
 
     //Remove sliders for second set of graphs
@@ -285,18 +280,17 @@ function filterTags(tags) {
 function mergeGraphs() {
   w = w*2;
   data1 = scatterGraph1.getData();
-  console.log(data1)
   data2 = scatterGraph2.getData();
-  console.log(data2);
+  filtered_data1 = scatterGraph1.getFilteredData();
+  filtered_data2 = scatterGraph2.getFilteredData();
   var all_data = data1.concat(data2);
-  console.log(all_data);
   merge_filters = new Filters(all_data);
 
   d3.select('#scatter1').remove();
   d3.select('#scatter2').remove();
 
   var merge_x = d3.scaleLinear()
-    .domain([Math.min(scatterGraph1.getFilters().getMinHeartRate(), scatterGraph2.getFilters().getMinHeartRate()), Math.max(scatterGraph1.getFilters().getMaxHeartRate(), scatterGraph2.getFilters().getMaxHeartRate())])
+    .domain([Math.min(d3.min(data1, function(d) { return d.heart_rate; }), d3.min(data2, function(d) { return d.heart_rate; })), Math.max(d3.max(data1, function(d) { return d.heart_rate; }), d3.max(data2, function(d) { return d.heart_rate; }))])
     .range([0, w]);
 
   var merge_y = d3.scaleLinear()
@@ -328,7 +322,9 @@ function mergeGraphs() {
   var merge_yAxis = scatter3.append("g")
       .call(merge_yAxisCall)
 
-  plotScatterPoints(scatter3, data1, "#ff471a", merge_x, merge_y, merge_filters);
-  plotScatterPoints(scatter3, data2, "#00ff00", merge_x, merge_y, merge_filters);
+  plotScatterPoints(scatter3, filtered_data1, "#ff471a", merge_x, merge_y, merge_filters);
+  plotScatterPoints(scatter3, filtered_data2, "#00ff00", merge_x, merge_y, merge_filters);
+  updateTrendline(filtered_data1, scatter3, merge_x, merge_y);
+  updateTrendline(filtered_data2, scatter3, merge_x, merge_y);
 
 }

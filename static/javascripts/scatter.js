@@ -1,6 +1,7 @@
 class Scatter {
-  constructor(container, data, filters, margin, width, height, id) {
+  constructor(container, data, filters, margin, width, height, id, colour) {
     this.data = data;
+    this.colour = colour;
     this.filters = filters;
     this.filtered_data = this.filterData(this.data);
     this.container = container;
@@ -23,18 +24,18 @@ class Scatter {
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
       .attr("width", this.width + this.margin.left + this.margin.right)
-      .attr("height", this.height + this.margin.top + this.margin.bottom);
-    this.plot = this.svg.append('g')
-      .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
+      .attr("height", this.height + this.margin.top + this.margin.bottom)
+        .append('g')
+          .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    plotScatterPoints(this.plot, this.filtered_data, "#ff471a", this.x, this.y, this.filters);
+    plotScatterPoints(this.svg, this.filtered_data, this.colour, this.x, this.y, this.filters);
   }
 
   createAxes() {
     this.xAxisCall = d3.axisBottom(this.x)
 
-    this.xAxis = this.plot.append("g")
+    this.xAxis = this.svg.append("g")
         .attr("transform", "translate(0," + this.height + ")")
         .call(this.xAxisCall);
 
@@ -47,7 +48,7 @@ class Scatter {
         var minutes = Math.floor(d - (d % 1));
         return (minutes + ":" + seconds);
       })
-    this.yAxis = this.plot.append("g")
+    this.yAxis = this.svg.append("g")
         .call(this.yAxisCall)
 
 
@@ -138,10 +139,10 @@ class Scatter {
     this.xAxis.call(this.xAxisCall);
     this.yAxis.call(this.yAxisCall);
 
-    this.plot.selectAll("circle").remove();
+    this.svg.selectAll("circle").remove();
     // Update our circles
     this.filtered_data = this.filterData(this.data);
-    plotScatterPoints(this.plot, this.filtered_data, "#ff471a", this.x, this.y, this.filters);
+    plotScatterPoints(this.svg, this.filtered_data, this.colour, this.x, this.y, this.filters);
   }
 
   getX() {
@@ -152,8 +153,8 @@ class Scatter {
     return this.y;
   }
 
-  getPlot() {
-    return this.plot;
+  getSvg() {
+    return this.svg;
   }
 
   getData() {
@@ -162,6 +163,10 @@ class Scatter {
 
   getFilters() {
     return this.filters;
+  }
+
+  getFilteredData() {
+    return this.filtered_data;
   }
 
 }

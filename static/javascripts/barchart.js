@@ -30,7 +30,7 @@ class BarChart {
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    this.plotBars();
+    plotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width);
   }
 
   createAxes() {
@@ -54,40 +54,6 @@ class BarChart {
       .call(this.yAxisCall);
   }
 
-  plotBars() {
-    this.rects = this.plot.selectAll("rect").data(this.barVals);
-    this.rects.enter()
-      .append("rect")
-        .attr("x", d => this.xAxisScale(this.barVals.indexOf(d)))
-        .attr("y", d => Math.min(this.y(0), this.y(d)))
-        .attr('width', this.width/24)
-        .attr("fill", this.colour)
-        .attr('height', d => Math.abs(this.y(d) - this.y(0)))
-      .on('mouseover', function(d, i) {
-        d3.select(this)
-          .transition()
-          .attr("fill", "#000000")
-        if (i < 10) { var time = "0" + i + ":00" }
-        else { var time = i + ":00" }
-        var html  = "Time of run: <b> " + time + "</b><br/>" +
-                    "Variance from mean bpkm: <b>" + d.toFixed(3) + "bpkm</b>";
-
-        tooltip.html(html)
-            .style("left", (d3.event.pageX + 15) + "px")
-            .style("top", (d3.event.pageY - 28) + "px")
-          .transition()
-            .duration(200) // ms
-            .style("opacity", .7) // started as 0!
-      })
-      .on('mouseout', function(d) {
-        d3.select(this)
-          .transition()
-          .attr("fill", this.colour)
-        tooltip.transition()
-            .duration(300) // ms
-            .style("opacity", 0); // don't care about position!
-      });
-  }
 
   Mean(numbers) {
       var total = 0, i;
@@ -142,7 +108,7 @@ class BarChart {
 
     // Update the bars
     this.plot.selectAll("rect").remove();
-    this.plotBars();
+    plotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width);
   }
 
   dataInDate(d) {
@@ -193,4 +159,38 @@ class BarChart {
   getData() {
     return this.data;
   }
+}
+function plotBars(plot, data, colour, y, x, w) {
+  rects = plot.selectAll("rect").data(data);
+  rects.enter()
+    .append("rect")
+      .attr("x", d => x(data.indexOf(d)))
+      .attr("y", d => Math.min(y(0), y(d)))
+      .attr('width', w/24)
+      .attr("fill", colour)
+      .attr('height', d => Math.abs(y(d) - y(0)))
+    .on('mouseover', function(d, i) {
+      d3.select(this)
+        .transition()
+        .attr("fill", "#000000")
+      if (i < 10) { var time = "0" + i + ":00" }
+      else { var time = i + ":00" }
+      var html  = "Time of run: <b> " + time + "</b><br/>" +
+                  "Variance from mean bpkm: <b>" + d.toFixed(3) + "bpkm</b>";
+
+      tooltip.html(html)
+          .style("left", (d3.event.pageX + 15) + "px")
+          .style("top", (d3.event.pageY - 28) + "px")
+        .transition()
+          .duration(200) // ms
+          .style("opacity", .7) // started as 0!
+    })
+    .on('mouseout', function(d) {
+      d3.select(this)
+        .transition()
+        .attr("fill", colour)
+      tooltip.transition()
+          .duration(300) // ms
+          .style("opacity", 0); // don't care about position!
+    });
 }
