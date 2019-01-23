@@ -22,8 +22,8 @@ class BarChart {
 
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
-      .attr('width', w + this.margin.left + this.margin.right)
-      .attr("height", h/2 + this.margin.top + this.margin.bottom)
+      .attr('width', this.width + this.margin.left + this.margin.right)
+      .attr("height", this.height + this.margin.top + this.margin.bottom)
 
     this.plot = this.svg.append("g")
           .attr("transform",

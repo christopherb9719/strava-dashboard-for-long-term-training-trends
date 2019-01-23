@@ -17,6 +17,7 @@ var tooltip = d3.select("#graph_container").append("div")
 //Build Graphs
 var graph1Filters = new Filters(dataset)
 var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1", "#ff471a");
+plotScatterPoints(scatterGraph1.getSvg(), dataset, "#ff471a", scatterGraph1.getX(), scatterGraph1.getY(), graph1Filters);
 appendPath(scatterGraph1.getSvg(), reg, scatterGraph1.getX(), scatterGraph1.getY());
 var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
 
@@ -90,10 +91,11 @@ function plotGraphs(access_token) {
 function createGraphs(d, line_points, colour) {
   console.log(clicked);
   if (clicked == false) {
+    w = w/2
     document.getElementById('addChart').value = "Remove Graph";
     console.log("Adding graph")
     clicked = true;
-    w = w/2;
+    
     //Update 1st set of graphs
     scatterGraph1.update(w, h);
     updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getSvg(), scatterGraph1.getX(), scatterGraph1.getY());
@@ -102,6 +104,7 @@ function createGraphs(d, line_points, colour) {
     //Create second set of graphs
     graph2Filters = new Filters(d);
     scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
+    plotScatterPoints(scatterGraph2.getSvg(), dataset, "#00e600", scatterGraph2.getX(), scatterGraph2.getY(), graph2Filters);
     appendPath(scatterGraph2.getSvg(), line_points, scatterGraph2.getX(), scatterGraph2.getY());
     var barChart2 = new BarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
 
@@ -183,16 +186,15 @@ function createGraphs(d, line_points, colour) {
   else {
     document.getElementById('addChart').value = "Add Graph";
     clicked = false;
-    w = w*2;
     console.log("Removing graph");
     //Remove second set of graphs
     d3.select('#scatter2').remove();
     d3.select('#barChart2').remove();
 
     //Update first set of graphs
-    scatterGraph1.update(w, h);
-    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getPlot());
-    barChart1.update(w, h/2);
+    scatterGraph1.update(w/2, h);
+    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getSvg(), scatterGraph1.getX(), scatterGraph1.getY());
+    barChart1.update(w/2, h/2);
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
@@ -278,49 +280,17 @@ function filterTags(tags) {
 }
 
 function mergeGraphs() {
-  w = w*2;
   data1 = scatterGraph1.getData();
   data2 = scatterGraph2.getData();
   filtered_data1 = scatterGraph1.getFilteredData();
   filtered_data2 = scatterGraph2.getFilteredData();
-  var all_data = data1.concat(data2);
+  all_data = data1.concat(data2);
   merge_filters = new Filters(all_data);
 
   d3.select('#scatter1').remove();
   d3.select('#scatter2').remove();
 
-  var merge_x = d3.scaleLinear()
-    .domain([Math.min(d3.min(data1, function(d) { return d.heart_rate; }), d3.min(data2, function(d) { return d.heart_rate; })), Math.max(d3.max(data1, function(d) { return d.heart_rate; }), d3.max(data2, function(d) { return d.heart_rate; }))])
-    .range([0, w]);
-
-  var merge_y = d3.scaleLinear()
-    .domain([Math.min(d3.min(data1, function(d) { return d.average_pace; }), d3.min(data2, function(d) { return d.average_pace; })), Math.max(d3.max(data1, function(d) { return d.average_pace; }), d3.max(data2, function(d) { return d.average_pace; }))])
-    .range([h, 0]);
-
-  var scatter3 = d3.select('#graph_container').append('svg')
-    .attr("id", 'scatter3')
-    .attr("width", w + margin.left + margin.right)
-    .attr("height", h + margin.top + margin.bottom)
-      .append('g').attr("transform","translate(" + margin.left + "," + margin.top + ")");
-
-  var merge_xAxisCall = d3.axisBottom(merge_x)
-
-  var merge_xAxis = scatter3.append("g")
-      .attr("transform", "translate(0," + h + ")")
-      .call(merge_xAxisCall);
-
-  var merge_yAxisCall = d3.axisLeft(merge_y)
-    .tickFormat(function(d) {
-      var seconds = Math.round((d % 1) * 60);
-      if (seconds < 10) {
-        seconds = "0" + seconds;
-      }
-      var minutes = Math.floor(d - (d % 1));
-      return (minutes + ":" + seconds);
-    })
-
-  var merge_yAxis = scatter3.append("g")
-      .call(merge_yAxisCall)
+  var scatter3 = new Scatter("#graph_container", all_data, merge_filters, margin, w, h, "#scatter3");
 
   plotScatterPoints(scatter3, filtered_data1, "#ff471a", merge_x, merge_y, merge_filters);
   plotScatterPoints(scatter3, filtered_data2, "#00ff00", merge_x, merge_y, merge_filters);

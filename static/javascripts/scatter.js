@@ -29,7 +29,6 @@ class Scatter {
           .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    plotScatterPoints(this.svg, this.filtered_data, this.colour, this.x, this.y, this.filters);
   }
 
   createAxes() {
@@ -55,15 +54,15 @@ class Scatter {
     // Labels
     this.xAxis.append("text")
         .attr("transform",
-            "translate(" + (w/2) + " ," +
-                      (h + margin.top + 20) + ")")
+            "translate(" + this.width + " ," +
+                      (this.height + margin.top + 20) + ")")
         .style("text-anchor", "middle")
         .text("Mean Heart Rate (beats per minute)");
 
     this.yAxis.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - margin.left)
-        .attr("x",0 - (h / 2))
+        .attr("x",0 - (this.height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
         .text("Mean Pace (minutes per km)");
@@ -128,12 +127,14 @@ class Scatter {
     }
   }
 
-  update(w, h){
+  update(nwidth, nheight){
+    console.log(nwidth);
+    console.log(nheight);
     // Update our scales
-    this.x.range([0, w]);
-    this.y.range([h, 0]);
+    this.x.range([0, nwidth]);
+    this.y.range([nheight, 0]);
 
-    this.svg.attr("width", w + this.margin.left + this.margin.right);
+    this.svg.attr("width", nwidth + this.margin.left + this.margin.right);
 
     // Update our axes
     this.xAxis.call(this.xAxisCall);
