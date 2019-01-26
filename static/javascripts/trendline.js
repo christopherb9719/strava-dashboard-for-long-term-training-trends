@@ -1,15 +1,22 @@
-function appendPath(graph, pts, x, y) {
+function appendPath(graph, pts, line_class) {
   var lineFunction = d3.line()
     .x(function(d) {
-      return x(d.x);
+      return graph.getX()(d.x);
     })
     .y(function(d) {
-      return y(d.y);
+      return graph.getY()(d.y);
     })
 
 
-  graph.append("path")
-    .attr("class", "line")
-    .attr("id", function(d) {return "trendline";})
-    .attr("d", lineFunction(pts));
+  graph.getSvg().append("path")
+    .attr("class", line_class)
+    .attr("d", lineFunction(pts))
+    .on("click", function(d) {
+      console.log(graph.getX()(d3.event.pageX))
+      graph.getSvg().append("a").append("circle")
+        .attr("x", graph.getX()(d3.event.pageX))
+        .attr("y", graph.getY()(d3.event.pageY))
+        .attr("r", "4")
+        .attr("fill", "black")
+    })
  }

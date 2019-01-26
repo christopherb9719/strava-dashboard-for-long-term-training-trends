@@ -18,7 +18,7 @@ var tooltip = d3.select("#graph_container").append("div")
 var graph1Filters = new Filters(dataset)
 var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1", "#ff471a");
 plotScatterPoints(scatterGraph1.getSvg(), dataset, "#ff471a", scatterGraph1.getX(), scatterGraph1.getY(), graph1Filters);
-appendPath(scatterGraph1.getSvg(), reg, scatterGraph1.getX(), scatterGraph1.getY());
+appendPath(scatterGraph1, reg, "line_primary");
 var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
 
 document.getElementById("addChart").onclick = function() {
@@ -30,7 +30,7 @@ document.getElementById("mergeGraphs").onclick = function() {
   mergeGraphs();
 };
 
-function updateTrendline(filtered_data, graph, x, y) {
+function updateTrendline(filtered_data, graph, line_class) {
   $.ajax({
     url: '/_gaussian_calculation',
     data: JSON.stringify(filtered_data),
@@ -38,8 +38,8 @@ function updateTrendline(filtered_data, graph, x, y) {
     type: 'POST',
     success: function(response){
       console.log("Updating trend line");
-      graph.selectAll("path").remove();
-      appendPath(graph, response, x, y);
+      graph.getSvg().select("." + line_class).remove();
+      appendPath(graph, response, line_class);
     },
     error: function(error){
       console.log(error);
@@ -95,17 +95,17 @@ function createGraphs(d, line_points, colour) {
     document.getElementById('addChart').value = "Remove Graph";
     console.log("Adding graph")
     clicked = true;
-    
+
     //Update 1st set of graphs
     scatterGraph1.update(w, h);
-    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getSvg(), scatterGraph1.getX(), scatterGraph1.getY());
+    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
     barChart1.update(w, h/2);
 
     //Create second set of graphs
     graph2Filters = new Filters(d);
     scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
     plotScatterPoints(scatterGraph2.getSvg(), dataset, "#00e600", scatterGraph2.getX(), scatterGraph2.getY(), graph2Filters);
-    appendPath(scatterGraph2.getSvg(), line_points, scatterGraph2.getX(), scatterGraph2.getY());
+    appendPath(scatterGraph2, line_points, "line_secondary");
     var barChart2 = new BarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
 
     //Set up sliders for second set of graphs
@@ -193,7 +193,7 @@ function createGraphs(d, line_points, colour) {
 
     //Update first set of graphs
     scatterGraph1.update(w/2, h);
-    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1.getSvg(), scatterGraph1.getX(), scatterGraph1.getY());
+    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
     barChart1.update(w/2, h/2);
 
     //Remove sliders for second set of graphs
@@ -280,6 +280,7 @@ function filterTags(tags) {
 }
 
 function mergeGraphs() {
+  w = w*2
   data1 = scatterGraph1.getData();
   data2 = scatterGraph2.getData();
   filtered_data1 = scatterGraph1.getFilteredData();
@@ -292,9 +293,25 @@ function mergeGraphs() {
 
   var scatter3 = new Scatter("#graph_container", all_data, merge_filters, margin, w, h, "#scatter3");
 
-  plotScatterPoints(scatter3, filtered_data1, "#ff471a", merge_x, merge_y, merge_filters);
-  plotScatterPoints(scatter3, filtered_data2, "#00ff00", merge_x, merge_y, merge_filters);
-  updateTrendline(filtered_data1, scatter3, merge_x, merge_y);
-  updateTrendline(filtered_data2, scatter3, merge_x, merge_y);
+  plotScatterPoints(scatter3.getSvg(), filtered_data1, "#ff471a", scatter3.getX(), scatter3.getY(), merge_filters);
+  plotScatterPoints(scatter3.getSvg(), filtered_data2, "#00ff00", scatter3.getX(), scatter3.getY(), merge_filters);
+  updateTrendline(filtered_data1, scatter3, "line_primary");
+  updateTrendline(filtered_data2, scatter3, "line_secondary");
 
+}
+
+
+function getNeededPace(distance, data) {
+  console.log(data);
+  var min_dist = distance - (0.1*distance);
+  var max_dist = parseInt(distance) + parseInt((0.1*distance));
+  console.log(min_dist);
+  console.log(max_dist);
+  acceptable_data = data.filter(d => (d.distance <= max_dist && d.distance >= min_dist));
+  graph1Filters.setDistances(min_dist, max_dist);
+  scatterGraph1.update(w, h);
+  filtered = scatterGraph1.getFilteredData();
+  needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
+  console.log(needed_pace);
+  document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
 }

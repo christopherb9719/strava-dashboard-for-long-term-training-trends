@@ -7,12 +7,17 @@ a {
   color: #00B7FF;
 }
 
-.line {
+.line_primary {
   fill: none;
   stroke: steelblue;
   stroke-width: 2px;
 }
 
+.line_secondary {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px;
+}
 .axis text {
     font-family: sans-serif;
     font-size: 11px;

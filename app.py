@@ -130,12 +130,12 @@ def findUsers():
 
 def parse_data(token):
     #'3c2e651e3382f3f391bbabe33d8df7b097bbc9fa'
-    client=Client(access_token = token)
-    print(client.access_token)
+    c=Client(access_token = token)
+    print(c.access_token)
     #print(type(client.access_token))
-    athlete = client.get_athlete()
+    athlete = c.get_athlete()
     print(athlete.firstname);
-    activities = client.get_activities()
+    activities = c.get_activities()
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None, activities)
     summaries = []
     for run in runs:

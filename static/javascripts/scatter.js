@@ -24,8 +24,9 @@ class Scatter {
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
       .attr("width", this.width + this.margin.left + this.margin.right)
-      .attr("height", this.height + this.margin.top + this.margin.bottom)
-        .append('g')
+      .attr("height", this.height + this.margin.top + this.margin.bottom);
+
+    this.plot = this.svg.append('g')
           .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
@@ -34,7 +35,7 @@ class Scatter {
   createAxes() {
     this.xAxisCall = d3.axisBottom(this.x)
 
-    this.xAxis = this.svg.append("g")
+    this.xAxis = this.plot.append("g")
         .attr("transform", "translate(0," + this.height + ")")
         .call(this.xAxisCall);
 
@@ -47,7 +48,7 @@ class Scatter {
         var minutes = Math.floor(d - (d % 1));
         return (minutes + ":" + seconds);
       })
-    this.yAxis = this.svg.append("g")
+    this.yAxis = this.plot.append("g")
         .call(this.yAxisCall)
 
 
@@ -128,8 +129,6 @@ class Scatter {
   }
 
   update(nwidth, nheight){
-    console.log(nwidth);
-    console.log(nheight);
     // Update our scales
     this.x.range([0, nwidth]);
     this.y.range([nheight, 0]);
@@ -143,7 +142,7 @@ class Scatter {
     this.svg.selectAll("circle").remove();
     // Update our circles
     this.filtered_data = this.filterData(this.data);
-    plotScatterPoints(this.svg, this.filtered_data, this.colour, this.x, this.y, this.filters);
+    plotScatterPoints(this.plot, this.filtered_data, this.colour, this.x, this.y, this.filters);
   }
 
   getX() {
@@ -155,7 +154,7 @@ class Scatter {
   }
 
   getSvg() {
-    return this.svg;
+    return this.plot;
   }
 
   getData() {
