@@ -16,10 +16,13 @@ var tooltip = d3.select("#graph_container").append("div")
 
 //Build Graphs
 var graph1Filters = new Filters(dataset)
-var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, w, h, "scatter1", "#ff471a");
+var scatterBarX = new StandardBarChart('#graph_container', dataset, graph1Filters, margin, ((3/4)*w), h/4, "scatterBarX", '#ff471a', "heart_rate");
+var scatterBarY = new StandardBarChart('#graph_container', dataset, graph1Filters, margin, ((3/4)*w), ((1/4)*h), "scatterBarY", '#ff471a', "average_pace");
+//scatterBarY.getPlot().attr("transform","rotate(90 200 200)");
+var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, ((3/4)*w), h, "scatter1", "#ff471a");
 plotScatterPoints(scatterGraph1.getSvg(), dataset, "#ff471a", scatterGraph1.getX(), scatterGraph1.getY(), graph1Filters);
 appendPath(scatterGraph1, reg, "line_primary");
-var barChart1 = new BarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
+var barChart1 = new PositiveAndNegativeBarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
 
 document.getElementById("addChart").onclick = function() {
   createGraphs(dataset, reg, "#00e600");
@@ -106,7 +109,7 @@ function createGraphs(d, line_points, colour) {
     scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
     plotScatterPoints(scatterGraph2.getSvg(), dataset, "#00e600", scatterGraph2.getX(), scatterGraph2.getY(), graph2Filters);
     appendPath(scatterGraph2, line_points, "line_secondary");
-    var barChart2 = new BarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
+    var barChart2 = new PositiveAndNegativeBarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
