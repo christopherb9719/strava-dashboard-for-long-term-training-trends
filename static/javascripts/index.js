@@ -102,9 +102,11 @@ function createGraphs(d, line_points, colour) {
     clicked = true;
 
     //Update 1st set of graphs
-    scatterGraph1.update(w, h);
+    scatterGraph1.update((3/4)*w, (3/4)*h);
     updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
     barChart1.update(w, h/2);
+    scatterBarY.update((3/4)*h, (1/4)*h);
+    scatterBarX.update((3/4)*w, (1/4)*h);
 
     //Create second set of graphs
     graph2Filters = new Filters(d);
@@ -198,9 +200,11 @@ function createGraphs(d, line_points, colour) {
     d3.select('#barChart2').remove();
 
     //Update first set of graphs
-    scatterGraph1.update(w, h);
+    scatterGraph1.update((3/4)*w, (3/4)*h);
     updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
     barChart1.update(w, h/2);
+    scatterBarY.update((3/4)*h, (1/4)*h);
+    scatterBarX.update((3/4)*w, (1/4)*h);
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");

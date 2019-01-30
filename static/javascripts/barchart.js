@@ -380,7 +380,7 @@ function standardPlotBars(plot, data, colour, y, x, w, x_val, width) {
   rects = plot.selectAll("rect").data(keys);
   rects.enter()
     .append("rect")
-      .attr("x", function(d) { console.log(d); return x(d);})
+      .attr("x", d => x(d))
       .attr("y", d => y(data[d]))
       .attr('width', "6")
       .attr("fill", colour)
