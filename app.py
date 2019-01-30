@@ -28,7 +28,7 @@ class User(db.Document, UserMixin):
     username = db.StringField()
     email = db.EmailField()
     password = db.StringField()
-    token = db.ListField()
+    token = db.StringField()
 
 
 @login_manager.user_loader
@@ -67,8 +67,10 @@ def register():
     if request.method == 'POST' and form.validate():
         existing_user = User.objects(username=form.username.data).first()
         if existing_user is None:
-            user = User(username=form.username.data, email=form.email.data, password=bcrypt.generate_password_hash(form.password.data)).save()
-            login_user(user)
+            session['username'] = form.username.data;
+            session['email'] = form.email.data;
+            print(type(str(bcrypt.generate_password_hash(form.password.data))))
+            session['password'] = str(bcrypt.generate_password_hash(form.password.data))
             client = Client()
             authorize_url = client.authorization_url(client_id='29429', redirect_uri='http://localhost:5000/redirect')
             return redirect(authorize_url)
@@ -82,14 +84,20 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route("/redirect")
-@login_required
 def redir():
     import requests
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    print(access_token)
-    current_user.update(token = access_token, upsert = True)
+    print(access_token['access_token'])
+    print(session['password'])
+    user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token']).save()
+    login_user(user);
+
+    client.access_token = access_token['access_token']
+    a = client.get_athlete();
+    print(a.firstname);
+
     return redirect(url_for('loadDashboard'))
 
 @app.route("/dashboard")
@@ -103,8 +111,8 @@ def loadDashboard():
 @app.route("/get_user_data", methods=['POST'])
 @login_required
 def getUserData():
-    #print(request.data.decode('utf-8'))
-    activities = parse_data(request.data.decode('utf-8'))
+    print(request.args)
+    activities = parse_data(request.data)
     line_coords = calculateRegression(activities)
     response = [activities, line_coords]
     return jsonify(response)
