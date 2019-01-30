@@ -12,7 +12,8 @@ function appendPath(graph, pts, line_class) {
     .attr("class", line_class)
     .attr("d", lineFunction(pts))
     .on("click", function(d) {
-      console.log(graph.getX()(d3.event.pageX))
+      var x = graph.getX()
+      console.log(x(d3.event.pageX));
       graph.getSvg().append("a").append("circle")
         .attr("x", graph.getX()(d3.event.pageX))
         .attr("y", graph.getY()(d3.event.pageY))
