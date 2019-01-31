@@ -27,14 +27,18 @@
           <input type="button" value="Submit" onclick="getNeededPace(distance.value, scatterGraph1.getData())"/>
           <p id="pace"></p>
         </div>
-        <div id="hist_container1" class="hist"></div>
-        <div id="hist_container2" class="hist"></div>
-        <div id="graph_container">
-          <div id="container1" class="box2">
-            <div id="above_hist"></div>
-            <div id="scatter_div"></div>
+        <div id="graphSet1Container" class="graph_container">
+          <div id="hist_container1"></div>
+          <div id="graph_container">
+            <div id="container1" class="box2">
+              <div id="above_hist"></div>
+              <div id="scatter_div"></div>
+            </div>
+            <div id="side_hist" class="box2"></div>
           </div>
-          <div id="side_hist" class="box2"></div>
+        </div>
+        <div id="graphSet2Container" class="graph_container">
+          <div id="hist_container2"></div>
           <div id="container2" class="box2">
             <div id="above_hist2"></div>
             <div id="scatter_div2"></div>

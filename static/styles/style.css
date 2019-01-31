@@ -74,6 +74,10 @@ a {
   display: inline-block;
 }
 
+.graph_container {
+  display: inline-block;
+}
+
 .track-overlay {
   pointer-events: stroke;
   stroke-width: 50px;
