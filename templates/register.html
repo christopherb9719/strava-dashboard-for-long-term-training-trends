@@ -1,27 +1,33 @@
-<html>
-  <head>
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body>
-    <form method="POST" action="">
-              {{ form.hidden_tag() if form.hidden_tag }}
-              {% for f in form if f.type != 'CSRFTokenField' %}
-              <div>
-              {{ f.label }}
-              {{ f }}
-              {% if f.errors %}
-              <ul>
-                  {% for e in f.errors %}
-                  <li>{{ e }}</li>
-                  {% endfor %}
-              </ul>
-              {% endif %}
-              </div>
-              {% endfor %}
-              <input type="submit" value="Register"/>
+<head>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel='stylesheet' href="{{ url_for('static',filename='styles/login.css') }}" />
+</head>
+<!------ Include the above in your HEAD tag ---------->
+<body>
+  <div class="wrapper fadeInDown">
+    <div id="formContent">
+      <!-- Tabs Titles -->
+
+      <h2>Strava Dashboard for Long Term Training Trends</h2>
+      <!-- Login Form -->
+      {% from "_formhelpers.html" import render_field %}
+      <form method=post>
+        {{ form.hidden_tag() }}
+        <dl>
+          {{ render_field(form.username) }}
+          {{ render_field(form.email) }}
+          {{ render_field(form.password) }}
+          {{ render_field(form.confirm) }}
+        </dl>
+        <p><input type=submit value=Register>
       </form>
-      Already a user? <a href="{{ url_for('login') }}">Login here</a>
-  </body>
-</html>
+
+      <!-- Remind Passowrd -->
+      <div id="formFooter">
+        Already have an account? <a class="underlineHover" href="{{ url_for('login') }}">Log In here</a>
+      </div>
+    </div>
+  </div>
+</body>
