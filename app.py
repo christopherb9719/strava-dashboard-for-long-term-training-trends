@@ -69,8 +69,7 @@ def register():
         if existing_user is None:
             session['username'] = form.username.data;
             session['email'] = form.email.data;
-            print(type(str(bcrypt.generate_password_hash(form.password.data))))
-            session['password'] = str(bcrypt.generate_password_hash(form.password.data))
+            session['password'] = bcrypt.generate_password_hash(form.password.data)
             client = Client()
             authorize_url = client.authorization_url(client_id='29429', redirect_uri='http://localhost:5000/redirect')
             return redirect(authorize_url)
@@ -113,8 +112,11 @@ def loadDashboard():
 def getUserData():
     print(request.args)
     activities = parse_data(request.data)
-    line_coords = calculateRegression(activities)
-    response = [activities, line_coords]
+    if len(activities) > 0:
+        line_coords = calculateRegression(activities)
+        response = [activities, line_coords]
+    else:
+        response = [activities]
     return jsonify(response)
 
 @app.route("/_gaussian_calculation", methods=['POST'])
