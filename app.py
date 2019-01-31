@@ -93,6 +93,7 @@ def redir():
     user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token']).save()
     login_user(user);
 
+    #This is just checking that the access token retrieved works
     client.access_token = access_token['access_token']
     a = client.get_athlete();
     print(a.firstname);
@@ -104,8 +105,11 @@ def redir():
 def loadDashboard():
     print("Loading dashboard")
     activities = parse_data(current_user['token'])
-    line_coords = calculateRegression(activities)
-    return render_template("index.html", sample = activities, regression = line_coords)
+    if len(activities) > 0:
+        line_coords = calculateRegression(activities)
+        return render_template("index.html", sample = activities, regression = line_coords)
+    else:
+        return render_template("index.html", sample = activities, regression = [])
 
 @app.route("/get_user_data", methods=['POST'])
 @login_required
