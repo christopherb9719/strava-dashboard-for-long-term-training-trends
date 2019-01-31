@@ -88,8 +88,6 @@ def redir():
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    print(access_token['access_token'])
-    print(session['password'])
     user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token']).save()
     login_user(user);
 
@@ -107,9 +105,10 @@ def loadDashboard():
     activities = parse_data(current_user['token'])
     if len(activities) > 0:
         line_coords = calculateRegression(activities)
-        return render_template("index.html", sample = activities, regression = line_coords)
     else:
-        return render_template("index.html", sample = activities, regression = [])
+        line_coords = []
+    return render_template("index.html", sample = activities, regression = line_coords)
+
 
 @app.route("/get_user_data", methods=['POST'])
 @login_required
@@ -141,12 +140,8 @@ def findUsers():
     return users.to_json()
 
 
-
 def parse_data(token):
-    #'3c2e651e3382f3f391bbabe33d8df7b097bbc9fa'
     c=Client(access_token = token)
-    print(c.access_token)
-    #print(type(client.access_token))
     athlete = c.get_athlete()
     print(athlete.firstname);
     activities = c.get_activities()

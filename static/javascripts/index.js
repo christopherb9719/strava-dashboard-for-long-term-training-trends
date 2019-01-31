@@ -3,8 +3,8 @@ var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
-    w = 1200 - margin.left - margin.right,
-    h = 600 - margin.top - margin.bottom;
+    w = 1000 - margin.left - margin.right,
+    h = 500 - margin.top - margin.bottom;
 
 var clicked = false;
 var  scatterGraph2;
@@ -16,15 +16,13 @@ var tooltip = d3.select("#graph_container").append("div")
 
 //Build Graphs
 var graph1Filters = new Filters(dataset)
-var scatterBarY = new StandardBarChart('#graph_container', dataset, graph1Filters, margin, ((3/4)*h), ((1/4)*h), "scatterBarY", '#ff471a', "average_pace", "decimal");
-scatterBarY.getSvg().attr("transform","rotate(270)");
-//scatterBarY.getSvg().style("float", "top");
-var scatterBarX = new StandardBarChart('#graph_container', dataset, graph1Filters, margin, ((3/4)*w), h/4, "scatterBarX", '#ff471a', "heart_rate");
-//scatterBarX.getSvg().style("float", "right");
-var scatterGraph1 = new Scatter('#graph_container', dataset, graph1Filters, margin, ((3/4)*w), ((3/4)*h), "scatter1", "#ff471a");
+var scatterBarY = new StandardBarChart('#side_hist', dataset, graph1Filters, margin, ((3/4)*h), ((1/4)*h), "scatterBarY", '#ff471a', "average_pace", "decimal");
+scatterBarY.getSvg().attr("transform","rotate(270, -90, -40)");
+var scatterBarX = new StandardBarChart('#above_hist', dataset, graph1Filters, margin, ((3/4)*w), h/4, "scatterBarX", '#ff471a', "heart_rate");
+var scatterGraph1 = new Scatter('#scatter_div', dataset, graph1Filters, margin, ((3/4)*w), ((3/4)*h), "scatter1", "#ff471a");
 plotScatterPoints(scatterGraph1.getSvg(), dataset, "#ff471a", scatterGraph1.getX(), scatterGraph1.getY(), graph1Filters);
 appendPath(scatterGraph1, reg, "line_primary");
-var barChart1 = new PositiveAndNegativeBarChart('#hist_container', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
+var barChart1 = new PositiveAndNegativeBarChart('#hist_container1', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
 
 document.getElementById("addChart").onclick = function() {
   createGraphs(dataset, reg, "#00e600");
@@ -110,10 +108,13 @@ function createGraphs(d, line_points, colour) {
 
     //Create second set of graphs
     graph2Filters = new Filters(d);
-    scatterGraph2 = new Scatter('#graph_container', d, graph2Filters, margin, w, h, "scatter2", colour);
+    var scatterBarY2 = new StandardBarChart('#side_hist2', dataset, graph2Filters, margin, ((3/4)*h), ((1/4)*h), "scatterBarY2", '#00e600', "average_pace", "decimal");
+    scatterBarY2.getSvg().attr("transform","rotate(270, -90, -40)");
+    var scatterBarX2 = new StandardBarChart('#above_hist2', dataset, graph2Filters, margin, ((3/4)*w), h/4, "scatterBarX2", '#00e600', "heart_rate");
+    scatterGraph2 = new Scatter('#scatter_div2', d, graph2Filters, margin, (3/4)*w, (3/4)*h, "scatter2", colour);
     plotScatterPoints(scatterGraph2.getSvg(), dataset, "#00e600", scatterGraph2.getX(), scatterGraph2.getY(), graph2Filters);
     appendPath(scatterGraph2, line_points, "line_secondary");
-    var barChart2 = new PositiveAndNegativeBarChart('#hist_container', d, graph2Filters, margin, w, h/2, "barChart2", colour);
+    var barChart2 = new PositiveAndNegativeBarChart('#hist_container2', d, graph2Filters, margin, w, h/2, "barChart2", colour);
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
@@ -127,7 +128,9 @@ function createGraphs(d, line_points, colour) {
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
           graph2Filters.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-          scatterGraph2.update(w, h);
+          scatterGraph2.update((3/4)*w, (3/4)*h);
+          scatterBarY2.update((3/4)*h, (1/4)*h);
+          scatterBarX2.update((3/4)*w, (1/4)*h);
           barChart2.update(w, h/2);
         }
       });
@@ -141,7 +144,9 @@ function createGraphs(d, line_points, colour) {
         values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
         slide: function( event, ui ) {
           graph2Filters.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-          scatterGraph2.update(w, h);
+          scatterGraph2.update((3/4)*w, (3/4)*h);
+          scatterBarY2.update((3/4)*h, (1/4)*h);
+          scatterBarX2.update((3/4)*w, (1/4)*h);
           barChart2.update(w, h/2);
         }
       });
@@ -155,7 +160,9 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.distance })],
         slide: function( event, ui ) {
           graph2Filters.setDistances(ui.values[0], ui.values[1]);
-          scatterGraph2.update(w, h);
+          scatterGraph2.update((3/4)*w, (3/4)*h);
+          scatterBarY2.update((3/4)*h, (1/4)*h);
+          scatterBarX2.update((3/4)*w, (1/4)*h);
           barChart2.update(w, h/2);
 
         }
@@ -170,7 +177,9 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
         slide: function( event, ui ) {
           graph2Filters.setElevationGain(ui.values[0], ui.values[1]);
-          scatterGraph2.update(w, h);
+          scatterGraph2.update((3/4)*w, (3/4)*h);
+          scatterBarY2.update((3/4)*h, (1/4)*h);
+          scatterBarX2.update((3/4)*w, (1/4)*h);
           barChart2.update(w, h/2);
         }
       })
@@ -184,7 +193,9 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
         slide: function( event, ui ) {
           graph2Filters.setHeartRates(ui.values[0], ui.values[1]);
-          scatterGraph2.update(w, h);
+          scatterGraph2.update((3/4)*w, (3/4)*h);
+          scatterBarY2.update((3/4)*h, (1/4)*h);
+          scatterBarX2.update((3/4)*w, (1/4)*h);
           barChart2.update(w, h/2);
         }
       });
@@ -198,6 +209,8 @@ function createGraphs(d, line_points, colour) {
     //Remove second set of graphs
     d3.select('#scatter2').remove();
     d3.select('#barChart2').remove();
+    d3.select('#scatterBarY2').remove();
+    d3.select('#scatterBarX2').remove();
 
     //Update first set of graphs
     scatterGraph1.update((3/4)*w, (3/4)*h);

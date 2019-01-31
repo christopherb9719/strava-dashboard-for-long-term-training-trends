@@ -66,6 +66,14 @@ a {
   stroke-width: 8px;
 }
 
+.box2 {
+  display: inline-block;
+}
+
+.hist {
+  display: inline-block;
+}
+
 .track-overlay {
   pointer-events: stroke;
   stroke-width: 50px;
