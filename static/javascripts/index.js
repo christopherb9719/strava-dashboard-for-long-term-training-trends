@@ -61,8 +61,7 @@ $('#findUsers').change(function() {
       JSON.parse(response).forEach(function(elem) {
         var option = document.createElement("option");
         option.text = elem.username;
-        option.value = elem.token;
-        console.log(option.value);
+        option.value = elem.username;
         $("#dropdown").append(option);
       })
     },
@@ -72,11 +71,11 @@ $('#findUsers').change(function() {
   })
 })
 
-function plotGraphs(access_token) {
+function plotGraphs(user) {
   console.log("Get user data");
   $.ajax({
     url: '/get_user_data',
-    data: access_token,
+    data: user,
     contentType: 'text',
     type: 'POST',
     success: function(response) {

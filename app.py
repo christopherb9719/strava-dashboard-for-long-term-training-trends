@@ -104,8 +104,7 @@ def redir():
 @app.route("/dashboard")
 @login_required
 def loadDashboard():
-    print("Loading dashboard")
-    activities = parse_data(current_user['token'])
+    activities = parse_data(current_user)
     if len(activities) > 0:
         line_coords = calculateRegression(activities)
     else:
@@ -116,8 +115,8 @@ def loadDashboard():
 @app.route("/get_user_data", methods=['POST'])
 @login_required
 def getUserData():
-    print(request.args)
-    activities = parse_data(request.data)
+    user = User.objects(username = request.data.decode('utf-8')).first()
+    activities = parse_data(user)
     if len(activities) > 0:
         line_coords = calculateRegression(activities)
         response = [activities, line_coords]
@@ -137,17 +136,16 @@ def getGaussian():
 @login_required
 def findUsers():
     query = request.data.decode('utf-8')
-    print(query)
-    users = User.objects(username__contains=query)
-    print(users)
+    users = User.objects(username__contains=query).only('username')
+    print(users.to_json())
     return users.to_json()
 
 
-def parse_data(token):
+def parse_data(user):
     client = Client();
-    client.access_token = current_user['token'];
-    client.refresh_token = current_user['refresh_token'];
-    client.token_expires_at = current_user['expires_at'];
+    client.access_token = user['token'];
+    client.refresh_token = user['refresh_token'];
+    client.token_expires_at = user['expires_at'];
 
     print(client.token_expires_at)
     #This is only here because the test user for Simon was made before refresh tokens became a thing and so does not have one
@@ -155,7 +153,7 @@ def parse_data(token):
     if client.token_expires_at != None:
         if time.time() > client.token_expires_at:
             new_token = client.refresh_access_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
-            current_user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
+            user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
     athlete = client.get_athlete()
     print(athlete.firstname);
