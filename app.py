@@ -5,6 +5,7 @@ sys.path.append('./static/lib/python/')
 from gaussianregression import calculateRegression
 from forms import RegistrationForm, LoginForm
 import json
+import time
 from stravalib.client import Client
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_mongoengine import MongoEngine
@@ -29,6 +30,8 @@ class User(db.Document, UserMixin):
     email = db.EmailField()
     password = db.StringField()
     token = db.StringField()
+    refresh_token = db.StringField()
+    expires_at = db.IntField()
 
 
 @login_manager.user_loader
@@ -88,7 +91,7 @@ def redir():
     client=Client()
     code = request.args.get('code')
     access_token = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token']).save()
+    user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token'], refresh_token=access_token['refresh_token'], expires_at=access_token['expires_at']).save()
     login_user(user);
 
     #This is just checking that the access token retrieved works
@@ -141,10 +144,22 @@ def findUsers():
 
 
 def parse_data(token):
-    c=Client(access_token = token)
-    athlete = c.get_athlete()
+    client = Client();
+    client.access_token = current_user['token'];
+    client.refresh_token = current_user['refresh_token'];
+    client.token_expires_at = current_user['expires_at'];
+
+    print(client.token_expires_at)
+    #This is only here because the test user for Simon was made before refresh tokens became a thing and so does not have one
+    #REMOVE THIS IF STATEMENT WHEN A NEW ACCOUNT FOR SIMON IS MADE!!!!!!!!!
+    if client.token_expires_at != None:
+        if time.time() > client.token_expires_at:
+            new_token = client.refresh_access_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
+            current_user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
+
+    athlete = client.get_athlete()
     print(athlete.firstname);
-    activities = c.get_activities()
+    activities = client.get_activities()
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None, activities)
     summaries = []
     for run in runs:
