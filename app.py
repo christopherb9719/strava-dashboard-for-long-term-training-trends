@@ -90,14 +90,9 @@ def redir():
     import requests
     client=Client()
     code = request.args.get('code')
-    access_token = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    user = User(username=session['username'], email=session['email'], password=session['password'], token=access_token['access_token'], refresh_token=access_token['refresh_token'], expires_at=access_token['expires_at']).save()
+    tokens = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
+    user = User(username=session['username'], email=session['email'], password=session['password'], token=tokens['access_token'], refresh_token=tokens['refresh_token'], expires_at=tokens['expires_at']).save()
     login_user(user);
-
-    #This is just checking that the access token retrieved works
-    client.access_token = access_token['access_token']
-    a = client.get_athlete();
-    print(a.firstname);
 
     return redirect(url_for('loadDashboard'))
 
@@ -116,12 +111,14 @@ def loadDashboard():
 @login_required
 def getUserData():
     user = User.objects(username = request.data.decode('utf-8')).first()
+    print(user.username)
     activities = parse_data(user)
+    print(len(activities))
     if len(activities) > 0:
         line_coords = calculateRegression(activities)
-        response = [activities, line_coords]
     else:
-        response = [activities]
+        line_coords = []
+    response = [activities, line_coords]
     return jsonify(response)
 
 @app.route("/_gaussian_calculation", methods=['POST'])
@@ -137,7 +134,6 @@ def getGaussian():
 def findUsers():
     query = request.data.decode('utf-8')
     users = User.objects(username__contains=query).only('username')
-    print(users.to_json())
     return users.to_json()
 
 
@@ -147,11 +143,11 @@ def parse_data(user):
     client.refresh_token = user['refresh_token'];
     client.token_expires_at = user['expires_at'];
 
-    print(client.token_expires_at)
     #This is only here because the test user for Simon was made before refresh tokens became a thing and so does not have one
     #REMOVE THIS IF STATEMENT WHEN A NEW ACCOUNT FOR SIMON IS MADE!!!!!!!!!
     if client.token_expires_at != None:
         if time.time() > client.token_expires_at:
+            print("Token expired, getting new token")
             new_token = client.refresh_access_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
@@ -176,7 +172,6 @@ def parse_data(user):
         summary['minute'] = run.start_date.minute
         summary['second'] = run.start_date.second
         summaries.append(summary.copy())
-
     return summaries
 
 if __name__ == "__main__":

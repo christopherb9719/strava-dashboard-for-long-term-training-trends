@@ -10,19 +10,12 @@ var clicked = false;
 var  scatterGraph2;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
-var tooltip = d3.select("#graph_container").append("div")
+var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
 //Build Graphs
-var graph1Filters = new Filters(dataset)
-var scatterBarY = new StandardBarChart('#side_hist', dataset, graph1Filters, margin, ((3/4)*h), ((1/4)*h), "scatterBarY", '#ff471a', "average_pace", "decimal");
-scatterBarY.getSvg().attr("transform","rotate(270, -90, -40)");
-var scatterBarX = new StandardBarChart('#above_hist', dataset, graph1Filters, margin, ((3/4)*w), h/4, "scatterBarX", '#ff471a', "heart_rate");
-var scatterGraph1 = new Scatter('#scatter_div', dataset, graph1Filters, margin, ((3/4)*w), ((3/4)*h), "scatter1", "#ff471a");
-plotScatterPoints(scatterGraph1.getSvg(), dataset, "#ff471a", scatterGraph1.getX(), scatterGraph1.getY(), graph1Filters);
-appendPath(scatterGraph1, reg, "line_primary");
-var barChart1 = new PositiveAndNegativeBarChart('#hist_container1', dataset, graph1Filters, margin, w, h/2, "barChart1", "#ff471a");
+var graphSet1 = new graphSet(dataset, reg, margin, w, h, "graphSet1Container", 1, "#ff471a");
 
 document.getElementById("addChart").onclick = function() {
   createGraphs(dataset, reg, "#00e600");
@@ -94,26 +87,14 @@ function createGraphs(d, line_points, colour) {
   console.log(clicked);
   if (clicked == false) {
     w = w/2
-    document.getElementById('addChart').value = "Remove Graph";
-    console.log("Adding graph")
+    document.getElementById('addChart').innerText = "Remove Graph";
     clicked = true;
 
     //Update 1st set of graphs
-    scatterGraph1.update((3/4)*w, (3/4)*h);
-    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
-    barChart1.update(w, h/2);
-    scatterBarY.update((3/4)*h, (1/4)*h);
-    scatterBarX.update((3/4)*w, (1/4)*h);
+    graphSet1.resize(w);
 
     //Create second set of graphs
-    graph2Filters = new Filters(d);
-    var scatterBarY2 = new StandardBarChart('#side_hist2', dataset, graph2Filters, margin, ((3/4)*h), ((1/4)*h), "scatterBarY2", '#00e600', "average_pace", "decimal");
-    scatterBarY2.getSvg().attr("transform","rotate(270, -90, -40)");
-    var scatterBarX2 = new StandardBarChart('#above_hist2', dataset, graph2Filters, margin, ((3/4)*w), h/4, "scatterBarX2", '#00e600', "heart_rate");
-    scatterGraph2 = new Scatter('#scatter_div2', d, graph2Filters, margin, (3/4)*w, (3/4)*h, "scatter2", colour);
-    plotScatterPoints(scatterGraph2.getSvg(), dataset, "#00e600", scatterGraph2.getX(), scatterGraph2.getY(), graph2Filters);
-    appendPath(scatterGraph2, line_points, "line_secondary");
-    var barChart2 = new PositiveAndNegativeBarChart('#hist_container2', d, graph2Filters, margin, w, h/2, "barChart2", colour);
+    var graphSet2 = new graphSet(d, line_points, margin, w, h, 'graphSet2Container', 2, colour)
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
@@ -126,11 +107,8 @@ function createGraphs(d, line_points, colour) {
         max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
-          graph2Filters.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-          scatterGraph2.update((3/4)*w, (3/4)*h);
-          scatterBarY2.update((3/4)*h, (1/4)*h);
-          scatterBarX2.update((3/4)*w, (1/4)*h);
-          barChart2.update(w, h/2);
+          graphSet2.getFilters().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+          graphSet2.update();
         }
       });
     });
@@ -142,11 +120,8 @@ function createGraphs(d, line_points, colour) {
         max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
         values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
         slide: function( event, ui ) {
-          graph2Filters.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-          scatterGraph2.update((3/4)*w, (3/4)*h);
-          scatterBarY2.update((3/4)*h, (1/4)*h);
-          scatterBarX2.update((3/4)*w, (1/4)*h);
-          barChart2.update(w, h/2);
+          graphSet2.getFilters().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+          graphSet2.update();
         }
       });
     });
@@ -158,12 +133,8 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.distance }),
         values: [0, d3.max(dataset, function(d) { return d.distance })],
         slide: function( event, ui ) {
-          graph2Filters.setDistances(ui.values[0], ui.values[1]);
-          scatterGraph2.update((3/4)*w, (3/4)*h);
-          scatterBarY2.update((3/4)*h, (1/4)*h);
-          scatterBarX2.update((3/4)*w, (1/4)*h);
-          barChart2.update(w, h/2);
-
+          graphSet2.getFilters().setDistances(ui.values[0], ui.values[1]);
+          graphSet2.update();
         }
       })
     });
@@ -175,11 +146,8 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
         values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
         slide: function( event, ui ) {
-          graph2Filters.setElevationGain(ui.values[0], ui.values[1]);
-          scatterGraph2.update((3/4)*w, (3/4)*h);
-          scatterBarY2.update((3/4)*h, (1/4)*h);
-          scatterBarX2.update((3/4)*w, (1/4)*h);
-          barChart2.update(w, h/2);
+          graphSet2.getFilters().setElevationGain(ui.values[0], ui.values[1]);
+          graphSet2.update();
         }
       })
     });
@@ -191,32 +159,22 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.heart_rate }),
         values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
         slide: function( event, ui ) {
-          graph2Filters.setHeartRates(ui.values[0], ui.values[1]);
-          scatterGraph2.update((3/4)*w, (3/4)*h);
-          scatterBarY2.update((3/4)*h, (1/4)*h);
-          scatterBarX2.update((3/4)*w, (1/4)*h);
-          barChart2.update(w, h/2);
+          graphSet2.getFilters().setHeartRates(ui.values[0], ui.values[1]);
+          graphSet2.update();
         }
       });
     });
   }
   else {
     w = w*2;
-    document.getElementById('addChart').value = "Add Graph";
+    document.getElementById('addChart').innerText = "Add Graph";
     clicked = false;
     console.log("Removing graph");
     //Remove second set of graphs
-    d3.select('#scatter2').remove();
-    d3.select('#barChart2').remove();
-    d3.select('#scatterBarY2').remove();
-    d3.select('#scatterBarX2').remove();
+    d3.select('#graphSet2').remove();
 
     //Update first set of graphs
-    scatterGraph1.update((3/4)*w, (3/4)*h);
-    updateTrendline(scatterGraph1.getFilteredData(), scatterGraph1, "line_primary");
-    barChart1.update(w, h/2);
-    scatterBarY.update((3/4)*h, (1/4)*h);
-    scatterBarX.update((3/4)*w, (1/4)*h);
+    graphSet1.update();
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
@@ -231,11 +189,9 @@ $(function() {
     max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
-      graph1Filters.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      scatterGraph1.update(((3/4)*w), ((3/4)*h));
-      barChart1.update(w, h/2);
-      scatterBarY.update(((3/4)*h), ((1/4)*h));
-      scatterBarX.update(((3/4)*w), ((1/4)*h));
+      graphSet1.getFilters().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+      graphSet1.update();
+
     }
   });
 });
@@ -247,11 +203,8 @@ $(function() {
     max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
     values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
     slide: function( event, ui ) {
-      graph1Filters.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      scatterGraph1.update(((3/4)*w), ((3/4)*h));
-      barChart1.update(w, h/2);
-      scatterBarY.update(((3/4)*h), ((1/4)*h));
-      scatterBarX.update(((3/4)*w), ((1/4)*h));
+      graphSet1.getFilters().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+      graphSet1.update();
     }
   });
 });
@@ -264,11 +217,8 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.distance }),
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
-      graph1Filters.setDistances(ui.values[0], ui.values[1]);
-      scatterGraph1.update(((3/4)*w), ((3/4)*h));
-      barChart1.update(w, h/2);
-      scatterBarY.update(((3/4)*h), ((1/4)*h));
-      scatterBarX.update(((3/4)*w), ((1/4)*h));
+      graphSet1.getFilters().setDistances(ui.values[0], ui.values[1]);
+      graphSet1.update();
     }
   })
 });
@@ -280,11 +230,8 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
-      graph1Filters.setElevationGain(ui.values[0], ui.values[1]);
-      scatterGraph1.update(((3/4)*w), ((3/4)*h));
-      barChart1.update(w, h/2);
-      scatterBarY.update(((3/4)*h), ((1/4)*h));
-      scatterBarX.update(((3/4)*w), ((1/4)*h));
+      graphSet1.getFilters().setElevationGain(ui.values[0], ui.values[1]);
+      graphSet1.update();
     }
   })
 });
@@ -296,21 +243,15 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.heart_rate }),
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
-      graph1Filters.setHeartRates(ui.values[0], ui.values[1]);
-      scatterGraph1.update(((3/4)*w), ((3/4)*h));
-      barChart1.update(w, h/2);
-      scatterBarY.update(((3/4)*h), ((1/4)*h));
-      scatterBarX.update(((3/4)*w), ((1/4)*h));
+      graphSet1.getFilters().setHeartRates(ui.values[0], ui.values[1]);
+      graphSet1.update();
     }
   });
 });
 
 function filterTags(tags) {
-  graph1Filters.getFilters().setTags(tags.split(' '));
-  scatterGraph1.update(((3/4)*w), ((3/4)*h));
-  barChart1.update(w, h/2);
-  scatterBarY.update(((3/4)*h), ((1/4)*h));
-  scatterBarX.update(((3/4)*w), ((1/4)*h));
+  graphSet1.getFilters().setTags(tags.split(' '));
+  graphSet1.update()
 }
 
 function mergeGraphs() {
