@@ -95,7 +95,7 @@ class Scatter {
   update(filteredData, id){
     var selector = "circle";
     console.log(typeof selector);
-    this.graph.selectAll('circle').remove();
+    this.plot.selectAll('circle').remove();
 
     // Update our circles
     this.filtered_data = filteredData;
