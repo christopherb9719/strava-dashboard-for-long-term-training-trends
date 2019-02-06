@@ -1,14 +1,12 @@
 class Scatter {
-  constructor(container, data, filters, margin, width, height, id, colour) {
+  constructor(container, data, margin, width, height, colour, filters) {
     this.data = data;
-    this.colour = colour;
     this.filters = filters;
-    this.filtered_data = this.filterData(this.data);
+    this.colour = colour;
     this.container = container;
     this.margin = margin;
     this.width = width;
     this.height = height;
-    this.id = id;
     this.draw();
   }
 
@@ -69,52 +67,6 @@ class Scatter {
         .text("Mean Pace (minutes per km)");
   }
 
-  filterData(data) {
-    var filtered = data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
-      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
-      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
-      && this.dataInDate(d)
-      && this.dataInTime(d)
-      && this.containsTags(d)
-    ));
-
-    return filtered
-  }
-
-
-  dataInDate(d, filters) {
-    if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
-      return true;
-    }
-    else if (d.year == this.filters.getEarliestDate().getFullYear()) {
-        if (d.month >= this.filters.getEarliestDate().getMonth()) return true;
-    }
-    else if (d.year == this.filters.getLatestDate().getFullYear()) {
-      if (d.month <= this.filters.getLatestDate().getMonth()) return true;
-    }
-  }
-
-  dataInTime(d) {
-    if (d.hour > this.filters.getEarliestTime().getHours() && d.hour < this.filters.getLatestTime().getHours()) {
-      return true;
-    }
-    else if (d.hour == this.filters.getEarliestTime().getHours()) {
-      if (d.minute >= this.filters.getEarliestTime().getMinutes()) return true;
-    }
-    else if (d.year == this.filters.getLatestTime().getHours()) {
-      if (d.minute <= this.filters.getLatestTime().getMinutes()) return true;
-    }
-  }
-
-  containsTags(d) {
-    this.filters.getTags().forEach(function(tag) {
-      if (d.description != null && d.description.contains(tag)) {
-        return false;
-      }
-    })
-    return true;
-  }
-
   getRadius(d, filters) {
     var max = filters.getLatestDate().getTime()/1000,
         min = filters.getEarliestDate().getTime()/1000,
@@ -128,21 +80,25 @@ class Scatter {
     }
   }
 
-  update(nwidth, nheight){
+  resize(new_width) {
     // Update our scales
-    this.x.range([0, nwidth]);
-    this.y.range([nheight, 0]);
+    this.x.range([0, new_width]);
 
-    this.svg.attr("width", nwidth + this.margin.left + this.margin.right);
+    this.svg.attr("width", new_width + this.margin.left + this.margin.right);
 
     // Update our axes
     this.xAxis.call(this.xAxisCall);
     this.yAxis.call(this.yAxisCall);
+  }
 
-    this.svg.selectAll("circle").remove();
+
+  update(filteredData, id){
+    var selector = "circle";
+    console.log(typeof selector);
+    this.graph.selectAll('circle').remove();
+
     // Update our circles
-    this.filtered_data = this.filterData(this.data);
-    plotScatterPoints(this.plot, this.filtered_data, this.colour, this.x, this.y, this.filters);
+    this.filtered_data = filteredData;
   }
 
   getX() {
@@ -165,15 +121,9 @@ class Scatter {
     return this.filters;
   }
 
-  getFilteredData() {
-    return this.filtered_data;
-  }
-
 }
 
 function getRadius(d, filters) {
-  //console.log(filters.getLatestDate());
-  //console.log(filters.getEarliestDate());
   var max = filters.getLatestDate().getTime()/1000,
       min = filters.getEarliestDate().getTime()/1000,
       date = new Date(d.year, d.month, d.day, 0, 0, 0),
@@ -187,7 +137,7 @@ function getRadius(d, filters) {
 }
 
 
-function plotScatterPoints(plot, data, colour, x, y, filters) {
+function plotScatterPoints(plot, data, colour, x, y, filters, id) {
   var circles = plot.selectAll("circles");
 
   circles.data(data).enter()
@@ -198,6 +148,7 @@ function plotScatterPoints(plot, data, colour, x, y, filters) {
         .attr("cy", (d => y(d.average_pace)))
         .attr("r", function(d) { return getRadius(d, filters); })
         .attr("fill", colour)
+        .attr("id", id)
         .style("opacity", 0.5)
       .on('mouseover', function(d) {
         d3.select(this)

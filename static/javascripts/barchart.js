@@ -1,14 +1,11 @@
 class PositiveAndNegativeBarChart {
-  constructor(container, data, filters, margin, width, height, id, colour) {
+  constructor(container, data, filteredData, margin, width, height, colour) {
     this.data = data;
-    this.filters = filters;
-    this.barVals = this.buildBarValues();
+    this.barVals = this.buildBarValues(filteredData);
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
-    this.filters = filters;
-    this.id = id;
     this.colour = colour;
     this.draw();
   }
@@ -30,7 +27,6 @@ class PositiveAndNegativeBarChart {
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    plotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width);
   }
 
   createAxes() {
@@ -63,16 +59,9 @@ class PositiveAndNegativeBarChart {
       return total/numbers.length;
   }
 
-  buildBarValues() {
-    var activities = this.data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
-      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
-      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
-      && this.dataInDate(d)
-      && this.dataInTime(d)
-      && this.containsTags(d)
-    ));
-
-
+  buildBarValues(filteredData) {
+    console.log(Object.values(filteredData));
+    var activities = Object.values(filteredData);
     var tod = [];
     var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     var p = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -88,28 +77,29 @@ class PositiveAndNegativeBarChart {
     return tod;
   }
 
-  update(w, h){
+  resize(new_width) {
+    this.xAxisScale.range([0, new_width]);
+    this.width = new_width;
+
+    this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+
+    // Update the axes
+    this.xAxis.call(this.xAxisCall);
+    this.yAxis.call(this.yAxisCall);
+  }
+
+  update(filteredData){
     // Re-calculate the bar values
-    this.barVals = this.buildBarValues();
+    this.barVals = this.buildBarValues(filteredData);
 
     // Update the scales
     this.y.domain([
       Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })),
       (-1 * Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })))
     ]).nice();
-    this.xAxisScale.range([0, w]);
-    this.width = w;
-    this.height = h;
-
-    this.svg.attr("width", w + this.margin.left + this.margin.right);
-
-    // Update the axes
-    this.xAxis.call(this.xAxisCall);
-    this.yAxis.call(this.yAxisCall);
 
     // Update the bars
     this.plot.selectAll("rect").remove();
-    plotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width);
   }
 
   dataInDate(d) {
@@ -146,7 +136,7 @@ class PositiveAndNegativeBarChart {
   }
 
   getX() {
-    return this.x;
+    return this.xAxisScale;
   }
 
   getY() {
@@ -160,22 +150,27 @@ class PositiveAndNegativeBarChart {
   getData() {
     return this.data;
   }
+
+  getBarValues() {
+    return this.barVals;
+  }
+
+  getWidth() {
+    return this.width;
+  }
 }
 
 
 class StandardBarChart {
-  constructor(container, data, filters, margin, width, height, id, colour, x_val, type) {
+  constructor(container, data, filteredData, margin, width, height, colour, x_val, type) {
     this.data = data;
-    this.filters = filters;
     this.x_val = x_val;
     this.type = type;
-    this.barVals = this.buildBarValues();
+    this.barVals = this.buildBarValues(filteredData);
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
-    this.filters = filters;
-    this.id = id;
     this.colour = colour;
     this.draw();
   }
@@ -184,7 +179,8 @@ class StandardBarChart {
     var values = Object.values(this.barVals).map(d => parseInt(d));
     var max_y = Math.max.apply(null, values);
     var x_title = this.x_val;
-    this.x = d3.scaleBand().range([0, this.width]).round(.2).domain([d3.extent(this.data, d => d.x_title)]);
+    this.x = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
+      d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
     this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
 
     this.svg = d3.select(this.container).append('svg')
@@ -198,14 +194,14 @@ class StandardBarChart {
 
     this.createAxes();
     var width = w/(d3.max(this.data, d => d[this.x_val]) - d3.min(this.data, d => d[this.x_val]));
-    standardPlotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width, this.x_val, width);
   }
 
   createAxes() {
     var x_title = this.x_val;
     this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
       d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
-    this.xAxisCall = d3.axisBottom(this.xAxisScale)
+
+    this.xAxisCall = d3.axisBottom(this.x)
 
     this.yAxisCall = d3.axisLeft(this.y);
 
@@ -219,19 +215,11 @@ class StandardBarChart {
       .call(this.yAxisCall);
   }
 
-  buildBarValues() {
+  buildBarValues(filteredData) {
     var x_title = this.x_val;
-    var activities = this.data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
-      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
-      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
-      && this.dataInDate(d)
-      && this.dataInTime(d)
-      && this.containsTags(d)
-    ));
-
     var type = this.type;
     var bins = {};
-    activities.forEach(function(d) {
+    Object.values(filteredData).forEach(function(d) {
       var bin;
       if (type == "decimal") {
         bin = (Math.floor(d[x_title]*100))/100;
@@ -252,30 +240,30 @@ class StandardBarChart {
   }
 
 
-  update(w, h){
+  resize(new_width) {
+    this.xAxisScale.range([0, new_width]);
+    this.width = new_width;
+
+    this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+
+    // Update the axes
+    this.xAxis.call(this.xAxisCall);
+    this.yAxis.call(this.yAxisCall);
+  }
+
+  update(filteredData){
     // Re-calculate the bar values
-    this.barVals = this.buildBarValues();
-    console.log(this.barVals);
+    this.barVals = this.buildBarValues(filteredData);
 
     var values = Object.values(this.barVals).map(d => parseInt(d));
     var max_y = Math.max.apply(null, values);
 
     // Update the scales
     this.y.domain([0, max_y]).nice();
-    this.xAxisScale.range([0, w]);
-    this.width = w;
-    this.height = h;
-
-    this.svg.attr("width", w + this.margin.left + this.margin.right);
-
-    // Update the axes
-    this.xAxis.call(this.xAxisCall);
-    this.yAxis.call(this.yAxisCall);
 
     // Update the bars
     this.plot.selectAll("rect").remove();
-    var width = w/(d3.max(this.data, d => d[this.x_val]) - d3.min(this.data, d => d[this.x_val]));
-    standardPlotBars(this.plot, this.barVals, this.colour, this.y, this.xAxisScale, this.width, this.x_val, width);
+
   }
 
   dataInDate(d) {
@@ -319,6 +307,10 @@ class StandardBarChart {
     return this.y;
   }
 
+  getXVal() {
+    return this.x_val;
+  }
+
   getPlot() {
     return this.plot;
   }
@@ -327,24 +319,28 @@ class StandardBarChart {
     return this.data;
   }
 
-  getPlot() {
-    return this.plot;
-  }
-
   getSvg() {
     return this.svg;
+  }
+
+  getBarValues() {
+    return this.barVals;
   }
 }
 
 
-function plotBars(plot, data, colour, y, x, w) {
-  rects = plot.selectAll("rect").data(data);
-  rects.enter()
+function plotBars(graph, filtered, y, x, graph_width, colour) {
+  var plot = graph.getPlot();
+  var data = graph.buildBarValues(filtered);
+  console.log(data);
+  var rects = plot.selectAll("rects");
+  rects.data(data).enter()
     .append("rect")
       .attr("x", d => x(Object.keys(data).find(key => data[key] === d)))
       .attr("y", d => Math.min(y(0), y(d)))
-      .attr('width', w/24)
+      .attr('width', graph_width/24)
       .attr("fill", colour)
+      .style("opacity", 0.5)
       .attr('height', d => Math.abs(y(d) - y(0)))
     .on('mouseover', function(d, i) {
       d3.select(this)
@@ -373,17 +369,20 @@ function plotBars(plot, data, colour, y, x, w) {
 }
 
 
-function standardPlotBars(plot, data, colour, y, x, w, x_val, width) {
-  console.log(data);
+function standardPlotBars(graph, filtered, i, j, colour) {
+  var plot = graph.getPlot();
+  var data = graph.buildBarValues(filtered);
+  var y = graph.getY();
+  var x = graph.getX();
   var keys = Object.keys(data);
-  console.log(keys);
-  rects = plot.selectAll("rect").data(keys);
+  var rects = plot.selectAll("rects").data(keys);
   rects.enter()
     .append("rect")
       .attr("x", d => x(d))
       .attr("y", d => y(data[d]))
       .attr('width', "6")
       .attr("fill", colour)
+      .style("opacity", 0.5)
       .attr('height', d => (y(0) - y(data[d])))
     .on('mouseover', function(d, i) {
       d3.select(this)

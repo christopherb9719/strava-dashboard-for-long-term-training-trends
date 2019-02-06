@@ -1,53 +1,51 @@
 class graphSet {
-  constructor(data, line_coords, margin, width, height, div, id, colour) {
-    var parentDiv = document.getElementById(div);
-    var container = document.createElement('div')
-    container.className = 'box2';
-    this.filters = new Filters(data);
-    this.effortChart = new PositiveAndNegativeBarChart(parentDiv.appendChild(document.createElement('div')), data, this.filters, margin, width, height/2, "effortChart" + id, colour);
-    this.topBar = new StandardBarChart(parentDiv.appendChild(document.createElement('div')), data, this.filters, margin, ((3/4)*width), height/4, "scatterBarX" + id, colour, "heart_rate");
-    this.scatter = new Scatter(parentDiv.appendChild(container), data, this.filters, margin, ((3/4)*width), ((3/4)*height), "scatter" + id, colour);
-    this.sideBar = new StandardBarChart(parentDiv.appendChild(container), data, this.filters, margin, ((3/4)*height), ((1/4)*height), "scatterBarY" + id, colour, "average_pace", "decimal");
-    appendPath(this.scatter, line_coords, "line_primary");
-    plotScatterPoints(this.scatter.getSvg(), data, colour, this.scatter.getX(), this.scatter.getY(), this.filters);
-    this.sideBar.getSvg().attr("transform","rotate(270, 15, 0)");
+  constructor(margin, width, height, div) {
     this.height = height;
     this.width = width;
-    this.data = data;
+    this.margin = margin;
+    this.div = document.getElementById(div);
+  }
+
+  buildGraphs(data, filteredData, colour) {
+    var container = document.createElement('div')
+    container.className = 'box2';
+    this.effortChart = new PositiveAndNegativeBarChart(this.div.appendChild(document.createElement('div')), data, filteredData, this.margin, this.width, this.height/2, colour);
+    this.topBar = new StandardBarChart(this.div.appendChild(document.createElement('div')), data, filteredData, this.margin, ((3/4)*this.width), this.height/4, colour, "heart_rate");
+    this.scatter = new Scatter(this.div.appendChild(container), filteredData, this.margin, ((3/4)*this.width), ((3/4)*this.height), colour, this.filters);
+    this.sideBar = new StandardBarChart(this.div.appendChild(container), data, filteredData, this.margin, ((3/4)*this.height), ((1/4)*this.height), colour, "average_pace", "decimal");
+    this.sideBar.getSvg().attr("transform","rotate(270, 15, 0)");
   }
 
   resize(new_width) {
     this.width = new_width;
-    console.log(this.width);
-    this.effortChart.update(this.width, (1/2)*this.height);
-    this.scatter.update((3/4)*this.width, (3/4)*this.height);
-    this.topBar.update((3/4)*this.width, (1/4)*this.height);
-    this.sideBar.update((3/4)*this.height, (1/4)*this.height);
-    updateTrendline(this.scatter.getFilteredData(), this.scatter, "line_primary");
+    this.effortChart.resize(this.width);
+    this.scatter.resize((3/4)*this.width);
+    this.topBar.resize((3/4)*this.width);
+    this.sideBar.resize((3/4)*this.height);
+    this.populateAllGraphs(this.data, this.colour)
   }
 
-  update() {
-    this.scatter.update((3/4)*this.width, (3/4)*this.height);
-    this.sideBar.update((3/4)*this.height, (1/4)*this.height);
-    this.topBar.update((3/4)*this.width, (1/4)*this.width);
-    this.effortChart.update(this.width, this.height/2);
+  update(filters) {
+    var filteredData = filters.getFilteredData();
+    var id = filters.getId();
+    this.scatter.update(filteredData, id);
+    this.sideBar.update(filteredData, id);
+    this.topBar.update(filteredData, id);
+    this.effortChart.update(filteredData, id);
+    this.populateAllGraphs(filters, filters.getColour(), id)
+  }
+
+  populateAllGraphs(filters, colour, id) {
+    var filtered = filters.getFilteredData()
+    console.log(filtered);
+    plotScatterPoints(this.scatter.getSvg(), filtered, filters.getColour(), this.scatter.getX(), this.scatter.getY(), filters);
+    standardPlotBars(this.topBar, filtered, this.topBar.getY(), this.topBar.getX(), filters.getColour(), id);
+    standardPlotBars(this.sideBar, filtered, this.sideBar.getY(), this.sideBar.getX(), filters.getColour(), id);
+    plotBars(this.effortChart, filtered, this.effortChart.getY(), this.effortChart.getX(), this.effortChart.getWidth(), filters.getColour(), id);
   }
 
   getFilters() {
     return this.filters;
-  }
-
-
-  getFilteredData() {
-    var filtered = this.data.filter(d => ((d.distance <= this.filters.getMaxDistance() && d.distance >= this.filters.getMinDistance())
-      && (d.total_elevation_gain <= this.filters.getMaxElevationGain() && d.total_elevation_gain >= this.filters.getMinElevationGain())
-      && (d.heart_rate <= this.filters.getMaxHeartRate() && d.heart_rate >= this.filters.getMinHeartRate())
-      && this.dataInDate(d)
-      && this.dataInTime(d)
-      && this.containsTags(d)
-    ));
-
-    return filtered
   }
 
   getScatter() {

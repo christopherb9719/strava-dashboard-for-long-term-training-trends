@@ -1,6 +1,9 @@
 class Filters {
-  constructor(data) {
+  constructor(data, colour, id, graphSet) {
     this.data = data;
+    this.colour = colour;
+    this.id = id;
+    this.graphSet = graphSet;
     this.min_distance = d3.min(this.data, function(d) { return d.distance });
     this.max_distance = d3.max(this.data, function(d) { return d.distance });
     this.min_elevation_gain = d3.min(this.data, function(d) { return d.total_elevation_gain });
@@ -85,5 +88,70 @@ class Filters {
 
   getTags() {
     return this.tags;
+  }
+
+  getColour() {
+    return this.colour;
+  }
+
+  getId() {
+    return this.id;
+  }
+
+  getData() {
+    return this.data;
+  }
+
+  setGraphSet(graphSet) {
+    this.graphSet = graphSet;
+  }
+
+  getFilteredData() {
+    var filtered = this.data.filter(d => ((d.distance <= this.getMaxDistance() && d.distance >= this.getMinDistance())
+      && (d.total_elevation_gain <= this.getMaxElevationGain() && d.total_elevation_gain >= this.getMinElevationGain())
+      && (d.heart_rate <= this.getMaxHeartRate() && d.heart_rate >= this.getMinHeartRate())
+      && this.dataInDate(d)
+      && this.dataInTime(d)
+      && this.containsTags(d)
+    ));
+
+    return filtered;
+  }
+
+  dataInDate(d) {
+    if (d.year > this.getEarliestDate().getFullYear() && d.year < this.getLatestDate().getFullYear()) {
+      return true;
+    }
+    else if (d.year == this.getEarliestDate().getFullYear()) {
+        if (d.month >= this.getEarliestDate().getMonth()) return true;
+    }
+    else if (d.year == this.getLatestDate().getFullYear()) {
+      if (d.month <= this.getLatestDate().getMonth()) return true;
+    }
+  }
+
+  dataInTime(d) {
+    if (d.hour > this.getEarliestTime().getHours() && d.hour < this.getLatestTime().getHours()) {
+      return true;
+    }
+    else if (d.hour == this.getEarliestTime().getHours()) {
+      if (d.minute >= this.getEarliestTime().getMinutes()) return true;
+    }
+    else if (d.year == this.getLatestTime().getHours()) {
+      if (d.minute <= this.getLatestTime().getMinutes()) return true;
+    }
+  }
+
+  containsTags(d) {
+    this.getTags().forEach(function(tag) {
+      if (d.description != null && d.description.contains(tag)) {
+        return false;
+      }
+    })
+    return true;
+  }
+
+  update() {
+    this.graphSet.update(this);
   }
 }

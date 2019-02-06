@@ -1,13 +1,14 @@
 var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
+var splitGraphs = false;
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1000 - margin.left - margin.right,
     h = 500 - margin.top - margin.bottom;
 
+var secondaryFilterObject;
 var clicked = false;
-var  scatterGraph2;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
 var tooltip = d3.select("body").append("div")
@@ -15,16 +16,30 @@ var tooltip = d3.select("body").append("div")
     .style("opacity", 0);
 
 //Build Graphs
-var graphSet1 = new graphSet(dataset, reg, margin, w, h, "graphSet1Container", 1, "#ff471a");
+var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+var primaryFilterObject = new Filters(dataset, "#ff471a", "1", graphSet1);
+graphSet1.buildGraphs(dataset, primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
+graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
+updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
-document.getElementById("addChart").onclick = function() {
-  createGraphs(dataset, reg, "#00e600");
-};
 
-document.getElementById("mergeGraphs").onclick = function() {
-  console.log("Merging graphs");
-  mergeGraphs();
-};
+function split() {
+  console.log("Splitting");
+  d3.select('#graphSet1Container').selectAll('div').remove();
+
+  var graphSet1 = new graphSet(margin, w/2, h, "graphSet1Container");
+  primaryFilterObject.setGraphSet(graphSet1);
+  graphSet1.buildGraphs(primaryFilterObject.getData(), primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
+  graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
+  updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+
+  var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
+  secondaryFilterObject.setGraphSet(graphSet2);
+  graphSet2.buildGraphs(secondaryFilterObject.getData(), secondaryFilterObject.getFilteredData(), secondaryFilterObject.getColour());
+  graphSet2.populateAllGraphs(secondaryFilterObject, "#ff471a");
+  updateTrendline(secondaryFilterObject.getFilteredData(), graphSet2.getScatter(), "line_secondary");
+}
+
 
 function updateTrendline(filtered_data, graph, line_class) {
   $.ajax({
@@ -86,15 +101,17 @@ function plotGraphs(user) {
 function createGraphs(d, line_points, colour) {
   console.log(clicked);
   if (clicked == false) {
-    w = w/2
     document.getElementById('addChart').innerText = "Remove Graph";
     clicked = true;
 
     //Update 1st set of graphs
-    graphSet1.resize(w);
+    secondaryFilterObject = new Filters(d, colour, "2", graphSet1);
+    graphSet1.populateAllGraphs(secondaryFilterObject);
+    updateTrendline(secondaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_secondary");
 
     //Create second set of graphs
-    var graphSet2 = new graphSet(d, line_points, margin, w, h, 'graphSet2Container', 2, colour)
+    /**var graphSet2 = new graphSet(d, line_points, margin, w, h, "graphSet2Container", 2, colour);
+    graphSet2.populateAllGraphs();*/
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
@@ -107,8 +124,8 @@ function createGraphs(d, line_points, colour) {
         max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
-          graphSet2.getFilters().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-          graphSet2.update();
+          secondaryFilterObject.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+          secondaryFilterObject.update();
         }
       });
     });
@@ -120,8 +137,8 @@ function createGraphs(d, line_points, colour) {
         max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
         values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
         slide: function( event, ui ) {
-          graphSet2.getFilters().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-          graphSet2.update();
+          secondaryFilterObject.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+          secondaryFilterObject.update();
         }
       });
     });
@@ -133,8 +150,8 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.distance }),
         values: [0, d3.max(dataset, function(d) { return d.distance })],
         slide: function( event, ui ) {
-          graphSet2.getFilters().setDistances(ui.values[0], ui.values[1]);
-          graphSet2.update();
+          secondaryFilterObject.setDistances(ui.values[0], ui.values[1]);
+          secondaryFilterObject.update();
         }
       })
     });
@@ -146,8 +163,8 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
         values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
         slide: function( event, ui ) {
-          graphSet2.getFilters().setElevationGain(ui.values[0], ui.values[1]);
-          graphSet2.update();
+          secondaryFilterObject.setElevationGain(ui.values[0], ui.values[1]);
+          secondaryFilterObject.update();
         }
       })
     });
@@ -159,22 +176,22 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.heart_rate }),
         values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
         slide: function( event, ui ) {
-          graphSet2.getFilters().setHeartRates(ui.values[0], ui.values[1]);
-          graphSet2.update();
+          secondaryFilterObject.setHeartRates(ui.values[0], ui.values[1]);
+          secondaryFilterObject.update();
         }
       });
     });
   }
   else {
-    w = w*2;
     document.getElementById('addChart').innerText = "Add Graph";
     clicked = false;
     console.log("Removing graph");
     //Remove second set of graphs
-    d3.select('#graphSet2').remove();
+
+    d3.select('#graphSet2Container').selectAll('div').remove();
 
     //Update first set of graphs
-    graphSet1.update();
+    graphSet1.resize(w);
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
@@ -189,8 +206,8 @@ $(function() {
     max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
-      graphSet1.getFilters().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      graphSet1.update();
+      primaryFilterObject.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+      primaryFilterObject.update();
 
     }
   });
@@ -203,8 +220,8 @@ $(function() {
     max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
     values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
     slide: function( event, ui ) {
-      graphSet1.getFilters().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      graphSet1.update();
+      primaryFilterObject.setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+      primaryFilterObject.update();
     }
   });
 });
@@ -217,8 +234,8 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.distance }),
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
-      graphSet1.getFilters().setDistances(ui.values[0], ui.values[1]);
-      graphSet1.update();
+      primaryFilterObject.setDistances(ui.values[0], ui.values[1]);
+      primaryFilterObject.update();
     }
   })
 });
@@ -230,8 +247,8 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
-      graphSet1.getFilters().setElevationGain(ui.values[0], ui.values[1]);
-      graphSet1.update();
+      primaryFilterObject.setElevationGain(ui.values[0], ui.values[1]);
+      primaryFilterObject.update();
     }
   })
 });
@@ -243,50 +260,55 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.heart_rate }),
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
-      graphSet1.getFilters().setHeartRates(ui.values[0], ui.values[1]);
-      graphSet1.update();
+      primaryFilterObject.setHeartRates(ui.values[0], ui.values[1]);
+      primaryFilterObject.update();
     }
   });
 });
 
 function filterTags(tags) {
-  graphSet1.getFilters().setTags(tags.split(' '));
-  graphSet1.update()
+  primaryFilterObject.setTags(tags.split(' '));
+  primaryFilterObject.update();
 }
 
 function mergeGraphs() {
-  w = w*2
-  data1 = scatterGraph1.getData();
-  data2 = scatterGraph2.getData();
-  filtered_data1 = scatterGraph1.getFilteredData();
-  filtered_data2 = scatterGraph2.getFilteredData();
-  all_data = data1.concat(data2);
-  merge_filters = new Filters(all_data);
+  d3.select('#graphSet1Container').selectAll('div').remove();
+  d3.select('#graphSet2Container').selectAll('div').remove();
 
-  d3.select('#scatter1').remove();
-  d3.select('#scatter2').remove();
-
-  var scatter3 = new Scatter("#graph_container", all_data, merge_filters, margin, w, h, "#scatter3");
-
-  plotScatterPoints(scatter3.getSvg(), filtered_data1, "#ff471a", scatter3.getX(), scatter3.getY(), merge_filters);
-  plotScatterPoints(scatter3.getSvg(), filtered_data2, "#00ff00", scatter3.getX(), scatter3.getY(), merge_filters);
-  updateTrendline(filtered_data1, scatter3, "line_primary");
-  updateTrendline(filtered_data2, scatter3, "line_secondary");
-
+  var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+  secondaryFilterObject.setGraphSet(graphSet1);
+  graphSet1.buildGraphs(primaryFilterObject.getData().concat(secondaryFilterObject.getData()), primaryFilterObject.getFilteredData().concat(secondaryFilterObject.getFilteredData()), primaryFilterObject.getColour());
+  graphSet1.populateAllGraphs(primaryFilterObject);
+  graphSet1.populateAllGraphs(secondaryFilterObject);
+  updateTrendline(secondaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+  updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_secondary");
 }
 
-
 function getNeededPace(distance, data) {
-  console.log(data);
   var min_dist = distance - (0.1*distance);
   var max_dist = parseInt(distance) + parseInt((0.1*distance));
-  console.log(min_dist);
-  console.log(max_dist);
   acceptable_data = data.filter(d => (d.distance <= max_dist && d.distance >= min_dist));
   graph1Filters.setDistances(min_dist, max_dist);
   scatterGraph1.update(w, h);
   filtered = scatterGraph1.getFilteredData();
   needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
-  console.log(needed_pace);
   document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
 }
+
+document.getElementById("addChart").onclick = function() {
+  createGraphs(dataset, reg, "#00e600");
+};
+
+document.getElementById("mergeGraphs").onclick = function() {
+  console.log(document.getElementById("mergeGraphs").value);
+  if (document.getElementById("mergeGraphs").value == "true") {
+    document.getElementById("mergeGraphs").value = "false";
+    document.getElementById("mergeGraphs").innerHTML = "Merge Graphs";
+    split();
+  }
+  else {
+    document.getElementById("mergeGraphs").value = "true";
+    document.getElementById("mergeGraphs").innerHTML = "Split Graphs";
+    mergeGraphs();
+  }
+};
