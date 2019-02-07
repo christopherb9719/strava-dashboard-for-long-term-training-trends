@@ -18,28 +18,31 @@ var tooltip = d3.select("body").append("div")
     .style("opacity", 0);
 
 //Build Graphs
+var primaryFilterObject = new Filters(dataset);
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-var primaryFilterObject = new Filters(dataset, "#ff471a", "1", graphSet1);
-graphSet1.buildGraphs(dataset, primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
-graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
-updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+var dataObject1 = new DataObject(dataset, "1", primaryFilterObject, graphSet1);
+graphSet1.buildGraphs(primaryFilterObject, dataset);
+graphSet1.updatePlots(dataObject1.getFilteredData(), primaryFilterObject);
+updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
 
 function split() {
   console.log("Splitting");
   d3.select('#graphSet1Container').selectAll('div').remove();
 
-  var graphSet1 = new graphSet(margin, w/2, h, "graphSet1Container");
-  primaryFilterObject.setGraphSet(graphSet1);
-  graphSet1.buildGraphs(primaryFilterObject.getData(), primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
-  graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
-  updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+  var primaryFilterObject = new Filters(dataset);
+  var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+  var dataObject1 = new DataObject(dataset, "1", primaryFilterObject, graphSet1);
+  graphSet1.buildGraphs(secondaryFilterObject, dataset);
+  graphSet1.populateAllGraphs(dataObject1.getData(), secondaryFilterObject);
+  updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
-  var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
-  secondaryFilterObject.setGraphSet(graphSet2);
-  graphSet2.buildGraphs(secondaryFilterObject.getData(), secondaryFilterObject.getFilteredData(), secondaryFilterObject.getColour());
-  graphSet2.populateAllGraphs(secondaryFilterObject, "#ff471a");
-  updateTrendline(secondaryFilterObject.getFilteredData(), graphSet2.getScatter(), "line_secondary");
+  var secondaryFilterObject = new Filters(dataset);
+  var graphSet2 = new graphSet(margin, w, h, "graphSet2Container");
+  var dataObject2 = new DataObject(dataset, "2", secondaryFilterObject, graphSet2);
+  graphSet1.buildGraphs(filterObject, dataset);
+  graphSet2.populateAllGraphs(dataObject2.getData(), secondaryFilterObject);
+  updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary");
 }
 
 
@@ -114,7 +117,7 @@ function createGraphs(d, line_points, colour) {
     //Update 1st set of graphs
     this.secondaryFilterObject = new Filters(d, colour, "2", this.graphSet1);
     this.graphSet1.populateAllGraphs(this.secondaryFilterObject);
-    updateTrendline(this.secondaryFilterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
+    updateTrendline(dataObject2.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 
     //Create second set of graphs
     /**var graphSet2 = new graphSet(d, line_points, margin, w, h, "graphSet2Container", 2, colour);

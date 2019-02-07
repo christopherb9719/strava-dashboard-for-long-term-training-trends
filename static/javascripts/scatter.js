@@ -1,26 +1,19 @@
 class Scatter {
-  constructor(container, data, margin, width, height, colour, filters) {
-    this.data = data;
-    this.filters = filters;
-    this.colour = colour;
+  constructor(container, margin, width, height) {
     this.container = container;
     this.margin = margin;
     this.width = width;
     this.height = height;
-    this.draw();
   }
 
-  draw() {
+  draw(filterObject) {
     this.x = d3.scaleLinear()
-      .domain([d3.min(this.data, function(d) { return d.heart_rate; }),
-        d3.max(this.data, function(d) { return d.heart_rate; })])
+      .domain([filterObject.getMinHeartRate(), filterObject.getMaxHeartRate()])
       .range([0, this.width]);
     this.y = d3.scaleLinear()
-      .domain([d3.min(this.data, function(d) { return d.average_pace; }),
-        d3.max(this.data, function(d) { return d.average_pace; })])
+      .domain([filterObject.getMinPace(), filterObject.getMaxPace()])
       .range([this.height, 0]);
     this.svg = d3.select(this.container).append('svg')
-      .attr("id", this.id)
       .attr("width", this.width + this.margin.left + this.margin.right)
       .attr("height", this.height + this.margin.top + this.margin.bottom);
 
@@ -92,13 +85,8 @@ class Scatter {
   }
 
 
-  update(filteredData, id){
-    var selector = "circle";
-    console.log(typeof selector);
+  update(filtersObject){
     this.plot.selectAll('circle').remove();
-
-    // Update our circles
-    this.filtered_data = filteredData;
   }
 
   getX() {
@@ -137,15 +125,13 @@ function getRadius(d, filters) {
 }
 
 
-function plotScatterPoints(plot, data, colour, x, y, filters, id) {
+function plotScatterPoints(plot, data, colour, x, y, filters) {
   var circles = plot.selectAll("circles");
-  console.log(id);
 
   circles.data(data).enter()
     .append("a")
       .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
       .append("circle")
-        .attr("id", id)
         .attr("cx", (d => x(d.heart_rate)))
         .attr("cy", (d => y(d.average_pace)))
         .attr("r", function(d) { return getRadius(d, filters); })

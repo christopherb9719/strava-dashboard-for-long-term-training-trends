@@ -6,14 +6,24 @@ class graphSet {
     this.div = document.getElementById(div);
   }
 
-  buildGraphs(data, filteredData, colour) {
+  buildGraphs(filtersObject, data) {
     var container = document.createElement('div')
     container.className = 'box2';
-    this.effortChart = new PositiveAndNegativeBarChart(this.div.appendChild(document.createElement('div')), data, filteredData, this.margin, this.width, this.height/2, colour);
-    this.topBar = new StandardBarChart(this.div.appendChild(document.createElement('div')), data, filteredData, this.margin, ((3/4)*this.width), this.height/4, colour, "heart_rate");
-    this.scatter = new Scatter(this.div.appendChild(container), filteredData, this.margin, ((3/4)*this.width), ((3/4)*this.height), colour, this.filters);
-    this.sideBar = new StandardBarChart(this.div.appendChild(container), data, filteredData, this.margin, ((3/4)*this.height), ((1/4)*this.height), colour, "average_pace", "decimal");
+    this.effortChart = new PositiveAndNegativeBarChart(this.div.appendChild(document.createElement('div')), this.margin, this.width, this.height/2);
+    this.effortChart.draw(filtersObject, data);
+    this.topBar = new StandardBarChart(this.div.appendChild(document.createElement('div')), this.margin, ((3/4)*this.width), this.height/4, "heart_rate");
+    this.topBar.draw(filtersObject, data);
+    this.scatter = new Scatter(this.div.appendChild(container), this.margin, ((3/4)*this.width), ((3/4)*this.height));
+    this.scatter.draw(filtersObject);
+    this.sideBar = new StandardBarChart(this.div.appendChild(container), this.margin, ((3/4)*this.height), ((1/4)*this.height), "average_pace", "decimal");
+    this.sideBar.draw(filtersObject, data);
     this.sideBar.getSvg().attr("transform","rotate(270, 15, 0)");
+  }
+
+  rebuildGraphs(filtersObj, data) {
+    console.log(data);
+    d3.select('#graphSet1Container').selectAll('div').remove();
+    this.buildGraphs(filtersObj, data);
   }
 
   resize(new_width) {
@@ -25,26 +35,24 @@ class graphSet {
     this.sideBar.resize((3/4)*this.height);
   }
 
-  update(filters) {
-    var filteredData = filters.getFilteredData();
-    var id = filters.getId();
-    this.scatter.update(filteredData, id);
-    this.sideBar.update(filteredData, id);
-    this.topBar.update(filteredData, id);
-    this.effortChart.update(filteredData, id);
-    this.populateAllGraphs(filters, filters.getColour(), id)
+  populateAllGraphs(filteredData, filters) {
+    this.updateScales(filteredData, filters);
+    this.updatePlots(filteredData, filters);
   }
 
-  populateAllGraphs(filters, colour, id) {
-    var filtered = filters.getFilteredData()
-    plotScatterPoints(this.scatter.getSvg(), filtered, filters.getColour(), this.scatter.getX(), this.scatter.getY(), filters, filters.getId());
-    standardPlotBars(this.topBar, filtered, this.topBar.getY(), this.topBar.getX(), filters.getColour(), id);
-    standardPlotBars(this.sideBar, filtered, this.sideBar.getY(), this.sideBar.getX(), filters.getColour(), id);
-    plotBars(this.effortChart, filtered, this.effortChart.getY(), this.effortChart.getX(), this.effortChart.getWidth(), filters.getColour(), id);
+  updateScales(data, filters) {
+    this.scatter.update(filters);
+    this.sideBar.update(data, filters);
+    this.topBar.update(data, filters);
+    this.effortChart.update(data, filters);
   }
 
-  getFilters() {
-    return this.filters;
+  updatePlots(filteredData, filters) {
+    var colour = "#ff471a";
+    plotScatterPoints(this.scatter.getSvg(), filteredData, colour, this.scatter.getX(), this.scatter.getY(), filters);
+    plotBars(this.effortChart, filteredData, this.effortChart.getX(), this.effortChart.getY(), this.effortChart.getWidth(), colour);
+    standardPlotBars(this.topBar, filteredData, this.topBar.getX(), this.topBar.getY(), colour);
+    standardPlotBars(this.sideBar, filteredData, this.sideBar.getX(), this.sideBar.getY(), colour);
   }
 
   getScatter() {

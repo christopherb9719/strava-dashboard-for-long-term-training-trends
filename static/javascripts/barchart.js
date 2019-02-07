@@ -1,20 +1,18 @@
 class PositiveAndNegativeBarChart {
-  constructor(container, data, filteredData, margin, width, height, colour) {
-    this.data = data;
-    this.barVals = this.buildBarValues(filteredData);
+  constructor(container, margin, width, height) {
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
-    this.colour = colour;
-    this.draw();
   }
 
-  draw() {
+  draw(filtersObject, data) {
+    var filteredData = filtersObject.filterData(data);
+    var barVals = this.buildBarValues(filteredData);
     this.x = d3.scaleBand().range([0, this.width]).round(.2).domain([0, 23]);
     this.y = d3.scaleLinear().range([this.height, 0]).domain([
-      Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })),
-      (-1 * Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })))
+      Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
+      (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
     ]).nice();
 
     this.svg = d3.select(this.container).append('svg')
@@ -47,7 +45,7 @@ class PositiveAndNegativeBarChart {
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.height + ")")
+      .attr("transform", "translate(0," + this.y(0) + ")")
       .call(this.xAxisCall)
 
     this.plot.append("path")
@@ -94,14 +92,14 @@ class PositiveAndNegativeBarChart {
     //this.yAxis.call(this.yAxisCall);
   }
 
-  update(filteredData){
+  update(filteredData, filtersObject){
     // Re-calculate the bar values
-    this.barVals = this.buildBarValues(filteredData);
+    var barVals = this.buildBarValues(filteredData);
 
     // Update the scales
     this.y.domain([
-      Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })),
-      (-1 * Math.sqrt(d3.max(this.barVals, function(d) { return d**2 })))
+      Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
+      (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
     ]).nice();
 
     // Update the bars
@@ -168,25 +166,25 @@ class PositiveAndNegativeBarChart {
 
 
 class StandardBarChart {
-  constructor(container, data, filteredData, margin, width, height, colour, x_val, type) {
-    this.data = data;
+  constructor(container, margin, width, height, x_val, type) {
     this.x_val = x_val;
     this.type = type;
-    this.barVals = this.buildBarValues(filteredData);
     this.margin = margin;
     this.container = container;
     this.width = width;
     this.height = height;
-    this.colour = colour;
-    this.draw();
   }
 
-  draw() {
-    var values = Object.values(this.barVals).map(d => parseInt(d));
+  draw(filtersObject, data) {
+    var filteredData = filtersObject.filterData(data);
+    var barVals = this.buildBarValues(filteredData);
+
+    var values = Object.values(barVals).map(d => parseInt(d));
+
     var max_y = Math.max.apply(null, values);
     var x_title = this.x_val;
-    this.x = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
-      d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
+    this.x = d3.scaleLinear().domain([d3.min(filteredData, function(d) { return d[x_title]; }),
+      d3.max(filteredData, function(d) { return d[x_title]; })]).range([0, this.width]);
     this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
 
     this.svg = d3.select(this.container).append('svg')
@@ -199,20 +197,20 @@ class StandardBarChart {
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.createAxes();
-    var width = w/(d3.max(this.data, d => d[this.x_val]) - d3.min(this.data, d => d[this.x_val]));
+    var width = w/(d3.max(filteredData, d => d[this.x_val]) - d3.min(filteredData, d => d[this.x_val]));
   }
 
   createAxes() {
     var x_title = this.x_val;
-    this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
-      d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
+    //this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
+    //  d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
 
     this.xAxisCall = d3.axisBottom(this.x)
 
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.y(0) + ")")
+      .attr("transform", "translate(0," + this.height + ")")
       .call(this.xAxisCall)
   }
 
@@ -250,11 +248,12 @@ class StandardBarChart {
     this.xAxis.call(this.xAxisCall);
   }
 
-  update(filteredData){
+  update(filteredData, filtersObject){
     // Re-calculate the bar values
-    this.barVals = this.buildBarValues(filteredData);
+    var barVals = this.buildBarValues(filteredData);
 
-    var values = Object.values(this.barVals).map(d => parseInt(d));
+    var values = Object.values(barVals).map(d => parseInt(d));
+
     var max_y = Math.max.apply(null, values);
 
     // Update the scales
@@ -328,7 +327,7 @@ class StandardBarChart {
 }
 
 
-function plotBars(graph, filtered, y, x, graph_width, colour) {
+function plotBars(graph, filtered, x, y, graph_width, colour) {
   var plot = graph.getPlot();
   var data = graph.buildBarValues(filtered);
   var rects = plot.selectAll("rects");
@@ -367,11 +366,9 @@ function plotBars(graph, filtered, y, x, graph_width, colour) {
 }
 
 
-function standardPlotBars(graph, filtered, i, j, colour) {
+function standardPlotBars(graph, filtered, x, y, colour) {
   var plot = graph.getPlot();
   var data = graph.buildBarValues(filtered);
-  var y = graph.getY();
-  var x = graph.getX();
   var keys = Object.keys(data);
   var rects = plot.selectAll("rects").data(keys);
   rects.enter()

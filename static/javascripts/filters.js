@@ -1,17 +1,19 @@
 class Filters {
-  constructor(data, colour, id, graphSet) {
-    this.data = data;
-    this.colour = colour;
-    this.id = id;
-    this.graphSet = graphSet;
-    this.min_distance = d3.min(this.data, function(d) { return d.distance });
-    this.max_distance = d3.max(this.data, function(d) { return d.distance });
-    this.min_elevation_gain = d3.min(this.data, function(d) { return d.total_elevation_gain });
-    this.max_elevation_gain = d3.max(this.data, function(d) { return d.total_elevation_gain });
-    this.min_heart_rate = d3.min(this.data, function(d) { return d.heart_rate });
-    this.max_heart_rate = d3.max(this.data, function(d) { return d.heart_rate });
-    this.min_date = new Date(d3.min(dataset, function(d) {return d.year; }), d3.min(data, function(d) {return d.month; }), d3.min(data, function(d) {return d.day; }), 0, 0, 0);
-    this.max_date = new Date(d3.max(dataset, function(d) {return d.year; }), d3.max(data, function(d) {return d.month; }), d3.max(data, function(d) {return d.day; }), 0, 0, 0);
+  constructor(data) {
+    this.initialiseFilters(data);
+  }
+
+  initialiseFilters(allData) {
+    this.min_distance = d3.min(allData, function(d) { return d.distance });
+    this.max_distance = d3.max(allData, function(d) { return d.distance });
+    this.min_elevation_gain = d3.min(allData, function(d) { return d.total_elevation_gain });
+    this.max_elevation_gain = d3.max(allData, function(d) { return d.total_elevation_gain });
+    this.min_heart_rate = d3.min(allData, function(d) { return d.heart_rate });
+    this.max_heart_rate = d3.max(allData, function(d) { return d.heart_rate });
+    this.min_average_pace = d3.min(allData, function(d) { return d.average_pace });
+    this.max_average_pace = d3.max(allData, function(d) { return d.average_pace });
+    this.min_date = new Date(d3.min(allData, function(d) {return d.year; }), d3.min(allData, function(d) {return d.month; }), d3.min(allData, function(d) {return d.day; }), 0, 0, 0);
+    this.max_date = new Date(d3.max(allData, function(d) {return d.year; }), d3.max(allData, function(d) {return d.month; }), d3.max(allData, function(d) {return d.day; }), 0, 0, 0);
     this.min_time = new Date(0, 0, 0, 0, 0, 0);
     this.max_time = new Date(0, 0, 0, 23, 59, 59);
     this.tags = [];
@@ -90,35 +92,22 @@ class Filters {
     return this.tags;
   }
 
-  getColour() {
-    return this.colour;
+  getMinPace() {
+    return this.min_average_pace;
   }
 
-  getId() {
-    return this.id;
+  getMaxPace() {
+    return this.max_average_pace;
   }
 
-  getData() {
-    return this.data;
-  }
-
-  setGraphSet(graphSet) {
-    this.graphSet = graphSet;
-  }
-
-  getGraphSet() {
-    return this.graphSet;
-  }
-
-  getFilteredData() {
-    var filtered = this.data.filter(d => ((d.distance <= this.getMaxDistance() && d.distance >= this.getMinDistance())
+  filterData(data) {
+    var filtered = data.filter(d => ((d.distance <= this.getMaxDistance() && d.distance >= this.getMinDistance())
       && (d.total_elevation_gain <= this.getMaxElevationGain() && d.total_elevation_gain >= this.getMinElevationGain())
       && (d.heart_rate <= this.getMaxHeartRate() && d.heart_rate >= this.getMinHeartRate())
       && this.dataInDate(d)
       && this.dataInTime(d)
       && this.containsTags(d)
     ));
-
     return filtered;
   }
 
@@ -154,8 +143,25 @@ class Filters {
     })
     return true;
   }
+}
 
-  update() {
-    this.graphSet.update(this);
+class DataObject {
+  constructor(data, id, filters, graphSet) {
+    this.data = data;
+    this.id = id;
+    this.filters = filters;
+    this.graphSet = graphSet;
+  }
+
+  updateGraphs() {
+    this.graphSet.updatePlots(this.getFilteredData(), this.filters);
+  }
+
+  getData() {
+    return this.data;
+  }
+
+  getFilteredData() {
+    return this.filters.filterData(this.data);
   }
 }

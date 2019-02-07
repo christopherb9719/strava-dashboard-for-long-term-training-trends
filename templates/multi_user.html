@@ -20,7 +20,7 @@
         <a href="{{url_for('logout')}}">Log Out</a>
         <div class="dropdown">
           <button onclick="showDropdown()" class="dropbtn">Dropdown</button>
-          <div id="myDropdown" class="dropdown-content" onclick="plotGraphs(this.value)">
+          <div id="myDropdown" class="dropdown-content" onchange="findUserData()">
             <input id="userSearch" placeholder="Search for users">
           </div>
         </div>
