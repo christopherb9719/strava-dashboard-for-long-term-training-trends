@@ -106,6 +106,16 @@ def loadDashboard():
         line_coords = []
     return render_template("index.html", sample = activities, regression = line_coords)
 
+@app.route("/multi_user")
+@login_required
+def loadMultiUser():
+    activities = parse_data(current_user)
+    if len(activities) > 0:
+        line_coords = calculateRegression(activities)
+    else:
+        line_coords = []
+    return render_template("multi_user.html", sample = activities, regression = line_coords)
+
 
 @app.route("/get_user_data", methods=['POST'])
 @login_required
@@ -154,8 +164,6 @@ def parse_data(user):
     athlete = client.get_athlete()
     print(athlete.firstname);
     activities = client.get_activities()
-    for activity in activities:
-        print(activity.average_speed)
 
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None and a.average_speed.num != 0.00, activities)
 

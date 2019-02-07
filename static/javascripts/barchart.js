@@ -30,6 +30,10 @@ class PositiveAndNegativeBarChart {
   }
 
   createAxes() {
+    var lineFunction = d3.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; });
+
     this.xAxisScale = d3.scaleLinear().domain([0, 23]).range([0, this.width]);
     this.xAxisCall = d3.axisBottom(this.xAxisScale)
           .tickFormat(function(d) {
@@ -43,8 +47,11 @@ class PositiveAndNegativeBarChart {
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.y(0) + ")")
+      .attr("transform", "translate(0," + this.height + ")")
       .call(this.xAxisCall)
+
+    this.plot.append("path")
+      .attr("d", lineFunction([{"x": this.xAxisScale(0), "y": this.y(0)}, {"x": this.xAxisScale("23"), "y": this.y(0)}]))
 
     //this.yAxis = this.plot.append("g")
     //  .call(this.yAxisCall);
