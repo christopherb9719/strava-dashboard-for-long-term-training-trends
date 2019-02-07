@@ -204,6 +204,7 @@ function createGraphs(d, line_points, colour) {
 
     //Update first set of graphs
     this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+    primaryFilterObject = new Filters(dataset);
     dataObject1.setGraphSet(this.graphSet1);
     this.graphSet1.buildGraphs(primaryFilterObject, dataObject1.getData());
     this.graphSet1.updatePlots(dataObject1.getFilteredData(), primaryFilterObject);
@@ -292,6 +293,7 @@ function mergeGraphs() {
   d3.select('#graphSet1Container').selectAll('div').remove();
   d3.select('#graphSet2Container').selectAll('div').remove();
 
+  primaryFilterObject = new Filters(dataset);
   this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
   dataObject1.setGraphSet(this.graphSet1);
   dataObject2.setGraphSet(this.graphSet1);
