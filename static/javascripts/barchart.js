@@ -38,7 +38,7 @@ class PositiveAndNegativeBarChart {
               return d + ":00";
             });
 
-    this.yAxisCall = d3.axisLeft(this.y);
+    //this.yAxisCall = d3.axisLeft(this.y);
 
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
@@ -46,8 +46,8 @@ class PositiveAndNegativeBarChart {
       .attr("transform", "translate(0," + this.y(0) + ")")
       .call(this.xAxisCall)
 
-    this.yAxis = this.plot.append("g")
-      .call(this.yAxisCall);
+    //this.yAxis = this.plot.append("g")
+    //  .call(this.yAxisCall);
   }
 
 
@@ -60,7 +60,6 @@ class PositiveAndNegativeBarChart {
   }
 
   buildBarValues(filteredData) {
-    console.log(Object.values(filteredData));
     var activities = Object.values(filteredData);
     var tod = [];
     var hr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
@@ -85,7 +84,7 @@ class PositiveAndNegativeBarChart {
 
     // Update the axes
     this.xAxis.call(this.xAxisCall);
-    this.yAxis.call(this.yAxisCall);
+    //this.yAxis.call(this.yAxisCall);
   }
 
   update(filteredData){
@@ -203,16 +202,11 @@ class StandardBarChart {
 
     this.xAxisCall = d3.axisBottom(this.x)
 
-    this.yAxisCall = d3.axisLeft(this.y);
-
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + this.y(0) + ")")
       .call(this.xAxisCall)
-
-    this.yAxis = this.plot.append("g")
-      .call(this.yAxisCall);
   }
 
   buildBarValues(filteredData) {
@@ -235,7 +229,6 @@ class StandardBarChart {
         bins[bin] = 1;
       }
     })
-    console.log(bins);
     return bins;
   }
 
@@ -248,7 +241,6 @@ class StandardBarChart {
 
     // Update the axes
     this.xAxis.call(this.xAxisCall);
-    this.yAxis.call(this.yAxisCall);
   }
 
   update(filteredData){
@@ -332,7 +324,6 @@ class StandardBarChart {
 function plotBars(graph, filtered, y, x, graph_width, colour) {
   var plot = graph.getPlot();
   var data = graph.buildBarValues(filtered);
-  console.log(data);
   var rects = plot.selectAll("rects");
   rects.data(data).enter()
     .append("rect")

@@ -139,18 +139,20 @@ function getRadius(d, filters) {
 
 function plotScatterPoints(plot, data, colour, x, y, filters, id) {
   var circles = plot.selectAll("circles");
+  console.log(id);
 
   circles.data(data).enter()
     .append("a")
       .attr("xlink:href", function(d) {return "https://www.strava.com/activities/" + d.id})
       .append("circle")
+        .attr("id", id)
         .attr("cx", (d => x(d.heart_rate)))
         .attr("cy", (d => y(d.average_pace)))
         .attr("r", function(d) { return getRadius(d, filters); })
         .attr("fill", colour)
-        .attr("id", id)
         .style("opacity", 0.5)
       .on('mouseover', function(d) {
+        console.log(d.__data__);
         d3.select(this)
           .transition()
           .attr("fill", "#000000")

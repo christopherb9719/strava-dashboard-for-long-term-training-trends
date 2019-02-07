@@ -1,7 +1,9 @@
 var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
-var splitGraphs = false;
+
+document.getElementById('mergeGraphs').style.display = "none";
+document.getElementById('graph2sliders').style.display = "none";
 
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1000 - margin.left - margin.right,
@@ -102,12 +104,17 @@ function createGraphs(d, line_points, colour) {
   console.log(clicked);
   if (clicked == false) {
     document.getElementById('addChart').innerText = "Remove Graph";
+    document.getElementById('mergeGraphs').style.display = "inline";
+    document.getElementById('mergeGraphs').value = "true";
+    document.getElementById('mergeGraphs').innerHTML = "Split Graphs";
+
+
     clicked = true;
 
     //Update 1st set of graphs
-    secondaryFilterObject = new Filters(d, colour, "2", graphSet1);
-    graphSet1.populateAllGraphs(secondaryFilterObject);
-    updateTrendline(secondaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_secondary");
+    this.secondaryFilterObject = new Filters(d, colour, "2", this.graphSet1);
+    this.graphSet1.populateAllGraphs(this.secondaryFilterObject);
+    updateTrendline(this.secondaryFilterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 
     //Create second set of graphs
     /**var graphSet2 = new graphSet(d, line_points, margin, w, h, "graphSet2Container", 2, colour);
@@ -115,6 +122,7 @@ function createGraphs(d, line_points, colour) {
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
+    document.getElementById('graph2sliders').style.display = "inline";
     document.getElementById('graph2sliders').setAttribute("style","width: 50%");
 
     $(function() {
@@ -184,18 +192,25 @@ function createGraphs(d, line_points, colour) {
   }
   else {
     document.getElementById('addChart').innerText = "Add Graph";
+    document.getElementById('mergeGraphs').style.display = "none";
+
     clicked = false;
     console.log("Removing graph");
     //Remove second set of graphs
 
     d3.select('#graphSet2Container').selectAll('div').remove();
+    d3.select('#graphSet1Container').selectAll('div').remove();
 
     //Update first set of graphs
-    graphSet1.resize(w);
+    this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+    primaryFilterObject.setGraphSet(this.graphSet1);
+    this.graphSet1.buildGraphs(primaryFilterObject.getData(), primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
+    this.graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
+    updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
-    document.getElementById('graph2sliders').setAttribute("style","width: 0%");
+    document.getElementById('graph2sliders').style.display = "none";
   }
 }
 
@@ -206,6 +221,7 @@ $(function() {
     max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
+      console.log(primaryFilterObject);
       primaryFilterObject.setDates(ui.values[0] * 1000, ui.values[1] * 1000);
       primaryFilterObject.update();
 
@@ -275,11 +291,12 @@ function mergeGraphs() {
   d3.select('#graphSet1Container').selectAll('div').remove();
   d3.select('#graphSet2Container').selectAll('div').remove();
 
-  var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-  secondaryFilterObject.setGraphSet(graphSet1);
-  graphSet1.buildGraphs(primaryFilterObject.getData().concat(secondaryFilterObject.getData()), primaryFilterObject.getFilteredData().concat(secondaryFilterObject.getFilteredData()), primaryFilterObject.getColour());
-  graphSet1.populateAllGraphs(primaryFilterObject);
-  graphSet1.populateAllGraphs(secondaryFilterObject);
+  this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+  secondaryFilterObject.setGraphSet(this.graphSet1);
+  primaryFilterObject.setGraphSet(this.graphSet1);
+  this.graphSet1.buildGraphs(primaryFilterObject.getData().concat(secondaryFilterObject.getData()), primaryFilterObject.getFilteredData().concat(secondaryFilterObject.getFilteredData()), primaryFilterObject.getColour());
+  this.graphSet1.populateAllGraphs(primaryFilterObject);
+  this.graphSet1.populateAllGraphs(secondaryFilterObject);
   updateTrendline(secondaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
   updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_secondary");
 }

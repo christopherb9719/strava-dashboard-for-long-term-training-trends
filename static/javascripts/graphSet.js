@@ -18,11 +18,11 @@ class graphSet {
 
   resize(new_width) {
     this.width = new_width;
+    console.log(this.width);
     this.effortChart.resize(this.width);
     this.scatter.resize((3/4)*this.width);
     this.topBar.resize((3/4)*this.width);
     this.sideBar.resize((3/4)*this.height);
-    this.populateAllGraphs(this.data, this.colour)
   }
 
   update(filters) {
@@ -37,8 +37,7 @@ class graphSet {
 
   populateAllGraphs(filters, colour, id) {
     var filtered = filters.getFilteredData()
-    console.log(filtered);
-    plotScatterPoints(this.scatter.getSvg(), filtered, filters.getColour(), this.scatter.getX(), this.scatter.getY(), filters);
+    plotScatterPoints(this.scatter.getSvg(), filtered, filters.getColour(), this.scatter.getX(), this.scatter.getY(), filters, filters.getId());
     standardPlotBars(this.topBar, filtered, this.topBar.getY(), this.topBar.getX(), filters.getColour(), id);
     standardPlotBars(this.sideBar, filtered, this.sideBar.getY(), this.sideBar.getX(), filters.getColour(), id);
     plotBars(this.effortChart, filtered, this.effortChart.getY(), this.effortChart.getX(), this.effortChart.getWidth(), filters.getColour(), id);

@@ -154,7 +154,11 @@ def parse_data(user):
     athlete = client.get_athlete()
     print(athlete.firstname);
     activities = client.get_activities()
-    runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None, activities)
+    for activity in activities:
+        print(activity.average_speed)
+
+    runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None and a.average_speed.num != 0.00, activities)
+
     summaries = []
     for run in runs:
         summary = {}

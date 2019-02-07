@@ -106,6 +106,10 @@ class Filters {
     this.graphSet = graphSet;
   }
 
+  getGraphSet() {
+    return this.graphSet;
+  }
+
   getFilteredData() {
     var filtered = this.data.filter(d => ((d.distance <= this.getMaxDistance() && d.distance >= this.getMinDistance())
       && (d.total_elevation_gain <= this.getMaxElevationGain() && d.total_elevation_gain >= this.getMinElevationGain())

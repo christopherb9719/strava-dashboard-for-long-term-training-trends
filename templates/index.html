@@ -19,10 +19,8 @@
     <body>
         <a href="{{url_for('logout')}}">Log Out</a>
         <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group mr-2">
             <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
-            <button id="mergeGraphs" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
-          </div>
+            <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
         </div>
         <div id="dropdown" onclick="plotGraphs(this.value)">
           <input id="findUsers">
@@ -43,7 +41,7 @@
             <p><label>Elevation:</label><div id="elevationSlider"></div></p>
             <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
             <p><input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/></p>
-            <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), 'line_primary')"/></p>
+            <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), primaryFilterObject.getGraphSet().getScatter(), 'line_primary')"/></p>
           </div>
           <div id="graph2sliders">
             <p><label>Date:</label><div id="graph2slider"></div></p>
@@ -52,7 +50,7 @@
             <p><label>Elevation:</label><div id="graph2elevationSlider"></div></p>
             <p><label>Heart Rate:</label><div id="graph2heartrateSlider"></div></p>
             <p><input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/></p>
-            <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(secondaryFilterObject.getFilters().getFilteredData(), graphSet2.getScatter(), 'line_secondary')"/></p>
+            <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(secondaryFilterObject.getFilteredData(), secondaryFilterObject.getGraphSet().getScatter(), 'line_secondary')"/></p>
           </div>
         </div>
         <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
