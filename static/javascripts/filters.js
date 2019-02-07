@@ -164,4 +164,12 @@ class DataObject {
   getFilteredData() {
     return this.filters.filterData(this.data);
   }
+
+  setGraphSet(graphSet) {
+    this.graphSet = graphSet;
+  }
+
+  setFilterObject(filters) {
+    this.filters = filters;
+  }
 }

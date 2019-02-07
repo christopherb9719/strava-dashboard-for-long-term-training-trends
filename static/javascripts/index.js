@@ -10,6 +10,8 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     h = 500 - margin.top - margin.bottom;
 
 var secondaryFilterObject;
+var graphSet2;
+var dataObject2;
 var clicked = false;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
@@ -31,18 +33,18 @@ function split() {
   d3.select('#graphSet1Container').selectAll('div').remove();
 
   var primaryFilterObject = new Filters(dataset);
-  var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-  var dataObject1 = new DataObject(dataset, "1", primaryFilterObject, graphSet1);
-  graphSet1.buildGraphs(secondaryFilterObject, dataset);
-  graphSet1.populateAllGraphs(dataObject1.getData(), secondaryFilterObject);
+  var graphSet1 = new graphSet(margin, w/2, h, "graphSet1Container");
+  dataObject1 = new DataObject(dataset, "1", primaryFilterObject, graphSet1);
+  graphSet1.buildGraphs(primaryFilterObject, dataset);
+  graphSet1.updatePlots(dataObject1.getFilteredData(), primaryFilterObject);
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
   var secondaryFilterObject = new Filters(dataset);
-  var graphSet2 = new graphSet(margin, w, h, "graphSet2Container");
-  var dataObject2 = new DataObject(dataset, "2", secondaryFilterObject, graphSet2);
-  graphSet1.buildGraphs(filterObject, dataset);
-  graphSet2.populateAllGraphs(dataObject2.getData(), secondaryFilterObject);
-  updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary");
+  var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
+  this.dataObject2 = new DataObject(dataset, "2", secondaryFilterObject, graphSet2);
+  graphSet2.buildGraphs(secondaryFilterObject, dataset);
+  graphSet2.updatePlots(this.dataObject2.getFilteredData(), secondaryFilterObject);
+  updateTrendline(this.dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary");
 }
 
 
@@ -111,17 +113,13 @@ function createGraphs(d, line_points, colour) {
     document.getElementById('mergeGraphs').value = "true";
     document.getElementById('mergeGraphs').innerHTML = "Split Graphs";
 
-
     clicked = true;
 
     //Update 1st set of graphs
-    this.secondaryFilterObject = new Filters(d, colour, "2", this.graphSet1);
-    this.graphSet1.populateAllGraphs(this.secondaryFilterObject);
-    updateTrendline(dataObject2.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
-
-    //Create second set of graphs
-    /**var graphSet2 = new graphSet(d, line_points, margin, w, h, "graphSet2Container", 2, colour);
-    graphSet2.populateAllGraphs();*/
+    this.secondaryFilterObject = new Filters(d);
+    this.dataObject2 = new DataObject(d, "2", this.secondaryFilterObject, this.graphSet1);
+    this.graphSet1.updatePlots(this.dataObject2.getFilteredData(), this.secondaryFilterObject);
+    updateTrendline(this.dataObject2.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
@@ -206,10 +204,10 @@ function createGraphs(d, line_points, colour) {
 
     //Update first set of graphs
     this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-    primaryFilterObject.setGraphSet(this.graphSet1);
-    this.graphSet1.buildGraphs(primaryFilterObject.getData(), primaryFilterObject.getFilteredData(), primaryFilterObject.getColour());
-    this.graphSet1.populateAllGraphs(primaryFilterObject, "#ff471a");
-    updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+    dataObject1.setGraphSet(this.graphSet1);
+    this.graphSet1.buildGraphs(primaryFilterObject, dataObject1.getData());
+    this.graphSet1.updatePlots(dataObject1.getFilteredData(), primaryFilterObject);
+    updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
@@ -295,13 +293,14 @@ function mergeGraphs() {
   d3.select('#graphSet2Container').selectAll('div').remove();
 
   this.graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-  secondaryFilterObject.setGraphSet(this.graphSet1);
-  primaryFilterObject.setGraphSet(this.graphSet1);
-  this.graphSet1.buildGraphs(primaryFilterObject.getData().concat(secondaryFilterObject.getData()), primaryFilterObject.getFilteredData().concat(secondaryFilterObject.getFilteredData()), primaryFilterObject.getColour());
-  this.graphSet1.populateAllGraphs(primaryFilterObject);
-  this.graphSet1.populateAllGraphs(secondaryFilterObject);
-  updateTrendline(secondaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
-  updateTrendline(primaryFilterObject.getFilteredData(), graphSet1.getScatter(), "line_secondary");
+  dataObject1.setGraphSet(this.graphSet1);
+  dataObject2.setGraphSet(this.graphSet1);
+  dataObject2.setFilterObject(primaryFilterObject);
+  this.graphSet1.buildGraphs(primaryFilterObject, dataObject1.getData().concat(dataObject2.getData()));
+  graphSet1.updatePlots(dataObject1.getFilteredData(), primaryFilterObject);
+  graphSet1.updatePlots(dataObject2.getFilteredData(), secondaryFilterObject);
+  updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
+  updateTrendline(dataObject2.getFilteredData(), graphSet1.getScatter(), "line_secondary");
 }
 
 function getNeededPace(distance, data) {
