@@ -18,12 +18,11 @@
     </head>
     <body>
         <a href="{{url_for('logout')}}">Log Out</a>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
-            <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
-        </div>
-        <div id="dropdown" onclick="plotGraphs(this.value)">
-          <input id="findUsers">
+        <div class="dropdown">
+          <button onclick="showDropdown()" class="dropbtn">Dropdown</button>
+          <div id="myDropdown" class="dropdown-content" onclick="plotGraphs(this.value)">
+            <input id="userSearch" placeholder="Search for users">
+          </div>
         </div>
         <div id="graphSet1Container" class="graph_container"></div>
         <div id="wrapper">
@@ -44,6 +43,6 @@
         <script src="{{url_for('static', filename='javascripts/barchart.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
         <script src="{{url_for('static', filename='javascripts/graphSet.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/index.js')}}"></script>
+        <script src="{{url_for('static', filename='javascripts/multi_user.js')}}"></script>
     </body>
 </html>

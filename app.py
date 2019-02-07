@@ -121,7 +121,7 @@ def loadMultiUser():
 @login_required
 def getUserData():
     user = User.objects(username = request.data.decode('utf-8')).first()
-    print(user.username)
+    print(user)
     activities = parse_data(user)
     print(len(activities))
     if len(activities) > 0:
