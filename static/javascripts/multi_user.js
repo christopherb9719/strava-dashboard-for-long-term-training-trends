@@ -22,6 +22,7 @@ var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
 var dataObject = new DataObject(dataset, "1", filterObject, graphSet1);
 graphSet1.buildGraphs(filterObject, dataset);
 graphSet1.updatePlots(dataObject.getFilteredData(), filterObject);
+updateTrendline(dataObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
 //updateTrendline(filterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
 dataObjects.push(dataObject);
 
@@ -31,6 +32,7 @@ function showDropdown() {
 
 
 function updateTrendline(filtered_data, graph, line_class) {
+  console.log("Update trend line");
   $.ajax({
     url: '/_gaussian_calculation',
     data: JSON.stringify(filtered_data),
@@ -113,6 +115,7 @@ function addNewUserData(d, line_points, colour) {
     graphSet1.updateScales(allFilteredData, filterObject)
     for (var index in dataObjects) {
       graphSet1.updatePlots(dataObjects[index].getFilteredData(), filterObject);
+      updateTrendline(dataObjects[index].getFilteredData(), graphSet1.getScatter(), "line_secondary");
     }
     //updateTrendline(filterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 }

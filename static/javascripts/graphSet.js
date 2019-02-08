@@ -35,9 +35,9 @@ class graphSet {
     this.sideBar.resize((3/4)*this.height);
   }
 
-  populateAllGraphs(filteredData, filters) {
+  populateAllGraphs(filteredData, filters, colour) {
     this.updateScales(filteredData, filters);
-    this.updatePlots(filteredData, filters);
+    this.updatePlots(filteredData, filters, colour);
   }
 
   updateScales(data, filters) {
@@ -47,8 +47,11 @@ class graphSet {
     this.effortChart.update(data, filters);
   }
 
-  updatePlots(filteredData, filters) {
-    var colour = "#ff471a";
+  updatePlots(filteredData, filters, colour) {
+    console.log(colour);
+    if (colour == null) {
+      var colour = "#ff471a";
+    }
     plotScatterPoints(this.scatter.getSvg(), filteredData, colour, this.scatter.getX(), this.scatter.getY(), filters);
     plotBars(this.effortChart, filteredData, this.effortChart.getX(), this.effortChart.getY(), this.effortChart.getWidth(), colour);
     standardPlotBars(this.topBar, filteredData, this.topBar.getX(), this.topBar.getY(), colour);

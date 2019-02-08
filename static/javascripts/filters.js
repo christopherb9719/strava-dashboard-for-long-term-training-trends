@@ -146,10 +146,11 @@ class Filters {
 }
 
 class DataObject {
-  constructor(data, id, filters, graphSet) {
+  constructor(data, id, filters, colour, graphSet) {
     this.data = data;
     this.id = id;
     this.filters = filters;
+    this.colour = colour;
     this.graphSet = graphSet;
   }
 
@@ -161,12 +162,24 @@ class DataObject {
     return this.data;
   }
 
+  getColour() {
+    return this.colour;
+  }
+
   getFilteredData() {
     return this.filters.filterData(this.data);
   }
 
   setGraphSet(graphSet) {
     this.graphSet = graphSet;
+  }
+
+  getGraphSet() {
+    return this.graphSet;
+  }
+
+  getFilterObject() {
+    return this.filters;
   }
 
   setFilterObject(filters) {
