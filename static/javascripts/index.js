@@ -27,7 +27,7 @@ var tooltip = d3.select("body").append("div")
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
 var dataObject1 = new DataObject(dataset, "1", "#ff471a", graphSet1);
 graphSet1.buildGraphs(dataObject1.getFilterObject(), dataset);
-graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour());
+graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
 updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 graphSets.push(graphSet1);
 dataObjects.push(dataObject1);
@@ -41,13 +41,13 @@ function split() {
   var graphSet1 = new graphSet(margin, w/2, h, "graphSet1Container");
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-  dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour());
+  dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
 
   var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
-  dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour());
+  dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
   updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary");
 }
 
@@ -121,7 +121,7 @@ function createGraphs(d, line_points, colour) {
 
     //Update 1st set of graphs
     dataObject2 = new DataObject(d, "2", "#00e600", graphSet1);
-    dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour());
+    dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
     updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary");
 
     //Set up sliders for second set of graphs
@@ -311,8 +311,8 @@ function mergeGraphs() {
   dataObject1.setGraphSet(graphSet1);
   dataObject2.setGraphSet(graphSet1);
   graphSet1.buildGraphs(filterObject, dataObject1.getData().concat(dataObject2.getData()));
-  graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour());
-  graphSet1.updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour());
+  graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
+  graphSet1.updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
   updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary");
   updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary");
 }

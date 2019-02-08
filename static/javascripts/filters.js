@@ -160,7 +160,7 @@ class DataObject {
   }
 
   updateGraphs() {
-    this.graphSet.updatePlots(this.getFilteredData(), this.filters, this.colour);
+    this.graphSet.updatePlots(this.getFilteredData(), this.filters, this.colour, this.id);
   }
 
   getData() {
@@ -185,6 +185,10 @@ class DataObject {
 
   getFilterObject() {
     return this.filters;
+  }
+
+  getId() {
+    return this.id;
   }
 
   setFilterObject(filters) {

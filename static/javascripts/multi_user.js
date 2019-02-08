@@ -24,7 +24,7 @@ var dataObject = new DataObject(dataset, "1", colours(dataObjects.length), graph
 console.log(colours);
 console.log(colours(dataObjects.length));
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
-graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour());
+graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour(), dataObject.getId());
 updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary");
 dataObjects.push(dataObject);
 
@@ -117,7 +117,7 @@ function addNewUserData(user, d, line_points, colour) {
     graphSet1.rebuildGraphs(filterObject, allFilteredData);
     graphSet1.updateScales(allFilteredData, filterObject);
     for (var index in dataObjects) {
-      dataObjects[index].getGraphSet().updatePlots(dataObjects[index].getFilteredData(), dataObjects[index].getFilterObject(), dataObjects[index].getColour());
+      dataObjects[index].getGraphSet().updatePlots(dataObjects[index].getFilteredData(), dataObjects[index].getFilterObject(), dataObjects[index].getColour(), dataObjects[index].getId());
       updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary");
     }
 

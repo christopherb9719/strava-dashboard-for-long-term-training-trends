@@ -85,9 +85,7 @@ class Scatter {
   }
 
 
-  update(filtersObject){
-    this.plot.selectAll('circle').remove();
-  }
+  update(filtersObject, id){}
 
   getX() {
     return this.x;
@@ -125,7 +123,8 @@ function getRadius(d, filters) {
 }
 
 
-function plotScatterPoints(plot, data, colour, x, y, filters) {
+function plotScatterPoints(plot, data, colour, x, y, filters, id) {
+  plot.selectAll("[id='#dataset" + id + "']").remove();
   var circles = plot.selectAll("circles");
 
   circles.data(data).enter()
@@ -135,6 +134,7 @@ function plotScatterPoints(plot, data, colour, x, y, filters) {
         .attr("cx", (d => x(d.heart_rate)))
         .attr("cy", (d => y(d.average_pace)))
         .attr("r", function(d) { return getRadius(d, filters); })
+        .attr("id", d => '#dataset'+id)
         .attr("fill", colour)
         .style("opacity", 0.5)
       .on('mouseover', function(d) {

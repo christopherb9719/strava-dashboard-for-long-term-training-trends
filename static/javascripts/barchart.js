@@ -101,9 +101,6 @@ class PositiveAndNegativeBarChart {
       Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
       (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
     ]).nice();
-
-    // Update the bars
-    this.plot.selectAll("rect").remove();
   }
 
   dataInDate(d) {
@@ -258,13 +255,10 @@ class StandardBarChart {
 
     // Update the scales
     this.y.domain([0, max_y]).nice();
-
-    // Update the bars
-    this.plot.selectAll("rect").remove();
-
   }
 
-  dataInDate(d) {
+  dataInDate(d) {    this.plot.selectAll("rect").remove();
+
     if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
       return true;
     }
@@ -327,8 +321,10 @@ class StandardBarChart {
 }
 
 
-function plotBars(graph, filtered, x, y, graph_width, colour) {
+function plotBars(graph, filtered, x, y, graph_width, colour, id) {
   var plot = graph.getPlot();
+  console.log(id);
+  plot.selectAll("[id='#dataset" + id + "']").remove();
   var data = graph.buildBarValues(filtered);
   var rects = plot.selectAll("rects");
   rects.data(data).enter()
@@ -337,6 +333,7 @@ function plotBars(graph, filtered, x, y, graph_width, colour) {
       .attr("y", d => Math.min(y(0), y(d)))
       .attr('width', graph_width/24)
       .attr("fill", colour)
+      .attr("id", "#dataset" + id)
       .style("opacity", 0.5)
       .attr('height', d => Math.abs(y(d) - y(0)))
     .on('mouseover', function(d, i) {
@@ -366,8 +363,9 @@ function plotBars(graph, filtered, x, y, graph_width, colour) {
 }
 
 
-function standardPlotBars(graph, filtered, x, y, colour) {
+function standardPlotBars(graph, filtered, x, y, colour, id) {
   var plot = graph.getPlot();
+  plot.selectAll("[id='#dataset" + id + "']").remove();
   var data = graph.buildBarValues(filtered);
   var keys = Object.keys(data);
   var rects = plot.selectAll("rects").data(keys);
@@ -376,6 +374,7 @@ function standardPlotBars(graph, filtered, x, y, colour) {
       .attr("x", d => x(d))
       .attr("y", d => y(data[d]))
       .attr('width', "6")
+      .attr("id", "#dataset"+id)
       .attr("fill", colour)
       .style("opacity", 0.5)
       .attr('height', d => (y(0) - y(data[d])))

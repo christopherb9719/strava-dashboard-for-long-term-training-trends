@@ -46,14 +46,14 @@ class graphSet {
     this.effortChart.update(data, filters);
   }
 
-  updatePlots(filteredData, filters, colour) {
+  updatePlots(filteredData, filters, colour, id) {
     if (colour == null) {
       var colour = "#ff471a";
     }
-    plotScatterPoints(this.scatter.getSvg(), filteredData, colour, this.scatter.getX(), this.scatter.getY(), filters);
-    plotBars(this.effortChart, filteredData, this.effortChart.getX(), this.effortChart.getY(), this.effortChart.getWidth(), colour);
-    standardPlotBars(this.topBar, filteredData, this.topBar.getX(), this.topBar.getY(), colour);
-    standardPlotBars(this.sideBar, filteredData, this.sideBar.getX(), this.sideBar.getY(), colour);
+    plotScatterPoints(this.scatter.getSvg(), filteredData, colour, this.scatter.getX(), this.scatter.getY(), filters, id);
+    plotBars(this.effortChart, filteredData, this.effortChart.getX(), this.effortChart.getY(), this.effortChart.getWidth(), colour, id);
+    standardPlotBars(this.topBar, filteredData, this.topBar.getX(), this.topBar.getY(), colour, id);
+    standardPlotBars(this.sideBar, filteredData, this.sideBar.getX(), this.sideBar.getY(), colour, id);
   }
 
   getScatter() {
