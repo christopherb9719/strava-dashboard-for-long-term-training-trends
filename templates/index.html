@@ -22,13 +22,9 @@
             <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
             <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
         </div>
-        <div id="dropdown" onclick="plotGraphs(this.value)">
-          <input id="findUsers">
-        </div>
-        </div>
         <div id="distanceSearch">
           <input id="distance">
-          <input type="button" value="Submit" onclick="getNeededPace(distance.value, scatterGraph1.getData())"/>
+          <input type="button" class="btn btn-sm btn-outline-secondary" value="Submit" onclick="getNeededPace(distance.value, dataObject1)"/>
           <p id="pace"></p>
         </div>
         <div id="graphSet1Container" class="graph_container"></div>

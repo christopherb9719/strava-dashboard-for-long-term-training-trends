@@ -21,7 +21,6 @@ class graphSet {
   }
 
   rebuildGraphs(filtersObj, data) {
-    console.log(data);
     d3.select('#graphSet1Container').selectAll('div').remove();
     this.buildGraphs(filtersObj, data);
   }
@@ -48,7 +47,6 @@ class graphSet {
   }
 
   updatePlots(filteredData, filters, colour) {
-    console.log(colour);
     if (colour == null) {
       var colour = "#ff471a";
     }

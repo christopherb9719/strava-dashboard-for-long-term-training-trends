@@ -146,16 +146,21 @@ class Filters {
 }
 
 class DataObject {
-  constructor(data, id, filters, colour, graphSet) {
+  constructor(data, id, colour, graphSet, filters) {
     this.data = data;
     this.id = id;
-    this.filters = filters;
+    if (filters == null) {
+      this.filters = new Filters(data);
+    }
+    else {
+      this.filters = filters;
+    }
     this.colour = colour;
     this.graphSet = graphSet;
   }
 
   updateGraphs() {
-    this.graphSet.updatePlots(this.getFilteredData(), this.filters);
+    this.graphSet.updatePlots(this.getFilteredData(), this.filters, this.colour);
   }
 
   getData() {

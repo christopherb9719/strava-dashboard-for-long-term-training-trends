@@ -24,25 +24,32 @@
             <input id="userSearch" placeholder="Search for users">
           </div>
         </div>
-        <div id="graphSet1Container" class="graph_container"></div>
-        <div id="wrapper">
-          <div id="sliders">
-            <label>Date:</label><div id="slider"></div>
-            <label>Time:</label><div id="timeSlider"></div>
-            <label>Distance:</label><div id="distanceSlider"></div>
-            <label>Elevation:</label><div id="elevationSlider"></div>
-            <label>Heart Rate:</label><div id="heartrateSlider"></div>
-            <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
-            <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), primaryFilterObject.getGraphSet().getScatter(), 'line_primary')"/>
+        <div id="columns">
+          <div id="mainColumn" class="column">
+            <div id="graphSet1Container" class="graph_container"></div>
+            <div id="wrapper">
+              <div id="sliders">
+                <label>Date:</label><div id="slider"></div>
+                <label>Time:</label><div id="timeSlider"></div>
+                <label>Distance:</label><div id="distanceSlider"></div>
+                <label>Elevation:</label><div id="elevationSlider"></div>
+                <label>Heart Rate:</label><div id="heartrateSlider"></div>
+                <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
+                <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), primaryFilterObject.getGraphSet().getScatter(), 'line_primary')"/>
+              </div>
+            </div>
+            <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
+            <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
+            <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
+            <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
+            <script src="{{url_for('static', filename='javascripts/barchart.js')}}"></script>
+            <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
+            <script src="{{url_for('static', filename='javascripts/graphSet.js')}}"></script>
+            <script src="{{url_for('static', filename='javascripts/multi_user.js')}}"></script>
           </div>
-        </div>
-        <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
-        <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
-        <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/barchart.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/graphSet.js')}}"></script>
-        <script src="{{url_for('static', filename='javascripts/multi_user.js')}}"></script>
+          <div id="usersColumn" class="column">
+            <div id="usersList" class="user-list"></div>
+          </div>
+      </div>
     </body>
 </html>

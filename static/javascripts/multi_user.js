@@ -6,7 +6,7 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = 1000 - margin.left - margin.right,
     h = 500 - margin.top - margin.bottom;
 
-
+var colours = d3.scaleOrdinal(d3.schemeCategory10);
 var dataObjects = [];
 
 var clicked = false;
@@ -16,14 +16,16 @@ var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+
 //Build Graphs
 var filterObject = new Filters(dataset);
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-var dataObject = new DataObject(dataset, "1", filterObject, graphSet1);
-graphSet1.buildGraphs(filterObject, dataset);
-graphSet1.updatePlots(dataObject.getFilteredData(), filterObject);
-updateTrendline(dataObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
-//updateTrendline(filterObject.getFilteredData(), graphSet1.getScatter(), "line_primary");
+var dataObject = new DataObject(dataset, "1", colours(dataObjects.length), graphSet1, filterObject);
+console.log(colours);
+console.log(colours(dataObjects.length));
+graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
+graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour());
+updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary");
 dataObjects.push(dataObject);
 
 function showDropdown() {
@@ -83,7 +85,7 @@ function plotData(user) {
     success: function(response) {
       var activities = response[0];
       var line_coords = response[1];
-      addNewUserData(activities, line_coords, "#00e600");
+      addNewUserData(user, activities, line_coords, "#00e600");
       },
     error: function(error) {
       console.log(error);
@@ -94,16 +96,17 @@ function plotData(user) {
 function getAllData() {
   var allData = [];
   for (var index in dataObjects) {
-    var dataObj = dataObjects[index];
-    allData.push(dataObj.getData());
+    allData.push(dataObjects[index].getData());
   }
   allData = [].concat.apply([], allData);
   return allData;
 }
 
-function addNewUserData(d, line_points, colour) {
+function addNewUserData(user, d, line_points, colour) {
+    console.log(user);
     //Update 1st set of graphs
-    var dataObject = new DataObject(d, "2", filterObject, graphSet1);
+    console.log(colours[dataObjects.length]);
+    var dataObject = new DataObject(d, "2", colours(dataObjects.length), graphSet1, filterObject);
     dataObjects.push(dataObject);
 
     var allData = getAllData();
@@ -112,11 +115,15 @@ function addNewUserData(d, line_points, colour) {
     allFilteredData = filterObject.filterData(allData);
 
     graphSet1.rebuildGraphs(filterObject, allFilteredData);
-    graphSet1.updateScales(allFilteredData, filterObject)
+    graphSet1.updateScales(allFilteredData, filterObject);
     for (var index in dataObjects) {
-      graphSet1.updatePlots(dataObjects[index].getFilteredData(), filterObject);
-      updateTrendline(dataObjects[index].getFilteredData(), graphSet1.getScatter(), "line_secondary");
+      dataObjects[index].getGraphSet().updatePlots(dataObjects[index].getFilteredData(), dataObjects[index].getFilterObject(), dataObjects[index].getColour());
+      updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary");
     }
+
+    var userObject = document.createElement("a");
+    userObject.text = user;
+    document.getElementById('usersList').appendChild(userObject);
     //updateTrendline(filterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 }
 

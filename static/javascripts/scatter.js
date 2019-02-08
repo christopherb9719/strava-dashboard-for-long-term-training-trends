@@ -138,7 +138,6 @@ function plotScatterPoints(plot, data, colour, x, y, filters) {
         .attr("fill", colour)
         .style("opacity", 0.5)
       .on('mouseover', function(d) {
-        console.log(d.__data__);
         d3.select(this)
           .transition()
           .attr("fill", "#000000")
