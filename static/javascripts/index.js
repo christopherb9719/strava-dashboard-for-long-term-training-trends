@@ -28,7 +28,7 @@ var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
 var dataObject1 = new DataObject(dataset, "1", "#ff471a", graphSet1);
 graphSet1.buildGraphs(dataObject1.getFilterObject(), dataset);
 graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
-updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
+updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 graphSets.push(graphSet1);
 dataObjects.push(dataObject1);
 
@@ -42,17 +42,17 @@ function split() {
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
   dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
-  updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary");
+  updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
   var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
   dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
-  updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary");
+  updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
 
 
-function updateTrendline(filtered_data, graph, line_class) {
+function updateTrendline(filtered_data, graph, line_class, id, colour) {
   $.ajax({
     url: '/_gaussian_calculation',
     data: JSON.stringify(filtered_data),
@@ -61,7 +61,7 @@ function updateTrendline(filtered_data, graph, line_class) {
     success: function(response){
       console.log("Updating trend line");
       graph.getSvg().select("." + line_class).remove();
-      appendPath(graph, response, line_class);
+      appendPath(graph, response, line_class, id, d3.rgb(colour).darker());
     },
     error: function(error){
       console.log(error);
@@ -122,7 +122,7 @@ function createGraphs(d, line_points, colour) {
     //Update 1st set of graphs
     dataObject2 = new DataObject(d, "2", "#00e600", graphSet1);
     dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
-    updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary");
+    updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 
     //Set up sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 50%");
@@ -216,7 +216,7 @@ function createGraphs(d, line_points, colour) {
     dataObject1.setGraphSet(graphSet1);
     dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
     dataObject1.updateGraphs();
-    updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary");
+    updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
     //Remove sliders for second set of graphs
     document.getElementById('sliders').setAttribute("style","width: 100%");
@@ -313,8 +313,8 @@ function mergeGraphs() {
   graphSet1.buildGraphs(filterObject, dataObject1.getData().concat(dataObject2.getData()));
   graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
   graphSet1.updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
-  updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary");
-  updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary");
+  updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
+  updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
 
 function getNeededPace(distance, dataObject) {
@@ -324,7 +324,7 @@ function getNeededPace(distance, dataObject) {
   dataObject.getFilterObject().setDistances(min_dist, max_dist);
   dataObject.getGraphSet().updateScales(dataObject.getData(), dataObject.getFilterObject());
   dataObject.updateGraphs();
-  updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary");
+  updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
   filtered = dataObject.getFilteredData();
   needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
   document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
