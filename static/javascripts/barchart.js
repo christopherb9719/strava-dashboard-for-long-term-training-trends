@@ -323,7 +323,6 @@ class StandardBarChart {
 
 function plotBars(graph, filtered, x, y, graph_width, colour, id) {
   var plot = graph.getPlot();
-  console.log(id);
   plot.selectAll("[id='#dataset" + id + "']").remove();
   var data = graph.buildBarValues(filtered);
   var rects = plot.selectAll("rects");

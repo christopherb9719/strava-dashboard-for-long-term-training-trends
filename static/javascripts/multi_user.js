@@ -25,7 +25,7 @@ console.log(colours);
 console.log(colours(dataObjects.length));
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
 graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour(), dataObject.getId());
-updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary");
+updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId());
 dataObjects.push(dataObject);
 
 function showDropdown() {
@@ -33,8 +33,7 @@ function showDropdown() {
 }
 
 
-function updateTrendline(filtered_data, graph, line_class) {
-  console.log("Update trend line");
+function updateTrendline(filtered_data, graph, line_class, id) {
   $.ajax({
     url: '/_gaussian_calculation',
     data: JSON.stringify(filtered_data),
@@ -42,8 +41,8 @@ function updateTrendline(filtered_data, graph, line_class) {
     type: 'POST',
     success: function(response){
       console.log("Updating trend line");
-      graph.getSvg().select("." + line_class).remove();
-      appendPath(graph, response, line_class);
+      graph.getSvg().selectAll("[id='#regression" + id + "']").remove();
+      appendPath(graph, response, line_class, id);
     },
     error: function(error){
       console.log(error);
@@ -76,7 +75,6 @@ function findUserData() {
 
 function plotData(user) {
   console.log("Get user data");
-  console.log(user);
   $.ajax({
     url: '/get_user_data',
     data: user,
@@ -103,9 +101,7 @@ function getAllData() {
 }
 
 function addNewUserData(user, d, line_points, colour) {
-    console.log(user);
     //Update 1st set of graphs
-    console.log(colours[dataObjects.length]);
     id = id + 1;
     var dataObject = new DataObject(d, String(id), colours(dataObjects.length), graphSet1, filterObject);
     dataObjects.push(dataObject);
@@ -119,7 +115,7 @@ function addNewUserData(user, d, line_points, colour) {
     graphSet1.updateScales(allFilteredData, filterObject);
     for (var index in dataObjects) {
       dataObjects[index].getGraphSet().updatePlots(dataObjects[index].getFilteredData(), dataObjects[index].getFilterObject(), dataObjects[index].getColour(), dataObjects[index].getId());
-      updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary");
+      updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary", dataObjects[index].getId());
     }
 
     var userObject = document.createElement("a");
@@ -130,7 +126,6 @@ function addNewUserData(user, d, line_points, colour) {
       d3.select(userObject).remove();
     };
     document.getElementById('usersList').appendChild(userObject);
-    //updateTrendline(filterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 }
 
 $(function() {
@@ -244,9 +239,7 @@ function getNeededPace(distance, data) {
 }
 
 function removeUsersData(id) {
-  console.log("Before: " + dataObjects);
   d3.selectAll("[id='#dataset" + id + "']").remove();
   var index = dataObjects.indexOf(dataObjects.find(d => { return d.id == id }));
   dataObjects.splice(index, 1);
-  console.log("After: " + dataObjects);
 }
