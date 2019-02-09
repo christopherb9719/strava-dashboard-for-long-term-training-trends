@@ -8,7 +8,7 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
 
 var colours = d3.scaleOrdinal(d3.schemeCategory10);
 var dataObjects = [];
-
+var id = 1;
 var clicked = false;
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
@@ -20,7 +20,7 @@ var tooltip = d3.select("body").append("div")
 //Build Graphs
 var filterObject = new Filters(dataset);
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-var dataObject = new DataObject(dataset, "1", colours(dataObjects.length), graphSet1, filterObject);
+var dataObject = new DataObject(dataset, String(id), colours(dataObjects.length), graphSet1, filterObject);
 console.log(colours);
 console.log(colours(dataObjects.length));
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
@@ -106,7 +106,8 @@ function addNewUserData(user, d, line_points, colour) {
     console.log(user);
     //Update 1st set of graphs
     console.log(colours[dataObjects.length]);
-    var dataObject = new DataObject(d, "2", colours(dataObjects.length), graphSet1, filterObject);
+    id = id + 1;
+    var dataObject = new DataObject(d, String(id), colours(dataObjects.length), graphSet1, filterObject);
     dataObjects.push(dataObject);
 
     var allData = getAllData();
@@ -123,6 +124,10 @@ function addNewUserData(user, d, line_points, colour) {
 
     var userObject = document.createElement("a");
     userObject.text = user;
+    userObject.onclick = function(d) {
+      removeUsersData(String(id));
+      d3.select(userObject).remove();
+    };
     document.getElementById('usersList').appendChild(userObject);
     //updateTrendline(filterObject.getFilteredData(), this.graphSet1.getScatter(), "line_secondary");
 }
@@ -235,4 +240,8 @@ function getNeededPace(distance, data) {
   filtered = scatterGraph1.getFilteredData();
   needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
   document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
+}
+
+function removeUsersData(id) {
+  d3.selectAll("[id='#dataset" + id + "']").remove();
 }
