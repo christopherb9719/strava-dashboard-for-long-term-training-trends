@@ -1,4 +1,4 @@
-function appendPath(graph, pts, line_class, id) {
+function appendPath(graph, pts, line_class, id, colour) {
   var lineFunction = d3.line()
     .x(function(d) {
       return graph.getX()(d.x);
@@ -11,6 +11,7 @@ function appendPath(graph, pts, line_class, id) {
   graph.getSvg().append("path")
     .attr("class", line_class)
     .attr("id", "#regression" + id)
+    .attr("stroke", colour)
     .attr("d", lineFunction(pts))
     .on("click", function(d) {
       var x = graph.getX()

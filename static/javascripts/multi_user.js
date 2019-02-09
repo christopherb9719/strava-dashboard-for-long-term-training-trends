@@ -25,7 +25,7 @@ console.log(colours);
 console.log(colours(dataObjects.length));
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
 graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour(), dataObject.getId());
-updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId());
+updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
 dataObjects.push(dataObject);
 
 function showDropdown() {
@@ -33,7 +33,7 @@ function showDropdown() {
 }
 
 
-function updateTrendline(filtered_data, graph, line_class, id) {
+function updateTrendline(filtered_data, graph, line_class, id, colour) {
   $.ajax({
     url: '/_gaussian_calculation',
     data: JSON.stringify(filtered_data),
@@ -42,7 +42,7 @@ function updateTrendline(filtered_data, graph, line_class, id) {
     success: function(response){
       console.log("Updating trend line");
       graph.getSvg().selectAll("[id='#regression" + id + "']").remove();
-      appendPath(graph, response, line_class, id);
+      appendPath(graph, response, line_class, id, colour);
     },
     error: function(error){
       console.log(error);
@@ -115,7 +115,7 @@ function addNewUserData(user, d, line_points, colour) {
     graphSet1.updateScales(allFilteredData, filterObject);
     for (var index in dataObjects) {
       dataObjects[index].getGraphSet().updatePlots(dataObjects[index].getFilteredData(), dataObjects[index].getFilterObject(), dataObjects[index].getColour(), dataObjects[index].getId());
-      updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary", dataObjects[index].getId());
+      updateTrendline(dataObjects[index].getFilteredData(), dataObjects[index].getGraphSet().getScatter(), "line_secondary", dataObjects[index].getId(), dataObjects[index].getColour());
     }
 
     var userObject = document.createElement("a");
