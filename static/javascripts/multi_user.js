@@ -124,8 +124,9 @@ function addNewUserData(user, d, line_points, colour) {
 
     var userObject = document.createElement("a");
     userObject.text = user;
+    userObject.value = String(id);
     userObject.onclick = function(d) {
-      removeUsersData(String(id));
+      removeUsersData(userObject.value);
       d3.select(userObject).remove();
     };
     document.getElementById('usersList').appendChild(userObject);
@@ -243,5 +244,9 @@ function getNeededPace(distance, data) {
 }
 
 function removeUsersData(id) {
+  console.log("Before: " + dataObjects);
   d3.selectAll("[id='#dataset" + id + "']").remove();
+  var index = dataObjects.indexOf(dataObjects.find(d => { return d.id == id }));
+  dataObjects.splice(index, 1);
+  console.log("After: " + dataObjects);
 }
