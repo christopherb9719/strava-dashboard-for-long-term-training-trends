@@ -34,7 +34,6 @@ dataObjects.push(dataObject1);
 
 
 function split() {
-  console.log("Splitting");
   d3.select('#graphSet1Container').selectAll('div').remove();
 
   var filterObject = new Filters(dataset)

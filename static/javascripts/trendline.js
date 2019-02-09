@@ -9,16 +9,25 @@ function appendPath(graph, pts, line_class, id, colour) {
 
 
   graph.getSvg().append("path")
-    .attr("class", line_class)
+    .attr("class", "line")
     .attr("id", "#regression" + id)
     .attr("stroke", colour)
     .attr("d", lineFunction(pts))
-    .on("click", function(d) {
-      var x = graph.getX()
-      console.log(x(d3.event.pageX));
+    .on("click", function() {
+      graph.getSvg().selectAll("[id='#threshold" + id + "']").remove();
+      var pace = graph.getY().invert(d3.mouse(this)[1]);
+      var seconds = Math.round((pace % 1) * 60);
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      var minutes = Math.floor(pace - (pace % 1));
+      var threshold = minutes + ":" + seconds;
+      console.log("Threshold Pace: " + minutes + ":" + seconds);
+      document.getElementById("ThresholdPace").innerHTML = threshold;
       graph.getSvg().append("a").append("circle")
-        .attr("x", graph.getX()(d3.event.pageX))
-        .attr("y", graph.getY()(d3.event.pageY))
+        .attr("cx", d3.mouse(this)[0])
+        .attr("cy", d3.mouse(this)[1])
+        .attr("id", "#threshold" + id)
         .attr("r", "4")
         .attr("fill", "black")
     })

@@ -58,7 +58,7 @@ class Scatter {
         .attr("dy", "1em")
         .style("text-anchor", "middle")
         .text("Mean Pace (minutes per km)");
-  }
+    }
 
   getRadius(d, filters) {
     var max = filters.getLatestDate().getTime()/1000,
@@ -106,7 +106,6 @@ class Scatter {
   getFilters() {
     return this.filters;
   }
-
 }
 
 function getRadius(d, filters) {
