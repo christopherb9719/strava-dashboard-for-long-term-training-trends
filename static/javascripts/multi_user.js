@@ -240,6 +240,7 @@ function getNeededPace(distance, data) {
 
 function removeUsersData(id) {
   d3.selectAll("[id='#dataset" + id + "']").remove();
+  d3.selectAll("[id='#regression" + id + "']").remove();
   var index = dataObjects.indexOf(dataObjects.find(d => { return d.id == id }));
   dataObjects.splice(index, 1);
 }
