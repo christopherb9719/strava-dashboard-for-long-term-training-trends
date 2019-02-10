@@ -21,8 +21,6 @@ var tooltip = d3.select("body").append("div")
 var filterObject = new Filters(dataset);
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
 var dataObject = new DataObject(dataset, String(id), colours(dataObjects.length), graphSet1, filterObject);
-console.log(colours);
-console.log(colours(dataObjects.length));
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
 graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour(), dataObject.getId());
 updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
@@ -30,24 +28,6 @@ dataObjects.push(dataObject);
 
 function showDropdown() {
   document.getElementById("myDropdown").classList.toggle("show");
-}
-
-
-function updateTrendline(filtered_data, graph, line_class, id, colour) {
-  $.ajax({
-    url: '/_gaussian_calculation',
-    data: JSON.stringify(filtered_data),
-    contentType: 'application/json;charset=UTF-8',
-    type: 'POST',
-    success: function(response){
-      console.log("Updating trend line");
-      graph.getSvg().selectAll("[id='#regression" + id + "']").remove();
-      appendPath(graph, response, line_class, id, d3.rgb(colour).darker());
-    },
-    error: function(error){
-      console.log(error);
-    }
-  });
 }
 
 function findUserData() {
@@ -225,17 +205,6 @@ function filterTags(tags) {
     var dataObject = dataObjects[index];
     dataObject.updateGraphs();
   }
-}
-
-function getNeededPace(distance, data) {
-  var min_dist = distance - (0.1*distance);
-  var max_dist = parseInt(distance) + parseInt((0.1*distance));
-  acceptable_data = data.filter(d => (d.distance <= max_dist && d.distance >= min_dist));
-  graph1Filters.setDistances(min_dist, max_dist);
-  scatterGraph1.update(w, h);
-  filtered = scatterGraph1.getFilteredData();
-  needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
-  document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
 }
 
 function removeUsersData(id) {

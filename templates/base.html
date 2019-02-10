@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% block head %}
+        <title>Dashboard</title>
+        <link rel='stylesheet' href="{{ url_for('static',filename='styles/style.css') }}" />
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
+        <script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
+        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+        <script>
+            var dataset = {{ sample|tojson }};
+            var reg = {{regression|tojson }};
+        </script>
+        {% endblock %}
+    </head>
+    <body>
+      <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
+      <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
+      <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
+      <script src="{{url_for('static', filename='lib/js/dc.js')}}"></script>
+      <script src="{{url_for('static', filename='javascripts/barchart.js')}}"></script>
+      <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
+      <script src="{{url_for('static', filename='javascripts/graphSet.js')}}"></script>
+      <script src="{{url_for('static', filename='javascripts/functions.js')}}"></script>
+      {% block body %} {% endblock %}
+    </body>
+</html>

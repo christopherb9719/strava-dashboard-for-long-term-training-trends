@@ -51,63 +51,6 @@ function split() {
 }
 
 
-function updateTrendline(filtered_data, graph, line_class, id, colour) {
-  $.ajax({
-    url: '/_gaussian_calculation',
-    data: JSON.stringify(filtered_data),
-    contentType: 'application/json;charset=UTF-8',
-    type: 'POST',
-    success: function(response){
-      console.log("Updating trend line");
-      graph.getSvg().select("." + line_class).remove();
-      appendPath(graph, response, line_class, id, d3.rgb(colour).darker());
-    },
-    error: function(error){
-      console.log(error);
-    }
-  });
-}
-
-$('#findUsers').change(function() {
-  console.log("Change");
-  $.ajax({
-    url: '/find_users',
-    data: document.getElementById("findUsers").value,
-    contentType: 'text',
-    type: 'POST',
-    success: function(response) {
-      JSON.parse(response).forEach(function(elem) {
-        var option = document.createElement("option");
-        option.text = elem.username;
-        option.value = elem.username;
-        $("#dropdown").append(option);
-      })
-    },
-    error: function(error) {
-      console.log(error);
-    }
-  })
-})
-
-function plotGraphs(user) {
-  console.log("Get user data");
-  $.ajax({
-    url: '/get_user_data',
-    data: user,
-    contentType: 'text',
-    type: 'POST',
-    success: function(response) {
-      console.log(response);
-      var activities = response[0];
-      var line_coords = response[1];
-      createGraphs(activities, line_coords, "#00e600");
-      },
-    error: function(error) {
-      console.log(error);
-    }
-  })
-}
-
 function createGraphs(d, line_points, colour) {
   console.log(clicked);
   if (clicked == false) {
