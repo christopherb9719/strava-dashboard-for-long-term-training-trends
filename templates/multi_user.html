@@ -8,11 +8,11 @@
   </div>
 </div>
 <p id="ThresholdPace"></p>
-<div id="columns">
-  <div id="mainColumn" class="column">
+<div id="row">
+  <div id="mainColumn" class="column middle">
     <div id="graphSet1Container" class="graph_container"></div>
     <div id="wrapper">
-      <div id="sliders">
+      <div id="sliders" class="sliders">
         <label>Date:</label><div id="slider"></div>
         <label>Time:</label><div id="timeSlider"></div>
         <label>Distance:</label><div id="distanceSlider"></div>
@@ -22,9 +22,9 @@
         <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), primaryFilterObject.getGraphSet().getScatter(), 'line_primary')"/>
       </div>
     </div>
-    <div id="usersColumn" class="column">
-      <div id="usersList" class="user-list"></div>
-    </div>
+  </div>
+  <div id="usersColumn" class="column right">
+    <div id="usersList" class="user-list"></div>
   </div>
 </div>
 <script src="{{url_for('static', filename='javascripts/multi_user.js')}}"></script>

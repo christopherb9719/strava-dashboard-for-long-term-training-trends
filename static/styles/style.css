@@ -61,6 +61,7 @@ a {
 }
 
 .box2 {
+  float: left;
   display: inline-block;
 }
 
@@ -109,7 +110,6 @@ a {
 }
 #sliders {
     width: 90%;
-    float:left;
 }
 #graph2sliders {
     float: left;
@@ -195,13 +195,22 @@ a {
 .show {display:block;}
 
 .column {
+  float: left;
   display: inline;
+  margin: 3%;
+  border: 2%;
 }
 
-.left-column {
-    float: left;
-    margin-right: 8px;
+.left .right {
+  width: 25%;
 }
-.right-column {
-    float: right;
+
+.middle {
+  width: 75%;
+  background: #D3D3D3;
+  border-radius: 15px;
+}
+
+.sliders {
+  position: inherit;
 }

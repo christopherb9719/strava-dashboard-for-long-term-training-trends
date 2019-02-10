@@ -101,6 +101,8 @@ class PositiveAndNegativeBarChart {
       Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
       (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
     ]).nice();
+
+
   }
 
   dataInDate(d) {
@@ -163,8 +165,9 @@ class PositiveAndNegativeBarChart {
 
 
 class StandardBarChart {
-  constructor(container, margin, width, height, x_val, type) {
+  constructor(container, margin, width, height, x_val, type, x_or_y) {
     this.x_val = x_val;
+    this.x_or_y = x_or_y;
     this.type = type;
     this.margin = margin;
     this.container = container;
@@ -180,10 +183,16 @@ class StandardBarChart {
 
     var max_y = Math.max.apply(null, values);
     var x_title = this.x_val;
-    this.x = d3.scaleLinear().domain([d3.min(filteredData, function(d) { return d[x_title]; }),
-      d3.max(filteredData, function(d) { return d[x_title]; })]).range([0, this.width]);
-    this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
-
+    if (this.x_or_y == "x") {
+      this.x = d3.scaleLinear().domain([d3.min(filteredData, function(d) { return d[x_title]; }),
+        d3.max(filteredData, function(d) { return d[x_title]; })]).range([0, this.width]);
+      this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
+    }
+    else {
+      this.y = d3.scaleLinear().domain([d3.max(filteredData, function(d) { return d[x_title]; }),
+        d3.min(filteredData, function(d) { return d[x_title]; })]).range([0, this.height]);
+      this.x = d3.scaleLinear().range([0, this.width]).domain([0, max_y]).nice();
+    }
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
       .attr('width', this.width + this.margin.left + this.margin.right)
@@ -193,11 +202,16 @@ class StandardBarChart {
           .attr("transform",
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-    this.createAxes();
+    if (this.x_or_y == "x") {
+      this.createXAxis();
+    }
+    else {
+      this.createYAxis();
+    }
     var width = w/(d3.max(filteredData, d => d[this.x_val]) - d3.min(filteredData, d => d[this.x_val]));
   }
 
-  createAxes() {
+  createXAxis() {
     var x_title = this.x_val;
     //this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
     //  d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
@@ -209,6 +223,17 @@ class StandardBarChart {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + this.height + ")")
       .call(this.xAxisCall)
+  }
+
+  createYAxis() {
+    var y_title = this.y_val;
+    //this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
+    //  d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
+
+    this.yAxisCall = d3.axisLeft(this.y);
+
+    this.yAxis = this.plot.append("g")
+      .call(this.yAxisCall);
   }
 
   buildBarValues(filteredData) {
@@ -236,13 +261,24 @@ class StandardBarChart {
 
 
   resize(new_width) {
-    this.xAxisScale.range([0, new_width]);
-    this.width = new_width;
+    if (this.x_or_y == "x") {
+      this.xAxisScale.range([0, new_width]);
+      this.width = new_width;
 
-    this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+      this.svg.attr("width", new_width + this.margin.left + this.margin.right);
 
-    // Update the axes
-    this.xAxis.call(this.xAxisCall);
+      // Update the axes
+      this.xAxis.call(this.xAxisCall);
+    }
+    else {
+      this.yAxisScale.range([0, new_width]);
+      this.width = new_width;
+
+      this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+
+      // Update the axes
+      this.yAxis.call(this.yAxisCall);
+    }
   }
 
   update(filteredData, filtersObject){
@@ -254,11 +290,15 @@ class StandardBarChart {
     var max_y = Math.max.apply(null, values);
 
     // Update the scales
-    this.y.domain([0, max_y]).nice();
+    if (this.x_or_y == "x") {
+      this.y.domain([0, max_y]).nice();
+    }
+    else {
+      this.x.domain([0, max_y]).nice();
+    }
   }
 
-  dataInDate(d) {    this.plot.selectAll("rect").remove();
-
+  dataInDate(d) {
     if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
       return true;
     }
@@ -370,13 +410,41 @@ function standardPlotBars(graph, filtered, x, y, colour, id) {
   var rects = plot.selectAll("rects").data(keys);
   rects.enter()
     .append("rect")
-      .attr("x", d => x(d))
-      .attr("y", d => y(data[d]))
-      .attr('width', "6")
+      .attr("x", function(d) {
+        if (graph.x_or_y == "x") {
+          return x(d);
+        }
+        else {
+          return x(0);
+        }
+      })
+      .attr("y", function(d) {
+        if (graph.x_or_y == "x") {
+          return y(data[d]);
+        }
+        else {
+          return y(d);
+        }
+      })
+      .attr('width', function(d) {
+        if (graph.x_or_y == "y") {
+          return (x(data[d]) - x(0));
+        }
+        else {
+          return "6";
+        }
+      })
       .attr("id", "#dataset"+id)
       .attr("fill", colour)
       .style("opacity", 0.5)
-      .attr('height', d => (y(0) - y(data[d])))
+      .attr('height', function(d) {
+        if (graph.x_or_y == "x") {
+          return (y(0) -  y(data[d]));
+        }
+        else {
+          return "6";
+        }
+      })
     .on('mouseover', function(d, i) {
       d3.select(this)
         .transition()

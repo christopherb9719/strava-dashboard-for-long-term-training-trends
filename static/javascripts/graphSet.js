@@ -7,17 +7,28 @@ class graphSet {
   }
 
   buildGraphs(filtersObject, data) {
-    var container = document.createElement('div')
+    console.log(this.width);
+    console.log("Scatter width: " + (3/4)*this.width);
+    console.log("Side bar width: " + (1/4)*this.width);
+    var container = document.createElement('div');
     container.className = 'box2';
     this.effortChart = new PositiveAndNegativeBarChart(this.div.appendChild(document.createElement('div')), this.margin, this.width, this.height/2);
     this.effortChart.draw(filtersObject, data);
-    this.topBar = new StandardBarChart(this.div.appendChild(document.createElement('div')), this.margin, ((3/4)*this.width), this.height/4, "heart_rate");
+    this.topBar = new StandardBarChart(this.div.appendChild(document.createElement('div')), this.margin, ((3/4)*this.width), this.height/4, "heart_rate", "", "x");
     this.topBar.draw(filtersObject, data);
-    this.scatter = new Scatter(this.div.appendChild(container), this.margin, ((3/4)*this.width), ((3/4)*this.height));
+    this.scatter = new Scatter(this.div.appendChild(container), this.margin, ((0.7)*this.width), ((3/4)*this.height));
     this.scatter.draw(filtersObject);
-    this.sideBar = new StandardBarChart(this.div.appendChild(container), this.margin, ((3/4)*this.height), ((1/4)*this.height), "average_pace", "decimal");
+    this.sideBar = new StandardBarChart(this.div.appendChild(container), this.margin, ((0.2)*this.width), ((0.75)*this.height), "average_pace", "decimal", "y");
     this.sideBar.draw(filtersObject, data);
-    this.sideBar.getSvg().attr("transform","rotate(270, 15, 0)");
+    /*var svg = this.sideBar.getSvg();
+    console.log(svg);
+    this.sideBar.getSvg().attr('transform',function(){
+                var me = svg.node()
+                var x1 = me.getBBox().x + me.getBBox().width/2;//the center x about which you want to rotate
+                var y1 = me.getBBox().y + me.getBBox().height/2;//the center y about which you want to rotate
+
+                return `rotate(270, 10, 130)`;//rotate 180 degrees about x and y
+            });*/
   }
 
   rebuildGraphs(filtersObj, data) {
