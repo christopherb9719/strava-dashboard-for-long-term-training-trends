@@ -19,6 +19,18 @@
         {% endblock %}
     </head>
     <body>
+      {% block body %}
+      {% block toolbar %}
+      {% endblock %}
+      <div id="mainColumn" class="column middle">
+        {% block main_column %}
+        {% endblock %}
+      </div>
+      <div id="rightColumn" class="column right">
+        {% block right_column %}
+        {% endblock %}
+      </div>
+      {% endblock %}
       <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
       <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>
       <script src="{{url_for('static', filename='lib/js/crossfilter.js')}}"></script>
@@ -27,6 +39,7 @@
       <script src="{{url_for('static', filename='javascripts/trendline.js')}}"></script>
       <script src="{{url_for('static', filename='javascripts/graphSet.js')}}"></script>
       <script src="{{url_for('static', filename='javascripts/functions.js')}}"></script>
-      {% block body %} {% endblock %}
+      {% block scripts %}
+      {% endblock %}
     </body>
 </html>

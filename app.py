@@ -1,29 +1,35 @@
 import flask
 from flask import Flask, render_template, redirect, request, session, jsonify, url_for
-import sys
-sys.path.append('./static/lib/python/')
-from gaussianregression import calculateRegression
-from forms import RegistrationForm, LoginForm
+from .static.lib.python.gaussianregression import calculateRegression
+from .static.lib.python.forms import RegistrationForm, LoginForm
 import json
 import time
 from stravalib.client import Client
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_mongoengine import MongoEngine
 from flask_bcrypt import Bcrypt
+from .routes.blueprints import page
+from .config import DevelopmentConfig
 
-app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'memcached'
-app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
-app.config["MONGODB_CONFIG"] = {
-    'db': 'UserDatabase',
-    'host': 'mongodb://localhost:27017/UserDatabase'
-}
+def create_app(**config_overrides):
+    app = Flask(__name__)
+
+    app.config.from_object(DevelopmentConfig)
+
+    app.config.update(config_overrides)
+
+    db.init_app(app)
+
+    login_manager.init_app(app)
+    login_manager.login_view = "login"
+
+    return app
+
 db = MongoEngine()
-db.init_app(app)
-bcrypt = Bcrypt(app)
 login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
+app = create_app()
+app.register_blueprint(page)
+bcrypt = Bcrypt(app)
 
 class User(db.Document, UserMixin):
     username = db.StringField()
@@ -82,6 +88,7 @@ def register():
 @app.route("/logout")
 @login_required
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for('login'))
 
@@ -186,5 +193,7 @@ def parse_data(user):
         summaries.append(summary.copy())
     return summaries
 
+
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True)

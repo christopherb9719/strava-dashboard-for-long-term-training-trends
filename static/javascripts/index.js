@@ -67,9 +67,9 @@ function createGraphs(d, line_points, colour) {
     updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 
     //Set up sliders for second set of graphs
-    document.getElementById('sliders').setAttribute("style","width: 50%");
+    document.getElementById('sliders').setAttribute("style","width: 45%");
     document.getElementById('graph2sliders').style.display = "inline";
-    document.getElementById('graph2sliders').setAttribute("style","width: 50%");
+    document.getElementById('graph2sliders').setAttribute("style","width: 45%");
 
     $(function() {
       $( "#graph2slider" ).slider({
@@ -161,7 +161,7 @@ function createGraphs(d, line_points, colour) {
     updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
     //Remove sliders for second set of graphs
-    document.getElementById('sliders').setAttribute("style","width: 100%");
+    document.getElementById('sliders').setAttribute("style","width: 90%");
     document.getElementById('graph2sliders').style.display = "none";
   }
 }

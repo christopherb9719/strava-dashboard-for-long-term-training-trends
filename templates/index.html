@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block body %}
+{% block toolbar %}
 <a href="{{url_for('logout')}}">Log Out</a>
 <div class="btn-toolbar mb-2 mb-md-0">
     <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
@@ -11,27 +11,33 @@
   <p id="pace"></p>
 </div>
 <p id="ThresholdPace"></p>
+{% endblock %}
+
+{% block main_column %}
 <div id="graphSet1Container" class="graph_container"></div>
 <div id="graphSet2Container" class="graph_container"></div>
 <div id="wrapper">
   <div id="sliders">
-    <p><label>Date:</label><div id="slider"></div>
-    <p><label>Time:</label><div id="timeSlider"></div></p>
-    <p><label>Distance:</label><div id="distanceSlider"></div></p>
-    <p><label>Elevation:</label><div id="elevationSlider"></div></p>
-    <p><label>Heart Rate:</label><div id="heartrateSlider"></div></p>
-    <p><input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/></p>
-    <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), 'line_primary', dataObject1.getId(), dataObject1.getColour())"/></p>
+    <label>Date:</label><div id="slider"></div>
+    <label>Time:</label><div id="timeSlider"></div>
+    <label>Distance:</label><div id="distanceSlider"></div>
+    <label>Elevation:</label><div id="elevationSlider"></div>
+    <label>Heart Rate:</label><div id="heartrateSlider"></div>
+    <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
+    <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), 'line_primary', dataObject1.getId(), dataObject1.getColour())"/>
   </div>
   <div id="graph2sliders">
-    <p><label>Date:</label><div id="graph2slider"></div></p>
-    <p><label>Time:</label><div id="graph2timeSlider"></div></p>
-    <p><label>Distance:</label><div id="graph2distanceSlider"></div></p>
-    <p><label>Elevation:</label><div id="graph2elevationSlider"></div></p>
-    <p><label>Heart Rate:</label><div id="graph2heartrateSlider"></div></p>
-    <p><input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/></p>
-    <p><input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), 'line_secondary', dataObject2.getId(), dataObject2.getColour())"/></p>
+    <label>Date:</label><div id="graph2slider"></div>
+    <label>Time:</label><div id="graph2timeSlider"></div>
+    <label>Distance:</label><div id="graph2distanceSlider"></div>
+    <label>Elevation:</label><div id="graph2elevationSlider"></div>
+    <label>Heart Rate:</label><div id="graph2heartrateSlider"></div>
+    <input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/>
+    <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), 'line_secondary', dataObject2.getId(), dataObject2.getColour())"/>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
 <script src="{{url_for('static', filename='javascripts/index.js')}}"></script>
 {% endblock %}
