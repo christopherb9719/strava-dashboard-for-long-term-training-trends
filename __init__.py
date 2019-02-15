@@ -16,7 +16,6 @@ def load_user(user_id):
 
 def create_app(**config_class):
     app = Flask(__name__)
-    print(config_class)
     app.config.from_object('config.DevelopmentConfig')
     app.config.update(config_class)
 

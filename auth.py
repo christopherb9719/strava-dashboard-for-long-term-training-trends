@@ -38,10 +38,9 @@ def register():
 
     return render_template('register.html', form=form)
 
-@bp.route('/')
+@bp.route('/', methods=["GET", "POST"])
 @bp.route("/login", methods=["GET", "POST"])
 def login():
-    print(current_app.config)
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         check_user = User.objects(email = form.email.data).first()
@@ -57,7 +56,7 @@ def login():
                 #if not is_safe_url(next):
                 #    return flask.abort(400)
 
-                return redirect(next or flask.url_for('views.loadDashboard'))
+                return redirect(next or flask.redirect('/dashboard'))
     return render_template('login.html', form=form)
 
 @bp.route("/logout")
