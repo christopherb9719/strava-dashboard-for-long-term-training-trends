@@ -4,11 +4,15 @@ from flask_mongoengine import MongoEngine
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_bcrypt import Bcrypt
 from flask_wtf.csrf import CSRFProtect
-from . import auth, views
+from . import auth, views, models
 
 login = LoginManager()
 db = MongoEngine()
 csrf = CSRFProtect()
+
+@login.user_loader
+def load_user(user_id):
+    return models.User.objects(id=user_id).first()
 
 def create_app(**config_class):
     app = Flask(__name__)
@@ -16,7 +20,6 @@ def create_app(**config_class):
     app.config.from_object('config.DevelopmentConfig')
     app.config.update(config_class)
 
-    from . import auth
     login.init_app(app)
     db.init_app(app)
     csrf.init_app(app)
