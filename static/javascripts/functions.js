@@ -1,6 +1,6 @@
 function updateTrendline(filtered_data, graph, line_class, id, colour) {
   $.ajax({
-    url: '/_gaussian_calculation',
+    url: $SCRIPT_ROOT + "/_guassian_calculation",
     data: JSON.stringify(filtered_data),
     contentType: 'application/json;charset=UTF-8',
     type: 'POST',
@@ -17,7 +17,7 @@ function updateTrendline(filtered_data, graph, line_class, id, colour) {
 
 function updateTrendline(filtered_data, graph, line_class, id, colour) {
   $.ajax({
-    url: '/_gaussian_calculation',
+    url: $SCRIPT_ROOT + "/_guassian_calculation",
     data: JSON.stringify(filtered_data),
     contentType: 'application/json;charset=UTF-8',
     type: 'POST',

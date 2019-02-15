@@ -7,6 +7,8 @@ from jinja2 import TemplateNotFound
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_bcrypt import Bcrypt
+from .app import parse_data
+from .static.lib.python.gaussianregression import *
 
 
 bp = Blueprint('views', __name__, template_folder='templates')
@@ -29,7 +31,7 @@ def redir():
 
     return redirect(url_for('loadDashboard'))
 
-@bp.route("/dashboard")
+@bp.route("/dashboard", methods=['POST', 'GET'])
 @login_required
 def loadDashboard():
     activities = parse_data(current_user)

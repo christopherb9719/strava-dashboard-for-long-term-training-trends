@@ -9,10 +9,6 @@ from flask_login import LoginManager, login_user, UserMixin, current_user, login
 from flask_bcrypt import Bcrypt
 from .models import User
 
-"""
-
-    """
-
 bp = Blueprint('auth', __name__, template_folder='templates')
 
 @bp.route('/<page>')
@@ -56,7 +52,7 @@ def login():
                 #if not is_safe_url(next):
                 #    return flask.abort(400)
 
-                return redirect(next or flask.redirect('/dashboard'))
+                return redirect(next or flask.url_for('views.loadDashboard'))
     return render_template('login.html', form=form)
 
 @bp.route("/logout")
