@@ -8,7 +8,6 @@ from . import auth, views, models
 
 login = LoginManager()
 db = MongoEngine()
-csrf = CSRFProtect()
 
 @login.user_loader
 def load_user(user_id):
@@ -21,7 +20,6 @@ def create_app(**config_class):
 
     login.init_app(app)
     db.init_app(app)
-    csrf.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(views.bp)
 

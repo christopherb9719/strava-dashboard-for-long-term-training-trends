@@ -1,5 +1,5 @@
 import flask
-from flask import Blueprint, render_template, abort, request, redirect, current_app
+from flask import Blueprint, render_template, abort, request, redirect, current_app, jsonify
 from flask_login import current_user, login_required
 from .static.lib.python.forms import RegistrationForm, LoginForm
 from .db import *
