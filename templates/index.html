@@ -7,21 +7,70 @@
 {% block main_column %}
   <div id="primary_graphs" class="graph_container"></div>
   <div id="sliders">
-    <label>Date:</label><div id="slider"></div>
-    <label>Time:</label><div id="timeSlider"></div>
-    <label>Distance:</label><div id="distanceSlider"></div>
-    <label>Elevation:</label><div id="elevationSlider"></div>
-    <label>Heart Rate:</label><div id="heartrateSlider"></div>
+    <p>
+    <label>Date:</label>
+    <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="slider"></div>
+
+    <p>
+    <label>Time:</label>
+    <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="timeSlider"></div>
+
+    <p>
+    <label>Distance:</label>
+    <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="distanceSlider"></div>
+
+    <p>
+    <label>Elevation:</label>
+    <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="elevationSlider"></div>
+
+    <p>
+    <label>Heart Rate:</label>
+    <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="heartrateSlider"></div>
     <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
     <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), 'line_primary', dataObject1.getId(), dataObject1.getColour())"/>
   </div>
   <div id="secondary_graphs" class="graph_container"></div>
   <div id="graph2sliders">
-    <label>Date:</label><div id="graph2slider"></div>
-    <label>Time:</label><div id="graph2timeSlider"></div>
-    <label>Distance:</label><div id="graph2distanceSlider"></div>
-    <label>Elevation:</label><div id="graph2elevationSlider"></div>
-    <label>Heart Rate:</label><div id="graph2heartrateSlider"></div>
+    <p>
+      <label for="date2">Date:</label>
+      <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="graph2slider"></div>
+
+    <p>
+      <label for="time2">Time:</label>
+      <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="graph2timeSlider"></div>
+
+    <p>
+      <label for="distance2">Distance:</label>
+      <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="graph2distanceSlider"></div>
+
+    <p>
+      <label for="elevation2">Elevation:</label>
+      <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="graph2elevationSlider"></div>
+
+    <p>
+      <label for="heartrate2">Heart Rate:</label>
+      <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="graph2heartrateSlider"></div>
+
     <input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/>
     <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), 'line_secondary', dataObject2.getId(), dataObject2.getColour())"/>
   </div>

@@ -177,6 +177,8 @@ $(function() {
       dataObject1.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
       dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
+      $("#date" ).val($( "#slider" ).slider( "values", 0 ) +
+          " - " + $( "#slider" ).slider( "values", 1 ));
     }
   });
 });
@@ -191,6 +193,8 @@ $(function() {
       dataObject1.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
       dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
+      $("#time" ).val($( "#timeSlider" ).slider( "values", 0 ) +
+          " - " + $( "#timeSlider" ).slider( "values", 1 ));
     }
   });
 });
@@ -206,6 +210,8 @@ $(function() {
       dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
       dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
+      $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
+          " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
     }
   })
 });
@@ -220,6 +226,8 @@ $(function() {
       dataObject1.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
       dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
+      $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
+          " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
     }
   })
 });
@@ -234,6 +242,8 @@ $(function() {
       dataObject1.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
       dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
+      $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
+          " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
     }
   });
 });
