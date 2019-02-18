@@ -1,22 +1,11 @@
 {% extends "base.html" %}
-{% block toolbar %}
-<a href="{{url_for('auth.logout')}}">Log Out</a>
-<div class="btn-toolbar mb-2 mb-md-0">
-    <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
-    <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
-</div>
-<div id="distanceSearch">
-  <input id="distance">
-  <input type="button" class="btn btn-sm btn-outline-secondary" value="Submit" onclick="getNeededPace(distance.value, dataObject1)"/>
-  <p id="pace"></p>
-</div>
-<p id="ThresholdPace"></p>
+
+{% block navbar %}
+<a class="navbar-brand" href="{{url_for('views.loadMultiUser')}}">Compare With Other Users</a>
 {% endblock %}
 
 {% block main_column %}
-<div id="graphSet1Container" class="graph_container"></div>
-<div id="graphSet2Container" class="graph_container"></div>
-<div id="wrapper">
+  <div id="primary_graphs" class="graph_container"></div>
   <div id="sliders">
     <label>Date:</label><div id="slider"></div>
     <label>Time:</label><div id="timeSlider"></div>
@@ -26,6 +15,7 @@
     <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
     <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), 'line_primary', dataObject1.getId(), dataObject1.getColour())"/>
   </div>
+  <div id="secondary_graphs" class="graph_container"></div>
   <div id="graph2sliders">
     <label>Date:</label><div id="graph2slider"></div>
     <label>Time:</label><div id="graph2timeSlider"></div>
@@ -35,7 +25,19 @@
     <input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/>
     <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), 'line_secondary', dataObject2.getId(), dataObject2.getColour())"/>
   </div>
+{% endblock %}
+
+{% block right_column %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
+    <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
 </div>
+<form id="distanceSearch" class="form-inline mt-2 mt-md-0">
+  <input id="distance">
+  <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="getNeededPace(distance.value, dataObject1)">Search</button>
+  <p id="pace"></p>
+</form>
+<p id="ThresholdPace"></p>
 {% endblock %}
 
 {% block scripts %}

@@ -41,12 +41,12 @@ function findUserData() {
     contentType: 'text',
     type: 'POST',
     success: function(response) {
+      d3.select("#myDropdown").selectAll("a").remove();
       JSON.parse(response).forEach(function(elem) {
         var option = document.createElement("a");
         option.text = elem.username;
-        option.onclick = function() {
-        plotData(elem.username);
-        }
+        option.class = "user_option"
+        option.onclick = function() { plotData(elem.username); }
         $("#myDropdown").append(option);
       })
     },
@@ -57,6 +57,8 @@ function findUserData() {
 }
 
 function plotData(user) {
+  showDropdown();
+  d3.select("#myDropdown").selectAll("a").remove();
   console.log("Get user data");
   $.ajax({
     url: '/get_user_data',

@@ -1,13 +1,10 @@
 import flask
 from flask import Blueprint, render_template, abort, request, redirect, current_app
-from flask_login import current_user, login_required
-from .static.lib.python.forms import RegistrationForm, LoginForm
-from .db import *
+from myapp import models
+from flask_login import current_user, login_required, login_user, logout_user
+from myapp.static.lib.python.forms import RegistrationForm, LoginForm
 from jinja2 import TemplateNotFound
-from flask_mongoengine import MongoEngine
-from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
 from flask_bcrypt import Bcrypt
-from .models import User
 
 bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -22,7 +19,7 @@ def show(page):
 def register():
     form = RegistrationForm(request.form)
     if request.method == 'POST' and form.validate():
-        existing_user = User.objects(username=form.username.data).first()
+        existing_user = models.User.objects(username=form.username.data).first()
         if existing_user is None:
             bcrypt = Bcrypt(current_app)
             session['username'] = form.username.data;
@@ -39,7 +36,7 @@ def register():
 def login():
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
-        check_user = User.objects(email = form.email.data).first()
+        check_user = models.User.objects(email = form.email.data).first()
         if check_user:
             bcrypt = Bcrypt(current_app)
             if bcrypt.check_password_hash(check_user.password, str(form.password.data)):

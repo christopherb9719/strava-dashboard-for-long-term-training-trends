@@ -24,7 +24,7 @@ var tooltip = d3.select("body").append("div")
     .style("opacity", 0);
 
 //Build Graphs
-var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+var graphSet1 = new graphSet(margin, w, h, "primary_graphs");
 var dataObject1 = new DataObject(dataset, "1", "#ff471a", graphSet1);
 graphSet1.buildGraphs(dataObject1.getFilterObject(), dataset);
 graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
@@ -34,16 +34,16 @@ dataObjects.push(dataObject1);
 
 
 function split() {
-  d3.select('#graphSet1Container').selectAll('div').remove();
+  d3.select('#primary_graphs').selectAll('div').remove();
 
   var filterObject = new Filters(dataset)
-  var graphSet1 = new graphSet(margin, w/2, h, "graphSet1Container");
+  var graphSet1 = new graphSet(margin, w/2, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
   dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
-  var graphSet2 = new graphSet(margin, w/2, h, "graphSet2Container");
+  var graphSet2 = new graphSet(margin, w/2, h, "secondary_graphs");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
   dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
@@ -149,11 +149,11 @@ function createGraphs(d, line_points, colour) {
     console.log("Removing graph");
     //Remove second set of graphs
 
-    d3.select('#graphSet2Container').selectAll('div').remove();
-    d3.select('#graphSet1Container').selectAll('div').remove();
+    d3.select('#secondary_graphs').selectAll('div').remove();
+    d3.select('#primary_graphs').selectAll('div').remove();
 
     //Update first set of graphs
-    graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+    graphSet1 = new graphSet(margin, w, h, "primary_graphs");
     var filterObject = new Filters(dataset);
     dataObject1.setGraphSet(graphSet1);
     dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
@@ -245,11 +245,11 @@ function filterTags(tags) {
 }
 
 function mergeGraphs() {
-  d3.select('#graphSet1Container').selectAll('div').remove();
-  d3.select('#graphSet2Container').selectAll('div').remove();
+  d3.select('#primary_graphs').selectAll('div').remove();
+  d3.select('#secondary_graphs').selectAll('div').remove();
 
   var filterObject = new Filters(dataset);
-  graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
+  graphSet1 = new graphSet(margin, w, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject2.setGraphSet(graphSet1);
   graphSet1.buildGraphs(filterObject, dataObject1.getData().concat(dataObject2.getData()));

@@ -1,14 +1,11 @@
 import flask
 from flask import Blueprint, render_template, abort, request, redirect, current_app, jsonify
 from flask_login import current_user, login_required
-from .static.lib.python.forms import RegistrationForm, LoginForm
-from .db import *
+from myapp import models
 from jinja2 import TemplateNotFound
-from flask_mongoengine import MongoEngine
-from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
-from flask_bcrypt import Bcrypt
-from .app import parse_data
-from .static.lib.python.gaussianregression import *
+from flask_login import login_required
+from ..app import parse_data
+from ..static.lib.python.gaussianregression import *
 
 
 bp = Blueprint('views', __name__, template_folder='templates')
@@ -26,7 +23,7 @@ def redir():
     client=Client()
     code = request.args.get('code')
     tokens = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
-    user = User(username=session['username'], email=session['email'], password=session['password'], token=tokens['access_token'], refresh_token=tokens['refresh_token'], expires_at=tokens['expires_at']).save()
+    user = models.User(username=session['username'], email=session['email'], password=session['password'], token=tokens['access_token'], refresh_token=tokens['refresh_token'], expires_at=tokens['expires_at']).save()
     login_user(user);
 
     return redirect(url_for('loadDashboard'))
@@ -55,7 +52,7 @@ def loadMultiUser():
 @bp.route("/get_user_data", methods=['POST'])
 @login_required
 def getUserData():
-    user = User.objects(username = request.data.decode('utf-8')).first()
+    user = models.User.objects(username = request.data.decode('utf-8')).first()
     print(user)
     activities = parse_data(user)
     print(len(activities))
@@ -78,5 +75,5 @@ def getGaussian():
 @login_required
 def findUsers():
     query = request.data.decode('utf-8')
-    users = User.objects(username__contains=query).only('username')
+    users = models.User.objects(username__contains=query).only('username')
     return users.to_json()

@@ -19,9 +19,15 @@
             var dataset = {{ sample|tojson }};
             var reg = {{regression|tojson }};
         </script>
+        <script src="/docs/4.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP" crossorigin="anonymous"></script>
         {% endblock %}
     </head>
     <body>
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="{{url_for('auth.logout')}}">Log Out</a>
+        {% block navbar %}
+        {% endblock %}
+      </nav>
       {% block body %}
       {% block toolbar %}
       {% endblock %}

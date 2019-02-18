@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block toolbar %}
-<a href="{{url_for('auth.logout')}}">Log Out</a>
+{% block navbar %}
+<a class="navbar-brand" href="{{url_for('views.loadDashboard')}}">Return to main page</a>
 <div class="dropdown">
-  <button onclick="showDropdown()" class="dropbtn">Dropdown</button>
+  <button onclick="showDropdown()" class="dropbtn">Add User's Data</button>
   <div id="myDropdown" class="dropdown-content" onchange="findUserData()">
     <input id="userSearch" placeholder="Search for users">
   </div>

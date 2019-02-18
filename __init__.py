@@ -1,10 +1,11 @@
 from flask import Flask
 import config
 from flask_mongoengine import MongoEngine
-from flask_login import LoginManager, login_user, UserMixin, current_user, login_required, logout_user
+from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_wtf.csrf import CSRFProtect
-from . import auth, views, models
+from . import models
+from .routes import auth, views
 
 login = LoginManager()
 db = MongoEngine()
