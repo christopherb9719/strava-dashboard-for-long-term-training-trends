@@ -96,10 +96,8 @@ class PositiveAndNegativeBarChart {
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
 
-    console.log(barVals);
-
     var max_y = d3.max(barVals, function(d) { console.log(Math.abs(d)); return Math.abs(d); })
-    console.log(max_y);
+
     // Update the scales
     this.y.domain([max_y, -1*max_y]).nice();
 

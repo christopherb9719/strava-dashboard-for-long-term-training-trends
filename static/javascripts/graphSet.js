@@ -40,9 +40,9 @@ class graphSet {
 
   updateScales(data, filters) {
     this.scatter.update(filters);
-    this.sideBar.update(data, filters);
-    this.topBar.update(data, filters);
-    this.effortChart.update(data, filters);
+    this.sideBar.update(filters.filterData(data), filters);
+    this.topBar.update(filters.filterData(data), filters);
+    this.effortChart.update(filters.filterData(data), filters);
   }
 
   updatePlots(filteredData, filters, colour, id) {
