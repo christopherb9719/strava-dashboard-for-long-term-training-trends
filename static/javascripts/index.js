@@ -175,10 +175,12 @@ $(function() {
     slide: function( event, ui ) {
       console.log("slide");
       dataObject1.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
-      $("#date" ).val($( "#slider" ).slider( "values", 0 ) +
-          " - " + $( "#slider" ).slider( "values", 1 ));
+      min_date = new Date($( "#slider" ).slider( "values", 0 )*1000);
+      max_date = new Date($( "#slider" ).slider( "values", 1 )*1000);
+      $("#date" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
+          " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
     }
   });
 });
@@ -191,10 +193,13 @@ $(function() {
     values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
-      $("#time" ).val($( "#timeSlider" ).slider( "values", 0 ) +
-          " - " + $( "#timeSlider" ).slider( "values", 1 ));
+      min_time = new Date(ui.values[0]*1000);
+      max_time = new Date(ui.values[1]*1000);
+      console.log(min_time);
+      $("#time" ).val(min_time.getHours() + ":" + min_time.getMinutes() +
+          " - " + max_time.getHours() + ":" + max_time.getMinutes());
     }
   });
 });
@@ -208,7 +213,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
       $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
@@ -224,7 +229,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
       $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
@@ -240,7 +245,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
       dataObject1.updateGraphs();
       $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
           " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
@@ -250,7 +255,7 @@ $(function() {
 
 function filterTags(tags) {
   dataObject1.getFilterObject().setTags(tags.split(' '));
-  dataObject1.getGraphSet().updateScales(dataObject1.getData(), dataObject1.getFilterObject());
+  dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), dataObject1.getFilterObject());
   dataObject1.updateGraphs();
 }
 

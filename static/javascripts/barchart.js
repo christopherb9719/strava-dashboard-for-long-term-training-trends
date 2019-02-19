@@ -11,8 +11,8 @@ class PositiveAndNegativeBarChart {
     var barVals = this.buildBarValues(filteredData);
     this.x = d3.scaleBand().range([0, this.width]).round(.2).domain([0, 23]);
     this.y = d3.scaleLinear().range([this.height, 0]).domain([
-      Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
-      (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
+      (d3.max(barVals, d => Math.abs(d))),
+      (-1 * d3.max(barVals, d => Math.abs(d)))
     ]).nice();
 
     this.svg = d3.select(this.container).append('svg')
@@ -96,11 +96,12 @@ class PositiveAndNegativeBarChart {
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
 
+    console.log(barVals);
+
+    var max_y = d3.max(barVals, function(d) { console.log(Math.abs(d)); return Math.abs(d); })
+    console.log(max_y);
     // Update the scales
-    this.y.domain([
-      Math.sqrt(d3.max(barVals, function(d) { return d**2 })),
-      (-1 * Math.sqrt(d3.max(barVals, function(d) { return d**2 })))
-    ]).nice();
+    this.y.domain([max_y, -1*max_y]).nice();
 
 
   }
@@ -365,6 +366,7 @@ function plotBars(graph, filtered, x, y, graph_width, colour, id) {
   var plot = graph.getPlot();
   plot.selectAll("[id='#dataset" + id + "']").remove();
   var data = graph.buildBarValues(filtered);
+  console.log(data);
   var rects = plot.selectAll("rects");
   rects.data(data).enter()
     .append("rect")
