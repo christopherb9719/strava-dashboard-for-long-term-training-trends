@@ -2,11 +2,29 @@ var formatDateIntoYear = d3.timeFormat("%Y");
 var formatDate = d3.timeFormat("%b %Y");
 var parseDate = d3.timeParse("%m/%d/%y");
 
-document.getElementById('mergeGraphs').style.display = "none";
-document.getElementById('graph2sliders').style.display = "none";
+var bb = document.querySelector ('#primary_graphs')
+                    .getBoundingClientRect();
 
+var width = bb.right - bb.left;
+
+document.getElementById('mergeGraphs').style.display = "none";
+
+
+
+function showSecondarySliders() {
+  var dom = document.getElementById("graph2sliders");
+  var display = dom.style.display;
+  if (display == "none") {
+    dom.style.display = "";
+  }
+  else {
+    dom.style.display = "none";
+  }
+}
+
+showSecondarySliders();
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
-    w = 1000 - margin.left - margin.right,
+    w = width - margin.left - margin.right,
     h = 500 - margin.top - margin.bottom;
 
 var graphSets = [];
@@ -36,14 +54,28 @@ dataObjects.push(dataObject1);
 function split() {
   d3.select('#primary_graphs').selectAll('div').remove();
 
+  document.getElementById('primary_graphs').className = "col-6";
+  document.getElementById('secondary_graphs').className = "col-6";
+
+  var bb = document.querySelector ('#primary_graphs')
+                      .getBoundingClientRect();
+
+  var width = bb.right - bb.left;
+
   var filterObject = new Filters(dataset)
-  var graphSet1 = new graphSet(margin, w/2, h, "primary_graphs");
+  var graphSet1 = new graphSet(margin, width, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
   dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
-  var graphSet2 = new graphSet(margin, w/2, h, "secondary_graphs");
+
+  var bb = document.querySelector ('#secondary_graphs')
+                      .getBoundingClientRect();
+
+  var width = bb.right - bb.left;
+
+  var graphSet2 = new graphSet(margin, width, h, "secondary_graphs");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
   dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
@@ -53,10 +85,12 @@ function split() {
 
 function createGraphs(d, line_points, colour) {
   if (clicked == false) {
-    document.getElementById('addChart').innerText = "Remove Graph";
+    document.getElementById('addChart').innerText = "Remove Data";
+    document.getElementById('addChart').title = "Remove the Second Layer of Data from the Graph";
     document.getElementById('mergeGraphs').style.display = "inline";
     document.getElementById('mergeGraphs').value = "true";
     document.getElementById('mergeGraphs').innerHTML = "Split Graphs";
+    document.getElementById('mergeGraphs').title = "Merge the Data Layers back into one graph";
 
     clicked = true;
 
@@ -67,9 +101,9 @@ function createGraphs(d, line_points, colour) {
     updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 
     //Set up sliders for second set of graphs
-    document.getElementById('sliders').setAttribute("style","width: 45%");
-    document.getElementById('graph2sliders').style.display = "inline";
-    document.getElementById('graph2sliders').setAttribute("style","width: 45%");
+    showSecondarySliders();
+    document.getElementById('sliders').className = "col-6";
+    document.getElementById('graph2sliders').className = "col-6";
 
     $(function() {
       $( "#graph2slider" ).slider({
@@ -84,6 +118,10 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
+          min_date = new Date($( "#slider" ).slider( "values", 0 )*1000);
+          max_date = new Date($( "#slider" ).slider( "values", 1 )*1000);
+          $("#date2" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
+              " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
         }
       });
     });
@@ -101,6 +139,10 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
+          min_time = new Date(ui.values[0]*1000);
+          max_time = new Date(ui.values[1]*1000);
+          $("#time2" ).val(min_time.getHours() + ":" + min_time.getMinutes() +
+              " - " + max_time.getHours() + ":" + max_time.getMinutes());
         }
       });
     });
@@ -118,6 +160,7 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
+          $("#distance2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
     });
@@ -135,6 +178,7 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
+          $("#elevation2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
     });
@@ -152,31 +196,40 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
+          $("#heartrate2" ).val(ui.values[0]+ "bpm" + " - " + ui.values[1] + "bpm");
         }
       });
     });
   }
   else {
     document.getElementById('addChart').innerText = "Add Graph";
+    document.getElementById('addChart').title = "Add a Second Layer of Data to the Graph";
     document.getElementById('mergeGraphs').style.display = "none";
 
     clicked = false;
     //Remove second set of graphs
 
+    showSecondarySliders();
+
     d3.select('#secondary_graphs').selectAll('div').remove();
     d3.select('#primary_graphs').selectAll('div').remove();
+    document.getElementById('primary_graphs').className = "col-12";
+    document.getElementById('sliders').className = "col-12";
+
+
+
+    var bb = document.querySelector ('#primary_graphs')
+                        .getBoundingClientRect();
+
+    var width = bb.right - bb.left;
 
     //Update first set of graphs
-    graphSet1 = new graphSet(margin, w, h, "primary_graphs");
+    graphSet1 = new graphSet(margin, width, h, "primary_graphs");
     var filterObject = new Filters(dataset);
     dataObject1.setGraphSet(graphSet1);
     dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
     dataObject1.updateGraphs();
     updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
-
-    //Remove sliders for second set of graphs
-    document.getElementById('sliders').setAttribute("style","width: 90%");
-    document.getElementById('graph2sliders').style.display = "none";
   }
 }
 
@@ -281,10 +334,10 @@ $(function() {
 });
 
 function filterTags(tags) {
-  dataObject1.getFilterObject().setTags(tags.split(' '));
-  dataObject1.getGraphSet().updateScales(getAllData(), dataObject1.getFilterObject());
   for (index in dataObjects) {
     var dataObject = dataObjects[index];
+    dataObject.getFilterObject().setTags(tags.split(' '));
+    dataObject.getGraphSet().updateScales(getAllData(), dataObject.getFilterObject());
     dataObject.updateGraphs();
   }
 }
@@ -292,9 +345,16 @@ function filterTags(tags) {
 function mergeGraphs() {
   d3.select('#primary_graphs').selectAll('div').remove();
   d3.select('#secondary_graphs').selectAll('div').remove();
+  document.getElementById('primary_graphs').className = "col-12";
+
+
+  var bb = document.querySelector ('#primary_graphs')
+                      .getBoundingClientRect();
+
+  var width = bb.right - bb.left;
 
   var filterObject = new Filters(dataset);
-  graphSet1 = new graphSet(margin, w, h, "primary_graphs");
+  graphSet1 = new graphSet(margin, width, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject2.setGraphSet(graphSet1);
   graphSet1.buildGraphs(filterObject, dataObject1.getData().concat(dataObject2.getData()));
@@ -314,7 +374,7 @@ function getNeededPace(distance, dataObject) {
   updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
   filtered = dataObject.getFilteredData();
   needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
-  document.getElementById("pace").innerHTML=needed_pace.toFixed(3)+"bpkm";
+  document.getElementById("pace").innerHTML="Average Pace: " + needed_pace.toFixed(3)+" mins/km";
 }
 
 document.getElementById("addChart").onclick = function() {

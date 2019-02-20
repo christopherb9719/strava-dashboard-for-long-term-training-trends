@@ -22,7 +22,7 @@ function appendPath(graph, pts, line_class, id, colour) {
       }
       var minutes = Math.floor(pace - (pace % 1));
       var threshold = minutes + ":" + seconds;
-      document.getElementById("ThresholdPace").innerHTML = "Threshold Pace: " + threshold;
+      document.getElementById("ThresholdPace").innerHTML = "Threshold Pace: " + threshold + " mins/km";
       graph.getSvg().append("a").append("circle")
         .attr("cx", d3.mouse(this)[0])
         .attr("cy", d3.mouse(this)[1])

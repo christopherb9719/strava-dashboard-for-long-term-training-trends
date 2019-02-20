@@ -45,7 +45,8 @@ function findUserData() {
       JSON.parse(response).forEach(function(elem) {
         var option = document.createElement("a");
         option.text = elem.username;
-        option.class = "user_option"
+        option.class = "user_option";
+        option.title = "Click to remove";
         option.onclick = function() { plotData(elem.username); }
         $("#myDropdown").append(option);
       })

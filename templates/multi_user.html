@@ -1,33 +1,43 @@
 {% extends "base.html" %}
 
-{% block navbar %}
-<a class="navbar-brand" href="{{url_for('views.loadDashboard')}}">Return to main page</a>
-<div class="dropdown">
-  <button onclick="showDropdown()" class="dropbtn">Add User's Data</button>
-  <div id="myDropdown" class="dropdown-content" onchange="findUserData()">
-    <input id="userSearch" placeholder="Search for users">
-  </div>
-</div>
-<p id="ThresholdPace"></p>
-{% endblock %}
-
 {% block main_column %}
-<div id="graphSet1Container" class="graph_container"></div>
+<div id="graphSet1Container" class="col-12 graph_container"></div>
 <div id="wrapper">
-  <div id="sliders" class="sliders">
+  <div id="sliders" class="col-12">
     <label>Date:</label><div id="slider"></div>
     <label>Time:</label><div id="timeSlider"></div>
     <label>Distance:</label><div id="distanceSlider"></div>
     <label>Elevation:</label><div id="elevationSlider"></div>
     <label>Heart Rate:</label><div id="heartrateSlider"></div>
-    <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
-    <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(primaryFilterObject.getFilteredData(), primaryFilterObject.getGraphSet().getScatter(), 'line_primary')"/>
   </div>
 </div>
 {% endblock %}
 
 {% block right_column %}
+<br></br>
+<div class="dropdown">
+  <button onclick="showDropdown()" class="btn btn-secondary">Add User's Data</button>
+  <div id="myDropdown" class="dropdown-content" onchange="findUserData()">
+    <input id="userSearch" placeholder="Search for users">
+  </div>
+</div>
+<br></br>
+<form id="distanceSearch" class="form-inline mt-2 mt-md-0">
+  <label for="distance">Search for your average pace in runs around a distance</label>
+  <input id="distance" class="form-control" placeholder="Distance (km)">
+  <button class="btn btn-outline-success" type="submit" onclick="getNeededPace(distance.value, dataObject1)">Search</button>
+</form>
+<p id="pace">Average Pace: </p>
+<br></br>
+<label for="ThresholdPace">Click on regression line to set a threshold pace: </label>
+<p id="ThresholdPace">Threshold Pace:</p>
+<br></br>
+<input type="text" id="tags" placeholder="Add Filter Tags" name="tags" class="form-control"/><input class="btn btn-outline-success" type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
+<br></br>
+<input type="button" class="btn btn-primary" value="Refresh Trend Lines" onclick="refreshTrendLines(dataObjects)"/>
+<br></br>
 <div id="usersColumn" class="column right">
+  <label for="usersList">Users Data present: </label>
   <div id="usersList" class="user-list"></div>
 </div>
 {% endblock %}

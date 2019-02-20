@@ -1,92 +1,98 @@
 {% extends "base.html" %}
 
-{% block navbar %}
-<a class="navbar-brand" href="{{url_for('views.loadMultiUser')}}">Compare With Other Users</a>
-{% endblock %}
-
 {% block main_column %}
-  <div id="primary_graphs" class="graph_container"></div>
-  <div id="sliders">
-    <p>
-    <label>Date:</label>
-    <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="slider"></div>
-
-    <p>
-    <label>Time:</label>
-    <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="timeSlider"></div>
-
-    <p>
-    <label>Distance:</label>
-    <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="distanceSlider"></div>
-
-    <p>
-    <label>Elevation:</label>
-    <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="elevationSlider"></div>
-
-    <p>
-    <label>Heart Rate:</label>
-    <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="heartrateSlider"></div>
-    <input type="text" id="tags" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
-    <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), 'line_primary', dataObject1.getId(), dataObject1.getColour())"/>
+  <div id="graphs" class="row graph_container">
+    <div id="primary_graphs" class="col-12"></div>
+    <div id="secondary_graphs"></div>
   </div>
-  <div id="secondary_graphs" class="graph_container"></div>
-  <div id="graph2sliders">
-    <p>
-      <label for="date2">Date:</label>
+  <div class="row">
+    <div id="sliders" class="col-12">
+      <p>
+      <label>Date:</label>
       <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="graph2slider"></div>
+      </p>
+      <div id="slider"></div>
 
-    <p>
-      <label for="time2">Time:</label>
+      <p>
+      <label>Time:</label>
       <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="graph2timeSlider"></div>
+      </p>
+      <div id="timeSlider"></div>
 
-    <p>
-      <label for="distance2">Distance:</label>
+      <p>
+      <label>Distance:</label>
       <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="graph2distanceSlider"></div>
+      </p>
+      <div id="distanceSlider"></div>
 
-    <p>
-      <label for="elevation2">Elevation:</label>
+      <p>
+      <label>Elevation:</label>
       <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="graph2elevationSlider"></div>
+      </p>
+      <div id="elevationSlider"></div>
 
-    <p>
-      <label for="heartrate2">Heart Rate:</label>
+      <p>
+      <label>Heart Rate:</label>
       <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-    <div id="graph2heartrateSlider"></div>
+      </p>
+      <div id="heartrateSlider"></div>
+    </div>
+    <div id="graph2sliders">
+      <p>
+        <label for="date2">Date:</label>
+        <input type="text" id="date2" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="graph2slider"></div>
 
-    <input type="text" id="tags2" name="tags"/><input type="submit" value="Submit" onclick="filterTags(document.getElementById('tags2').value)"/>
-    <input type="button" class="btn btn-primary" value="Refresh Trend Line" onclick="updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), 'line_secondary', dataObject2.getId(), dataObject2.getColour())"/>
+      <p>
+        <label for="time2">Time:</label>
+        <input type="text" id="time2" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="graph2timeSlider"></div>
+
+      <p>
+        <label for="distance2">Distance:</label>
+        <input type="text" id="distance2" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="graph2distanceSlider"></div>
+
+      <p>
+        <label for="elevation2">Elevation:</label>
+        <input type="text" id="elevation2" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="graph2elevationSlider"></div>
+
+      <p>
+        <label for="heartrate2">Heart Rate:</label>
+        <input type="text" id="heartrate2" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="graph2heartrateSlider"></div>
+    </div>
   </div>
 {% endblock %}
 
 {% block right_column %}
-<div class="btn-toolbar mb-2 mb-md-0">
-    <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary">Add Graph</button>
-    <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true">Split Graphs</button>
+<div class="column right">
+  <br></br>
+  <div>
+      <button id="addChart" type="button" class="btn btn-sm btn-outline-secondary" title="Add a Second Layer of Data to the Graph">Add Data</button>
+      <button id="mergeGraphs" display="none" type="button" class="btn btn-sm btn-outline-secondary" value="true" title="Split Layers into Separate Graphs">Split Graphs</button>
+  </div>
+  <br></br>
+  <form id="distanceSearch" class="form-inline mt-2 mt-md-0">
+    <label for="distance">Search for your average pace in runs around a distance</label>
+    <input id="distance" class="form-control" placeholder="Distance (km)">
+    <button class="btn btn-outline-success" type="submit" onclick="getNeededPace(distance.value, dataObject1)">Search</button>
+  </form>
+  <p id="pace">Average Pace: </p>
+  <br></br>
+  <label for="ThresholdPace">Click on regression line to set a threshold pace: </label>
+  <p id="ThresholdPace">Threshold Pace:</p>
+  <br></br>
+  <input type="text" id="tags" placeholder="Add Filter Tags" name="tags" class="form-control"/><input class="btn btn-outline-success" type="submit" value="Submit" onclick="filterTags(document.getElementById('tags').value)"/>
+  <br></br>
+  <input type="button" class="btn btn-primary" value="Refresh Trend Lines" onclick="refreshTrendLines(dataObjects)"/>
 </div>
-<form id="distanceSearch" class="form-inline mt-2 mt-md-0">
-  <input id="distance">
-  <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="getNeededPace(distance.value, dataObject1)">Search</button>
-  <p id="pace"></p>
-</form>
-<p id="ThresholdPace"></p>
 {% endblock %}
 
 {% block scripts %}

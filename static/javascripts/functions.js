@@ -14,3 +14,14 @@ function updateTrendline(filtered_data, graph, line_class, id, colour) {
     }
   });
 }
+
+function refreshTrendLines(dataObjects) {
+  for (index in dataObjects) {
+    dataObject = dataObjects[index];
+    updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
+  }
+}
+
+document.getElementById("logout").onclick = function () {
+    location.href = $SCRIPT_ROOT + "/logout";
+};

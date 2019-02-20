@@ -16,6 +16,11 @@ a {
   display: inline-block;
 }
 
+.right_column {
+  background: #f2f2f2;
+  border-radius: 15px;
+}
+
 .axis text {
     font-family: sans-serif;
     font-size: 11px;
@@ -74,11 +79,13 @@ a {
 }
 
 .graph_container {
-  display: inline-block;
-  background: #D3D3D3;
+  background: #f2f2f2;
   border-radius: 15px;
 }
 
+.sliders_container {
+  display: inline-block;
+}
 .track-overlay {
   pointer-events: stroke;
   stroke-width: 50px;
