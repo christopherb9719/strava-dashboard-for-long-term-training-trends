@@ -18,7 +18,15 @@ class Scatter {
       .attr("height", this.height + this.margin.top + this.margin.bottom);
 
     this.plot = this.svg.append('g')
-          .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")");
+          .attr("transform","translate(" + this.margin.left + "," + this.margin.top + ")")
+          .style("background", "#ffffff");
+
+    this.plot.append("text")
+        .attr("x", (this.width / 2))
+        .attr("y", 0 - (this.margin.top/3))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .text("Activities according to Average Pace and Average Heart Rate");
 
     this.createAxes();
   }
@@ -44,16 +52,16 @@ class Scatter {
 
 
     // Labels
-    this.xAxis.append("text")
+    this.plot.append("text")
         .attr("transform",
-            "translate(" + this.width + " ," +
-                      (this.height + margin.top + 20) + ")")
+            "translate(" + this.width/2 + " ," +
+                      (this.height + this.margin.top + 20) + ")")
         .style("text-anchor", "middle")
         .text("Mean Heart Rate (beats per minute)");
 
-    this.yAxis.append("text")
+    this.plot.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
+        .attr("y", 0 - this.margin.left)
         .attr("x",0 - (this.height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")

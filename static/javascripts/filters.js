@@ -46,8 +46,48 @@ class Filters {
     console.log(this.max_time);
   }
 
-  setTags(tags) {
-    this.tags = tags;
+  addTag(tag) {
+    this.tags.push(tag);
+  }
+
+  setMaxDate(latestDate) {
+    this.max_date = latestDate;
+  }
+
+  setMinDate(date) {
+    this.min_date = date;
+  }
+
+  setMaxElevation(elevation) {
+    this.max_elevation_gain = elevation;
+  }
+
+  setMinElevation(elevation) {
+    this.min_elevation_gain = elevation;
+  }
+
+  setMaxHeartRate(heart_rate) {
+    this.max_heart_rate = heart_rate;
+  }
+
+  setMinHeartRate(heart_rate) {
+    this.min_heart_rate = heart_rate;
+  }
+
+  setMaxDistance(distance) {
+    this.max_distance = distance;
+  }
+
+  setMinDistance(distance) {
+    this.min_distance = distance;
+  }
+
+  setMinTime(time) {
+    this.min_time = time;
+  }
+
+  setMaxTime(time) {
+    this.max_time = time;
   }
 
   getMaxDistance() {
@@ -94,6 +134,13 @@ class Filters {
     return this.tags;
   }
 
+  removeTag(tag) {
+    var index = this.tags.indexOf(tag);
+    if (index > -1) {
+      this.tags.splice(index, 1);
+    }
+    console.log(this.tags)
+  }
   getMinPace() {
     return this.min_average_pace;
   }

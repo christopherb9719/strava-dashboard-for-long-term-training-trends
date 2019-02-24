@@ -24,6 +24,13 @@ class PositiveAndNegativeBarChart {
           .attr("transform",
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
+    this.plot.append("text")
+        .attr("x", (this.width / 2))
+        .attr("y", 0 - (this.margin.top/3))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .text("Variation from Average Effort by Time of Day");
+
     this.createAxes();
   }
 
@@ -96,7 +103,7 @@ class PositiveAndNegativeBarChart {
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
 
-    var max_y = d3.max(barVals, function(d) { console.log(Math.abs(d)); return Math.abs(d); })
+    var max_y = d3.max(barVals, d => Math.abs(d))
 
     // Update the scales
     this.y.domain([max_y, -1*max_y]).nice();
@@ -202,9 +209,21 @@ class StandardBarChart {
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     if (this.x_or_y == "x") {
+      this.plot.append("text")
+          .attr("x", (this.width / 2))
+          .attr("y", 0 - (this.margin.top/3))
+          .attr("text-anchor", "middle")
+          .style("font-size", "13px")
+          .text("No. Activities per Heart Rate");
       this.createXAxis();
     }
     else {
+      this.plot.append("text")
+          .attr("x", (this.width / 2))
+          .attr("y", 0 - (this.margin.top/3))
+          .style("font-size", "13px")
+          .attr("text-anchor", "middle")
+          .text("No. Activities per Pace");
       this.createYAxis();
     }
     var width = w/(d3.max(filteredData, d => d[this.x_val]) - d3.min(filteredData, d => d[this.x_val]));
@@ -364,7 +383,6 @@ function plotBars(graph, filtered, x, y, graph_width, colour, id) {
   var plot = graph.getPlot();
   plot.selectAll("[id='#dataset" + id + "']").remove();
   var data = graph.buildBarValues(filtered);
-  console.log(data);
   var rects = plot.selectAll("rects");
   rects.data(data).enter()
     .append("rect")
@@ -389,7 +407,7 @@ function plotBars(graph, filtered, x, y, graph_width, colour, id) {
           .style("top", (d3.event.pageY - 28) + "px")
         .transition()
           .duration(200) // ms
-          .style("opacity", .7) // started as 0!
+          .style("opacity", .9) // started as 0!
     })
     .on('mouseout', function(d) {
       d3.select(this)
@@ -451,15 +469,21 @@ function standardPlotBars(graph, filtered, x, y, colour, id) {
         .attr("fill", "#000000")
       if (i < 10) { var time = "0" + i + ":00" }
       else { var time = i + ":00" }
-      var html  = "Heart Rate: <b> " + d + "</b><br/>" +
-                  "Runs with this HR: <b>" + data[d] + "</b>";
+      if (graph.x_or_y == "x") {
+        var html  = "Heart Rate: <b> " + d + "bpm</b><br/>" +
+                    "Runs with this HR: <b>" + data[d] + "</b>";
+      }
+      else {
+        var html  = "Pace: <b> " + d + "mins/km</b><br/>" +
+                    "Runs with this Pace: <b>" + data[d] + "</b>";
+      }
 
       tooltip.html(html)
           .style("left", (d3.event.pageX + 15) + "px")
           .style("top", (d3.event.pageY - 28) + "px")
         .transition()
           .duration(200) // ms
-          .style("opacity", .7) // started as 0!
+          .style("opacity", .9) // started as 0!
     })
     .on('mouseout', function(d) {
       d3.select(this)

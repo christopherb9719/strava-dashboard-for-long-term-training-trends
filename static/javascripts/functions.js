@@ -25,3 +25,7 @@ function refreshTrendLines(dataObjects) {
 document.getElementById("logout").onclick = function () {
     location.href = $SCRIPT_ROOT + "/logout";
 };
+
+function showDropdown(id) {
+  document.getElementById(id).classList.toggle("show");
+}
