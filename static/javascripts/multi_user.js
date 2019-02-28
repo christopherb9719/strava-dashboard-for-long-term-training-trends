@@ -255,6 +255,7 @@ function removeUsersData(id) {
   d3.selectAll("[id='#dataset" + id + "']").remove();
   d3.selectAll("[id='#regression" + id + "']").remove();
   d3.selectAll("[id='#threshold" + id + "']").remove();
+  d3.selectAll("[id='#pace" + id + "']").remove();
   var index = dataObjects.indexOf(dataObjects.find(d => { return d.id == id }));
   dataObjects.splice(index, 1);
 }
@@ -278,7 +279,7 @@ function getNeededPace(distance) {
     var paceObject = document.createElement("li");
     paceObject.innerHTML = dataObject.user + ": " + needed_pace.toFixed(2) + "mins/km"
     paceObject.className = "list-group-item";
-    paceObject.value = String(id);
+    paceObject.id = "#pace" + dataObject.id;
 
     document.getElementById('distancePace').appendChild(paceObject);
   }
