@@ -22,10 +22,27 @@ function refreshTrendLines(dataObjects) {
   }
 }
 
-document.getElementById("logout").onclick = function () {
+function logout() {
     location.href = $SCRIPT_ROOT + "/logout";
 };
 
 function showDropdown(id) {
   document.getElementById(id).classList.toggle("show");
+}
+
+function buildTimeString(hours, minutes) {
+  var time = ""
+  if (hours < 10) {
+    time = time + "0" + hours;
+  }
+  else {
+    time = time + hours;
+  }
+  if (minutes < 10) {
+    time = time + ":0" + minutes;
+  }
+  else {
+    time = time + ":" + minutes;
+  }
+  return time;
 }

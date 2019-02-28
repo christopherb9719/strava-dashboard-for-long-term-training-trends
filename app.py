@@ -17,7 +17,6 @@ def parse_data(user):
             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
     athlete = client.get_athlete()
-    print(athlete.firstname);
     activities = client.get_activities()
 
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None and a.average_speed.num != 0.00, activities)

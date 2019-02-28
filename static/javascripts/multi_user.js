@@ -29,7 +29,7 @@ $(".nav .nav-link").on("click", function(){
 //Build Graphs
 var filterObject = new Filters(dataset);
 var graphSet1 = new graphSet(margin, w, h, "graphSet1Container");
-var dataObject = new DataObject(dataset, String(id), colours(dataObjects.length), graphSet1, filterObject);
+var dataObject = new DataObject(dataset, String(id), colours(dataObjects.length), graphSet1, filterObject, "you");
 graphSet1.buildGraphs(dataObject.getFilterObject(), dataObject.getData());
 graphSet1.updatePlots(dataObject.getFilteredData(), dataObject.getFilterObject(), dataObject.getColour(), dataObject.getId());
 updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
@@ -47,8 +47,7 @@ function findUserData() {
       JSON.parse(response).forEach(function(elem) {
         var option = document.createElement("a");
         option.text = elem.username;
-        option.class = "user_option";
-        option.onclick = function() { plotData(elem.username); }
+        option.onclick = function() { return plotData(elem.username); }
         $("#myDropdown").append(option);
       })
     },
@@ -59,7 +58,9 @@ function findUserData() {
 }
 
 function plotData(user) {
-  showDropdown();
+  console.log("Plot");
+  showDropdown("myDropdown");
+  console.log(d3.select("#myDropdown"));
   d3.select("#myDropdown").selectAll("a").remove();
   console.log("Get user data");
   $.ajax({
@@ -90,7 +91,7 @@ function getAllData() {
 function addNewUserData(user, d, line_points, colour) {
     //Update 1st set of graphs
     id = id + 1;
-    var dataObject = new DataObject(d, String(id), colours(dataObjects.length), graphSet1, filterObject);
+    var dataObject = new DataObject(d, String(id), colours(dataObjects.length), graphSet1, filterObject, user);
     dataObjects.push(dataObject);
 
     var allData = getAllData();
@@ -112,6 +113,7 @@ function addNewUserData(user, d, line_points, colour) {
     userObject.title = "Click to remove";
     userObject.onclick = function(d) {
       removeUsersData(userObject.value);
+      console.log(d3.select(userObject));
       d3.select(userObject).remove();
     };
     document.getElementById('usersList').appendChild(userObject);
@@ -136,6 +138,10 @@ $(function() {
           " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
     }
   });
+  d1 = new Date($( "#slider" ).slider( "values", 0 )*1000);
+  d2 = new Date($( "#slider" ).slider( "values", 1 )*1000);
+  $("#date" ).val(d1.getDay()+1 + "/" + parseInt(d1.getMonth()+1) + "/" + d1.getFullYear() +
+      " - " + parseInt(d2.getDay()+1) + "/" + parseInt(d2.getMonth()+1)+ "/" + d2.getFullYear());
 });
 
 $(function() {
@@ -153,10 +159,14 @@ $(function() {
       }
       min_time = new Date(ui.values[0]*1000);
       max_time = new Date(ui.values[1]*1000);
-      $("#time" ).val(min_time.getHours() + ":" + min_time.getMinutes() +
-          " - " + max_time.getHours() + ":" + max_time.getMinutes());
-    }
+      $("#time" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
+          " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
+}
   });
+  t1 = new Date($( "#timeSlider" ).slider( "values", 0 )*1000);
+  t2 = new Date($( "#timeSlider" ).slider( "values", 1 )*1000);
+  $("#time" ).val(buildTimeString(t1.getHours(), t1.getMinutes()) +
+      " - " + buildTimeString(t2.getHours(), t2.getMinutes()));
 });
 
 
@@ -177,6 +187,8 @@ $(function() {
           " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
     }
   })
+  $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
+      " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
 });
 
 $(function() {
@@ -196,6 +208,8 @@ $(function() {
           " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
     }
   })
+  $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
+      " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
 });
 
 $(function() {
@@ -215,6 +229,8 @@ $(function() {
           " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
     }
   });
+  $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
+      " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
 });
 
 function filterTags(tag) {
@@ -238,7 +254,33 @@ function filterTags(tag) {
 function removeUsersData(id) {
   d3.selectAll("[id='#dataset" + id + "']").remove();
   d3.selectAll("[id='#regression" + id + "']").remove();
-  d3.select("[id='#threshold" + id + "']]").remove();
+  d3.selectAll("[id='#threshold" + id + "']").remove();
   var index = dataObjects.indexOf(dataObjects.find(d => { return d.id == id }));
   dataObjects.splice(index, 1);
+}
+
+function getNeededPace(distance) {
+  var min_dist = distance - (0.1*distance);
+  var max_dist = parseInt(distance) + parseInt((0.1*distance));
+  $('#distanceSlider').slider( "values", 0, min_dist );
+  $('#distanceSlider').slider( "values", 1, max_dist );
+  $("#distance" ).val(min_dist + "m" + " - " + max_dist + "m");
+  document.getElementById("distancePace").innerHTML = "";
+  for (index in dataObjects) {
+    var dataObject = dataObjects[index];
+    acceptable_data = dataObject.getData().filter(d => (d.distance <= max_dist && d.distance >= min_dist));
+    dataObject.getFilterObject().setDistances(min_dist, max_dist);
+    dataObject.getGraphSet().updateScales(dataObject.getData(), dataObject.getFilterObject());
+    dataObject.updateGraphs();
+    updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
+    var filtered = dataObject.getFilteredData();
+    var needed_pace = d3.mean(filtered, d => d.average_pace);
+    var paceObject = document.createElement("li");
+    paceObject.innerHTML = dataObject.user + ": " + needed_pace.toFixed(2) + "mins/km"
+    paceObject.className = "list-group-item";
+    paceObject.value = String(id);
+
+    document.getElementById('distancePace').appendChild(paceObject);
+  }
+
 }

@@ -25,6 +25,7 @@ function showSecondarySliders() {
   }
 }
 
+
 showSecondarySliders();
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = width - margin.left - margin.right,
@@ -110,6 +111,8 @@ function createGraphs(d, line_points, colour) {
     document.getElementById('graph2sliders').className = "col-6";
 
     $(function() {
+      var min_date;
+      var max_date;
       $( "#graph2slider" ).slider({
         range: true,
         min: new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000,
@@ -130,14 +133,19 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
-
           $("#date2" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
               " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1) + "/" + max_date.getFullYear());
         }
       });
+      d1 = new Date($( "#graph2slider" ).slider( "values", 0 )*1000);
+      d2 = new Date($( "#graph2slider" ).slider( "values", 1 )*1000);
+      $("#date2" ).val(d1.getDay()+1 + "/" + parseInt(d1.getMonth()+1) + "/" + d1.getFullYear() +
+          " - " + parseInt(d2.getDay()+1) + "/" + parseInt(d2.getMonth()+1)+ "/" + d2.getFullYear());
     });
 
     $(function() {
+      var min_time;
+      var max_time;
       $( "#graph2timeSlider" ).slider({
         range: true,
         min: new Date(0, 0, 0, 0, 0, 0).getTime()/1000,
@@ -158,10 +166,14 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
-          $("#time2" ).val(min_time.getHours() + ":" + min_time.getMinutes() +
-              " - " + max_time.getHours() + ":" + max_time.getMinutes());
+          $("#time2" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
+              " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
         }
       });
+      t1 = new Date($( "#graph2timeSlider" ).slider( "values", 0 )*1000);
+      t2 = new Date($( "#graph2timeSlider" ).slider( "values", 1 )*1000);
+      $("#time2" ).val(buildTimeString(t1.getHours(), t1.getMinutes()) +
+      " - " + buildTimeString(t2.getHours(), t2.getMinutes()));
     });
 
     $(function() {
@@ -186,6 +198,8 @@ function createGraphs(d, line_points, colour) {
           $("#distance2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
+      $("#distance2" ).val($( "#graph2distanceSlider" ).slider( "values", 0 ) + "m" +
+          " - " + $( "#graph2distanceSlider" ).slider( "values", 1 ) + "m");
     });
 
     $(function() {
@@ -210,6 +224,8 @@ function createGraphs(d, line_points, colour) {
           $("#elevation2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
+      $("#elevation2" ).val($( "#graph2elevationSlider" ).slider( "values", 0 ) + "m" +
+          " - " + $( "#graph2elevationSlider" ).slider( "values", 1 ) + "m");
     });
 
     $(function() {
@@ -234,6 +250,8 @@ function createGraphs(d, line_points, colour) {
           $("#heartrate2" ).val(ui.values[0]+ "bpm" + " - " + ui.values[1] + "bpm");
         }
       });
+      $("#heartrate2" ).val($( "#graph2heartrateSlider" ).slider( "values", 0 ) + "bpm" +
+          " - " + $( "#graph2heartrateSlider" ).slider( "values", 1 ) + "bpm");
     });
   }
   else {
@@ -245,13 +263,13 @@ function createGraphs(d, line_points, colour) {
     //Remove second set of graphs
 
     showSecondarySliders();
+    d3.selectAll("[id='#threshold2']").remove();
+    d3.selectAll("[id='#pace2']").remove()
 
     d3.select('#secondary_graphs').selectAll('div').remove();
     d3.select('#primary_graphs').selectAll('div').remove();
     document.getElementById('primary_graphs').className = "col-12";
     document.getElementById('sliders').className = "col-12";
-
-
 
     var bb = document.querySelector ('#primary_graphs')
                         .getBoundingClientRect();
@@ -289,12 +307,14 @@ $(function() {
         var dataObject = dataObjects[index];
         dataObject.updateGraphs();
       }
-      min_date = new Date($( "#slider" ).slider( "values", 0 )*1000);
-      max_date = new Date($( "#slider" ).slider( "values", 1 )*1000);
       $("#date" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
           " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
     }
   });
+  d1 = new Date($( "#slider" ).slider( "values", 0 )*1000);
+  d2 = new Date($( "#slider" ).slider( "values", 1 )*1000);
+  $("#date" ).val(d1.getDay()+1 + "/" + parseInt(d1.getMonth()+1) + "/" + d1.getFullYear() +
+      " - " + parseInt(d2.getDay()+1) + "/" + parseInt(d2.getMonth()+1)+ "/" + d2.getFullYear());
 });
 
 $(function() {
@@ -318,12 +338,15 @@ $(function() {
         var dataObject = dataObjects[index];
         dataObject.updateGraphs();
       }
-      min_time = new Date(ui.values[0]*1000);
-      max_time = new Date(ui.values[1]*1000);
-      $("#time" ).val(min_time.getHours() + ":" + min_time.getMinutes() +
-          " - " + max_time.getHours() + ":" + max_time.getMinutes());
+      $("#time" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
+          " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
     }
   });
+  t1 = new Date($( "#timeSlider" ).slider( "values", 0 )*1000);
+  t2 = new Date($( "#timeSlider" ).slider( "values", 1 )*1000);
+  $("#time" ).val(buildTimeString(t1.getHours(), t1.getMinutes()) +
+      " - " + buildTimeString(t2.getHours(), t2.getMinutes()));
+
 });
 
 
@@ -341,7 +364,7 @@ $(function() {
         globalFilters.setMaxDistance(ui.values[1]);
       }
       dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(getAllData(), globalFilters);
+      dataObject1.graphSet.updateScales(getAllData(), globalFilters);
       for (index in dataObjects) {
         var dataObject = dataObjects[index];
         dataObject.updateGraphs();
@@ -350,6 +373,8 @@ $(function() {
           " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
     }
   })
+  $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
+      " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
 });
 
 $(function() {
@@ -375,6 +400,8 @@ $(function() {
           " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
     }
   })
+  $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
+      " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
 });
 
 $(function() {
@@ -400,23 +427,24 @@ $(function() {
           " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
     }
   });
+  $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
+      " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
 });
 
 function filterTags(tag) {
+  var tagObject = document.createElement("li");
+  tagObject.innerHTML = tag;
+  tagObject.className = "list-group-item";
+  tagObject.title = "Click to remove";
+  document.getElementById("tagsList").appendChild(tagObject);
+  tagObject.onclick = function(d) {
+    dataObject.getFilterObject().removeTag(tagObject.innerHTML)
+    d3.select(tagObject).remove();
+  };
   for (index in dataObjects) {
     var dataObject = dataObjects[index];
-    var tagObject = document.createElement("li");
-    tagObject.innerHTML = tag;
-    tagObject.className = "list-group-item";
-    tagObject.value = String(dataObject.getId());
-    tagObject.title = "Click to remove";
-    document.getElementById("tagsList").appendChild(tagObject);
-    tagObject.onclick = function(d) {
-      dataObject.getFilterObject().removeTag(tagObject.innerHTML)
-      d3.select(tagObject).remove();
-    };
     dataObject.getFilterObject().addTag(tag);
-    dataObject.getGraphSet().updateScales(getAllData(), dataObject.getFilterObject());
+    dataObject.graphSet.updateScales(getAllData(), dataObject.getFilterObject());
     dataObject.updateGraphs();
   }
 }
@@ -443,17 +471,32 @@ function mergeGraphs() {
   updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
 
-function getNeededPace(distance, dataObject) {
+function getNeededPace(distance) {
   var min_dist = distance - (0.1*distance);
   var max_dist = parseInt(distance) + parseInt((0.1*distance));
-  acceptable_data = dataObject.getData().filter(d => (d.distance <= max_dist && d.distance >= min_dist));
-  dataObject.getFilterObject().setDistances(min_dist, max_dist);
-  dataObject.getGraphSet().updateScales(dataObject.getData(), dataObject.getFilterObject());
-  dataObject.updateGraphs();
-  updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
-  filtered = dataObject.getFilteredData();
-  needed_pace = d3.mean(filtered, function(d) { return d.average_pace; })
-  document.getElementById("pace").innerHTML="Average Pace: " + needed_pace.toFixed(3)+" mins/km";
+  $('#distanceSlider').slider( "values", 0, min_dist );
+  $('#distanceSlider').slider( "values", 1, max_dist );
+  $("#distance" ).val(min_dist + "m" + " - " + max_dist + "m");
+  $('#graph2distanceSlider').slider( "values", 0, min_dist );
+  $('#graph2distanceSlider').slider( "values", 1, max_dist );
+  $("#distance2" ).val(min_dist + "m" + " - " + max_dist + "m");
+  document.getElementById("distancePace").innerHTML = "";
+  for (index in dataObjects) {
+    console.log(index);
+    var dataObject = dataObjects[index];
+    acceptable_data = dataObject.getData().filter(d => (d.distance <= max_dist && d.distance >= min_dist));
+    dataObject.getFilterObject().setDistances(min_dist, max_dist);
+    dataObject.getGraphSet().updateScales(dataObject.getData(), dataObject.getFilterObject());
+    dataObject.updateGraphs();
+    updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
+    var filtered = dataObject.getFilteredData();
+    var needed_pace = d3.mean(filtered, d => d.average_pace);
+    var paceObject = document.createElement("li");
+    paceObject.innerHTML = dataObject.id + ": " + needed_pace.toFixed(2) + "mins/km"
+    paceObject.className = "list-group-item";
+    paceObject.id = "#pace"+dataObject.id
+    document.getElementById('distancePace').appendChild(paceObject);
+  }
 }
 
 document.getElementById("addChart").onclick = function() {

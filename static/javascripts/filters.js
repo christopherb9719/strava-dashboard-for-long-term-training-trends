@@ -42,8 +42,6 @@ class Filters {
   setTimes(min_time, max_time) {
     this.min_time = new Date(min_time);
     this.max_time = new Date(max_time);
-    console.log(this.min_time);
-    console.log(this.max_time);
   }
 
   addTag(tag) {
@@ -139,7 +137,6 @@ class Filters {
     if (index > -1) {
       this.tags.splice(index, 1);
     }
-    console.log(this.tags)
   }
   getMinPace() {
     return this.min_average_pace;
@@ -195,7 +192,7 @@ class Filters {
 }
 
 class DataObject {
-  constructor(data, id, colour, graphSet, filters) {
+  constructor(data, id, colour, graphSet, filters, user) {
     this.data = data;
     this.id = id;
     if (filters == null) {
@@ -206,6 +203,7 @@ class DataObject {
     }
     this.colour = colour;
     this.graphSet = graphSet;
+    this.user = user;
   }
 
   updateGraphs() {

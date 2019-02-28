@@ -14,7 +14,7 @@ function appendPath(graph, pts, line_class, id, colour) {
     .attr("stroke", colour)
     .attr("d", lineFunction(pts))
     .on("click", function() {
-      graph.getSvg().selectAll("[id='#threshold" + id + "']").remove();
+      d3.selectAll("[id='#threshold" + id + "']").remove();
       var pace = graph.getY().invert(d3.mouse(this)[1]);
       var seconds = Math.round((pace % 1) * 60);
       if (seconds < 10) {
@@ -22,7 +22,11 @@ function appendPath(graph, pts, line_class, id, colour) {
       }
       var minutes = Math.floor(pace - (pace % 1));
       var threshold = minutes + ":" + seconds;
-      document.getElementById("ThresholdPace").innerHTML = "Threshold Pace: " + threshold + " mins/km";
+      var paceObject = document.createElement("li");
+      paceObject.innerHTML = id + ": " + threshold + "mins/km"
+      paceObject.className = "list-group-item";
+      paceObject.id = "#threshold" + id;
+      document.getElementById('ThresholdPace').appendChild(paceObject);
       graph.getSvg().append("a").append("circle")
         .attr("cx", d3.mouse(this)[0])
         .attr("cy", d3.mouse(this)[1])
