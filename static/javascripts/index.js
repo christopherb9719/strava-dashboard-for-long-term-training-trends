@@ -8,11 +8,9 @@ var bb = document.querySelector ('#primary_graphs')
 var width = bb.right - bb.left;
 
 document.getElementById('mergeGraphs').style.display = "none";
+$('#single_user').addClass( 'active' )
 
-$(".nav .nav-link").on("click", function(){
-   $(".nav").find(".active").removeClass("active");
-   $(this).addClass("active");
-});
+
 
 function showSecondarySliders() {
   var dom = document.getElementById("graph2sliders");
@@ -119,8 +117,11 @@ function createGraphs(d, line_points, colour) {
         max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
-          min_date = new Date($( "#slider" ).slider( "values", 0 )*1000);
-          max_date = new Date($( "#slider" ).slider( "values", 1 )*1000);
+          min_date = new Date(ui.values[0]*1000);
+          max_date = new Date(ui.values[1]*1000);
+          $("#date2" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
+              " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1) + "/" + max_date.getFullYear());
+
           if (globalFilters.getEarliestDate().getTime()/1000 > ui.values[0]) {
             globalFilters.setMinDate(min_date);
           }
@@ -133,8 +134,6 @@ function createGraphs(d, line_points, colour) {
             var dataObject = dataObjects[index];
             dataObject.updateGraphs();
           }
-          $("#date2" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
-              " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1) + "/" + max_date.getFullYear());
         }
       });
       d1 = new Date($( "#graph2slider" ).slider( "values", 0 )*1000);

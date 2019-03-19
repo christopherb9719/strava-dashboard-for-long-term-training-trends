@@ -29,6 +29,7 @@
         {% endblock %}
     </head>
     <body>
+      <div id="topheader">
       <nav class="navbar navbar-expand-md navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
           <div class="navbar-header">
@@ -42,21 +43,21 @@
           </div>
 
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-              <li class="active">
-                <a href="{{url_for('views.loadDashboard')}}" title="Analyse your own data">Single User</a>
+            <ul class="nav navbar-nav navbar-left">
+              <li id="single_user">
+                <a href="{{url_for('auth.loadDashboard')}}" title="Analyse your own data">Single User</a>
               </li>
-              <li>
-                <a href="{{url_for('views.loadMultiUser')}}" title="Compare your data with other user's">Multi-User<span class="sr-only">(current)</span></a>
+              <li id="multi_user">
+                <a href="{{url_for('auth.loadMultiUser')}}" title="Compare your data with other user's">Multi-User<span class="sr-only">(current)</span></a>
               </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">VDOT Calculator</a>
                   <ul class="dropdown-menu">
                     <iframe src="https://runsmartproject.com/calculator/embed/index.php?title=false" width="600" height="500" frameborder="0"></iframe>
                   </ul>
               </li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
               <li>
                 <button id="logout" class="btn btn-default navbar-btn" onclick="logout()">Log Out</button>
               </li>
@@ -64,6 +65,7 @@
           </div>
         </div>
       </nav>
+    </div>
       <br></br>
       {% block body %}
         <div class="row">

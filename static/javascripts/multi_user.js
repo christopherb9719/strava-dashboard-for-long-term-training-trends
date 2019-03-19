@@ -7,6 +7,8 @@ var bb = document.querySelector('#graphSet1Container')
 
 var width = bb.right - bb.left;
 
+$('#multi_user').addClass( 'active' )
+
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = width - margin.left - margin.right,
     h = 500 - margin.top - margin.bottom;
@@ -21,10 +23,6 @@ var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-$(".nav .nav-link").on("click", function(){
-   $(".nav").find(".active").removeClass("active");
-   $(this).addClass("active");
-});
 
 //Build Graphs
 var filterObject = new Filters(dataset);
