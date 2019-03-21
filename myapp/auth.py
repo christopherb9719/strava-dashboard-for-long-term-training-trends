@@ -155,8 +155,6 @@ def parse_data(user):
     if client.token_expires_at != None:
         if time.time() > client.token_expires_at:
             print("Token expired, getting new token")
-            print(client.refresh_token)
-
             new_token = client.refresh_access_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
@@ -172,7 +170,7 @@ def parse_data(user):
             'distance' : run.distance.num,
             'heart_rate' : run.average_heartrate,
             'average_speed' : (run.average_speed.num*60*60)/1000,
-            'average_pace' : 60/summary['average_speed'],
+            'average_pace' : 60/((run.average_speed.num*60*60)/1000),
             'description' : run.description,
             'total_elevation_gain' : run.total_elevation_gain.num,
             'year' : run.start_date.year,

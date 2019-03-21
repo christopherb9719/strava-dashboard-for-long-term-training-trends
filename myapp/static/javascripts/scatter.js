@@ -155,11 +155,11 @@ function plotScatterPoints(plot, data, colour, x, y, filters, id) {
         }
         var minutes = Math.floor(d.average_pace - (d.average_pace % 1));
         //var pace = (d.average_pace - (d.average_pace % 1)) + ":" + d.average_pace%1.toFixed(2);
-        var html  = "<span style='color:" + 'blue' + ";'>Run ID: " + d.id + "<br/></span> " +
+        var html  = "<span style='color:" + 'blue' + ";'>" + d.name + "<br/></span> " +
+                    "Date: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b><br/>" +
                     "Distance: <b> " + d.distance + "m </b><br/>" +
-                    "Average Heart Rate: <b>" + d.heart_rate + " bpm</b>" +
-                    "<br/> Average Pace: <b/>" + minutes + ":" + seconds + "/km</b>" +
-                    "<br/> Date of Run: <b/>" + d.day + "/" + d.month + "/" + d.year + "</b>";
+                    "Heart Rate: <b>" + d.heart_rate + " bpm</b><br/>" +
+                    "Pace: <b/>" + minutes + ":" + seconds + "/km</b>";
 
         tooltip.html(html)
             .style("left", (d3.event.pageX + 15) + "px")

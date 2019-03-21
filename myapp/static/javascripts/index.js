@@ -439,11 +439,13 @@ function filterTags(tag) {
   tagObject.onclick = function(d) {
     dataObject.getFilterObject().removeTag(tagObject.innerHTML)
     d3.select(tagObject).remove();
+    dataObject.getGraphSet().updateScales(dataObject.getFilteredData(), dataObject.getFilterObject());
+    dataObject.updateGraphs();
   };
   for (index in dataObjects) {
     var dataObject = dataObjects[index];
     dataObject.getFilterObject().addTag(tag);
-    dataObject.graphSet.updateScales(getAllData(), dataObject.getFilterObject());
+    dataObject.getGraphSet().updateScales(dataObject.getFilteredData(), dataObject.getFilterObject());
     dataObject.updateGraphs();
   }
 }

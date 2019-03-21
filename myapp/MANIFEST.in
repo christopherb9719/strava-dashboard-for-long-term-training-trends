@@ -1,0 +1,7 @@
+graft myapp/static
+graft myapp/templates
+graft config.py
+graft myapp/models.py
+graft myapp/routes/auth.py
+graft myapp/routes/views.py
+global-exclude *.pyc

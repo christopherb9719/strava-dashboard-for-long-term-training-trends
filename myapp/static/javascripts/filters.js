@@ -152,7 +152,7 @@ class Filters {
       && (d.heart_rate <= this.getMaxHeartRate() && d.heart_rate >= this.getMinHeartRate())
       && this.dataInDate(d)
       && this.dataInTime(d)
-      && this.containsTags(d)
+      && (this.containsTags(d) != true)
     ));
     return filtered;
   }
@@ -182,12 +182,14 @@ class Filters {
   }
 
   containsTags(d) {
+    var containsTag = false;
+    var list = d.name.split(" ");
     this.getTags().forEach(function(tag) {
-      if (d.description != null && d.description.contains(tag)) {
-        return false;
+      if (list.includes(tag)) {
+        containsTag = true;
       }
     })
-    return true;
+    return containsTag;
   }
 }
 

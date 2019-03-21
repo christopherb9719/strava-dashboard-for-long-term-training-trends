@@ -13,7 +13,6 @@ def parse_data(user):
     if client.token_expires_at != None:
         if time.time() > client.token_expires_at:
             print("Token expired, getting new token")
-            print(client.refresh_token)
             new_token = client.refresh_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
