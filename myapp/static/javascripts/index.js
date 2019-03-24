@@ -448,7 +448,7 @@ function updateGraphScales(filtersObject) {
     console.log("Clicked = false");
     console.log("Global min dist: " + globalFilters.getMinDistance());
     console.log("Global min elev: " + globalFilters.getMinElevationGain());
-    graphSet1.updateScales(globalFilters.filterData(dataObject1.getData()));
+    graphSet1.updateScales(globalFilters.filterData(getAllData()));
     for (index in dataObjects) {
       var dataObject = dataObjects[index];
       dataObject.updateGraphs();
