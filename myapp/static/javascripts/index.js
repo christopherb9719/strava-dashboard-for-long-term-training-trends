@@ -88,6 +88,7 @@ function split() {
 
 function createGraphs(d, line_points, colour) {
   if (clicked == false) {
+    //Upadate buttons
     document.getElementById('addChart').innerText = "Remove Data";
     document.getElementById('addChart').title = "Remove the Second Layer of Data from the graph";
     document.getElementById('mergeGraphs').style.display = "inline";
@@ -97,10 +98,12 @@ function createGraphs(d, line_points, colour) {
 
     clicked = true;
 
-    //Update 1st set of graphs
+    //Update Graphs
+    console.log("Creating new graphs");
     dataObject2 = new DataObject(d, "2", "#00e600", graphSet1);
     dataObjects.push(dataObject2);
-    dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
+    updateGlobalFilters();
+    updateGraphScales();
     updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 
     //Set up sliders for second set of graphs
@@ -117,23 +120,15 @@ function createGraphs(d, line_points, colour) {
         max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
+          dataObject2.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
+          globalFilters.setMinDate(getMinDate());
+          globalFilters.setMaxDate(getMaxDate());
+          updateGraphScales(dataObject2);
+
           min_date = new Date(ui.values[0]*1000);
           max_date = new Date(ui.values[1]*1000);
           $("#date2" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
               " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1) + "/" + max_date.getFullYear());
-
-          if (globalFilters.getEarliestDate().getTime()/1000 > ui.values[0]) {
-            globalFilters.setMinDate(min_date);
-          }
-          if (globalFilters.getLatestDate().getTime()/1000 < ui.values[1]) {
-            globalFilters.setMaxDate(max_date);
-          }
-          dataObject2.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-          dataObject2.getGraphSet().updateScales(dataObject2.getData(), globalFilters);
-          for (index in dataObjects) {
-            var dataObject = dataObjects[index];
-            dataObject.updateGraphs();
-          }
         }
       });
       d1 = new Date($( "#graph2slider" ).slider( "values", 0 )*1000);
@@ -151,20 +146,13 @@ function createGraphs(d, line_points, colour) {
         max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
         values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
         slide: function( event, ui ) {
+          dataObject2.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
+          globalFilters.setMinTime(getMinTime());
+          globalFilters.setMaxTime(getMaxTime());
+          updateGraphScales(dataObject2);
+
           min_time = new Date(ui.values[0]*1000);
           max_time = new Date(ui.values[1]*1000);
-          if (globalFilters.getEarliestTime().getTime()/1000 > ui.values[0]) {
-            globalFilters.setMinTime(min_time);
-          }
-          if (globalFilters.getLatestTime().getTime()/1000 < ui.values) {
-            globalFilters.setMaxDate(max_time);
-          }
-          dataObject2.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-          dataObject2.getGraphSet().updateScales(dataObject2.getData(), globalFilters);
-          for (index in dataObjects) {
-            var dataObject = dataObjects[index];
-            dataObject.updateGraphs();
-          }
           $("#time2" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
               " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
         }
@@ -182,18 +170,11 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.distance }),
         values: [0, d3.max(dataset, function(d) { return d.distance })],
         slide: function( event, ui ) {
-          if (globalFilters.getMinDistance() > ui.values[0]) {
-            globalFilters.setMinDistance(ui.values[0]);
-          }
-          if (globalFilters.getMaxDistance() < ui.values[1]) {
-            globalFilters.setMaxDistance(ui.values[1]);
-          }
           dataObject2.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-          dataObject2.getGraphSet().updateScales(dataObject2.getData(), globalFilters);
-          for (index in dataObjects) {
-            var dataObject = dataObjects[index];
-            dataObject.updateGraphs();
-          }
+          globalFilters.setMinDistance(getMinDistance());
+          globalFilters.setMaxDistance(getMaxDistance());
+          updateGraphScales(dataObject2)
+
           $("#distance2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
@@ -208,18 +189,11 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
         values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
         slide: function( event, ui ) {
-          if (globalFilters.getMinElevationGain() > ui.values[0]) {
-            globalFilters.setMinElevation(ui.values[0]);
-          }
-          if (globalFilters.getMaxElevationGain() < ui.values[1]) {
-            globalFilters.setMaxElevation(ui.values[1]);
-          }
           dataObject2.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-          dataObject2.getGraphSet().updateScales(dataObject2.getData(), globalFilters);
-          for (index in dataObjects) {
-            var dataObject = dataObjects[index];
-            dataObject.updateGraphs();
-          }
+          globalFilters.setMinElevation(getMinElevationGain());
+          globalFilters.setMaxElevation(getMaxElevationGain());
+          updateGraphScales(dataObject2)
+
           $("#elevation2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
       })
@@ -234,18 +208,10 @@ function createGraphs(d, line_points, colour) {
         max: d3.max(dataset, function(d) { return d.heart_rate }),
         values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
         slide: function( event, ui ) {
-          if (globalFilters.getMinHeartRate() > ui.values[0]) {
-            globalFilters.setMinHeartRate(ui.values[0]);
-          }
-          if (globalFilters.getMaxHeartRate() < ui.values[1]) {
-            globalFilters.getMaxHeartRate(ui.values[1]);
-          }
           dataObject2.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-          dataObject2.getGraphSet().updateScales(dataObject2.getData(), globalFilters);
-          for (index in dataObjects) {
-            var dataObject = dataObjects[index];
-            dataObject.updateGraphs();
-          }
+          globalFilters.setMinHeartRate(getMinHeartRate());
+          globalFilters.setMaxHeartRate(getMaxHeartRate());
+          updateGraphScales(dataObject2)
           $("#heartrate2" ).val(ui.values[0]+ "bpm" + " - " + ui.values[1] + "bpm");
         }
       });
@@ -292,20 +258,13 @@ $(function() {
     max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
-      min_date = new Date($( "#slider" ).slider( "values", 0 )*1000);
-      max_date = new Date($( "#slider" ).slider( "values", 1 )*1000);
-      if (globalFilters.getEarliestDate().getTime() > min_date.getTime()) {
-        globalFilters.setMinDate(min_date);
-      }
-      if (globalFilters.getLatestDate().getTime() < max_date.getTime()) {
-        globalFilters.setMaxDate(max_date);
-      }
       dataObject1.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      dataObject1.getGraphSet().updateScales(getAllData(), globalFilters);
-      for (index in dataObjects) {
-        var dataObject = dataObjects[index];
-        dataObject.updateGraphs();
-      }
+      globalFilters.setMinDate(getMinDate());
+      globalFilters.setMaxDate(getMaxDate());
+      updateGraphScales(dataObject1);
+
+      min_date = new Date(ui.values[0]*1000);
+      max_date = new Date(ui.values[1]*1000);
       $("#date" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
           " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
     }
@@ -325,18 +284,11 @@ $(function() {
     slide: function( event, ui ) {
       min_time = new Date(ui.values[0]*1000);
       max_time = new Date(ui.values[1]*1000);
-      if (globalFilters.getEarliestTime().getTime() > min_time.getTime()) {
-        globalFilters.setMinTime(min_time);
-      }
-      if (globalFilters.getLatestTime().getTime() < max_time.getTime()) {
-        globalFilters.setMaxDate(max_time);
-      }
       dataObject1.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      dataObject1.getGraphSet().updateScales(getAllData(), globalFilters);
-      for (index in dataObjects) {
-        var dataObject = dataObjects[index];
-        dataObject.updateGraphs();
-      }
+      globalFilters.setMinTime(getMinTime());
+      globalFilters.setMaxTime(getMaxTime());
+      updateGraphScales(dataObject1);
+
       $("#time" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
           " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
     }
@@ -356,18 +308,11 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.distance }),
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
-      if (globalFilters.getMinDistance() > ui.values[0]) {
-        globalFilters.setMinDistance(ui.values[0]);
-      }
-      if (globalFilters.getMaxDistance() < ui.values[1]) {
-        globalFilters.setMaxDistance(ui.values[1]);
-      }
       dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-      dataObject1.graphSet.updateScales(getAllData(), globalFilters);
-      for (index in dataObjects) {
-        var dataObject = dataObjects[index];
-        dataObject.updateGraphs();
-      }
+      globalFilters.setMinDistance(getMinDistance());
+      globalFilters.setMaxDistance(getMaxDistance());
+      updateGraphScales(dataObject1);
+
       $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
     }
@@ -383,18 +328,11 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
-      if (globalFilters.getMinElevationGain() > ui.values[0]) {
-        globalFilters.setMinElevation(ui.values[0]);
-      }
-      if (globalFilters.getMaxElevationGain() < ui.values[1]) {
-        globalFilters.setMaxElevation(ui.values[1]);
-      }
       dataObject1.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(getAllData(), globalFilters);
-      for (index in dataObjects) {
-        var dataObject = dataObjects[index];
-        dataObject.updateGraphs();
-      }
+      globalFilters.setMinElevation(getMinElevationGain());
+      globalFilters.setMaxElevation(getMaxElevationGain());
+      updateGraphScales(dataObject1);
+
       $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
     }
@@ -410,18 +348,11 @@ $(function() {
     max: d3.max(dataset, function(d) { return d.heart_rate }),
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
-      if (globalFilters.getMinHeartRate() > ui.values[0]) {
-        globalFilters.setMinHeartRate(ui.values[0]);
-      }
-      if (globalFilters.getMaxHeartRate() < ui.values[1]) {
-        globalFilters.getMaxHeartRate(ui.values[1]);
-      }
       dataObject1.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-      dataObject1.getGraphSet().updateScales(dataObject1.getFilteredData(), globalFilters);
-      for (index in dataObjects) {
-        var dataObject = dataObjects[index];
-        dataObject.updateGraphs();
-      }
+      globalFilters.setMinHeartRate(getMinHeartRate());
+      globalFilters.setMaxHeartRate(getMaxHeartRate());
+      updateGraphScales(dataObject1);
+
       $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
           " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
     }
@@ -439,13 +370,13 @@ function filterTags(tag) {
   tagObject.onclick = function(d) {
     dataObject.getFilterObject().removeTag(tagObject.innerHTML)
     d3.select(tagObject).remove();
-    dataObject.getGraphSet().updateScales(dataObject.getFilteredData(), dataObject.getFilterObject());
+    dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
     dataObject.updateGraphs();
   };
   for (index in dataObjects) {
     var dataObject = dataObjects[index];
     dataObject.getFilterObject().addTag(tag);
-    dataObject.getGraphSet().updateScales(dataObject.getFilteredData(), dataObject.getFilterObject());
+    dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
     dataObject.updateGraphs();
   }
 }
@@ -454,20 +385,16 @@ function mergeGraphs() {
   d3.select('#primary_graphs').selectAll('div').remove();
   d3.select('#secondary_graphs').selectAll('div').remove();
   document.getElementById('primary_graphs').className = "col-12";
-
-
   var bb = document.querySelector ('#primary_graphs')
                       .getBoundingClientRect();
-
   var width = bb.right - bb.left;
 
   var filterObject = new Filters(dataset);
   graphSet1 = new graphSet(margin, width, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject2.setGraphSet(graphSet1);
-  graphSet1.buildGraphs(filterObject, dataObject1.getData().concat(dataObject2.getData()));
-  graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
-  graphSet1.updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
+  graphSet1.buildGraphs(globalFilters, getAllData());
+  updateGraphScales();
   updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
   updateTrendline(dataObject2.getFilteredData(), dataObject2.getGraphSet().getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
@@ -487,9 +414,8 @@ function getNeededPace(distance) {
     var dataObject = dataObjects[index];
     acceptable_data = dataObject.getData().filter(d => (d.distance <= max_dist && d.distance >= min_dist));
     dataObject.getFilterObject().setDistances(min_dist, max_dist);
-    dataObject.getGraphSet().updateScales(dataObject.getData(), dataObject.getFilterObject());
+    dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
     dataObject.updateGraphs();
-    updateTrendline(dataObject.getFilteredData(), dataObject.getGraphSet().getScatter(), "line_primary", dataObject.getId(), dataObject.getColour());
     var filtered = dataObject.getFilteredData();
     var needed_pace = d3.mean(filtered, d => d.average_pace);
     var paceObject = document.createElement("li");
@@ -517,6 +443,27 @@ document.getElementById("mergeGraphs").onclick = function() {
   }
 };
 
+function updateGraphScales(filtersObject) {
+  if (clicked == true) {
+    console.log("Clicked = false");
+    console.log("Global min dist: " + globalFilters.getMinDistance());
+    console.log("Global min elev: " + globalFilters.getMinElevationGain());
+    graphSet1.updateScales(globalFilters.filterData(dataObject1.getData()));
+    for (index in dataObjects) {
+      var dataObject = dataObjects[index];
+      dataObject.updateGraphs();
+    }
+  }
+  else {
+    console.log("Clicked = true");
+    for (index in dataObjects) {
+      var dataObject = dataObjects[index];
+      dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
+      dataObject.updateGraphs();
+    }
+  }
+}
+
 function getAllData() {
   var allData = [];
   for (var index in dataObjects) {
@@ -524,4 +471,143 @@ function getAllData() {
   }
   allData = [].concat.apply([], allData);
   return allData;
+}
+
+
+function updateGlobalFilters() {
+  globalFilters.setMinDate(getMinDate());
+  globalFilters.setMaxDate(getMaxDate());
+  globalFilters.setMinTime(getMinTime());
+  globalFilters.setMaxTime(getMaxTime());
+  globalFilters.setMinDistance(getMinDistance());
+  globalFilters.setMaxDistance(getMaxDistance());
+  globalFilters.setMinElevation(getMinElevationGain());
+  globalFilters.setMaxElevation(getMaxElevationGain());
+  globalFilters.setMinHeartRate(getMinHeartRate());
+  globalFilters.setMaxHeartRate(getMaxHeartRate());
+}
+
+function getMinElevationGain() {
+  if (dataObjects.length > 1) {
+    var minElevationGain = dataObjects[0].getFilterObject().getMinElevationGain();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMinElevationGain() < minElevationGain) {
+        minElevationGain = dataObjects[index].getFilterObject().getMinElevationGain();
+      }
+    }
+    return minElevationGain;
+  }
+  return dataObjects[0].getFilterObject().getMinElevationGain();
+}
+function getMaxElevationGain() {
+  if (dataObjects.length > 1) {
+    var maxElevationGain = dataObjects[0].getFilterObject().getMaxElevationGain();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMaxElevationGain() > maxElevationGain) {
+        maxElevationGain = dataObjects[index].getFilterObject().getMaxElevationGain();
+      }
+    }
+    return maxElevationGain;
+  }
+  return dataObjects[0].getFilterObject().getMaxElevationGain();
+}
+
+function getMinDistance() {
+  if (dataObjects.length > 1) {
+    var minDistance = dataObjects[0].getFilterObject().getMinDistance();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMinDistance() < minDistance) {
+        minDistance = dataObjects[index].getFilterObject().getMinDistance();
+      }
+    }
+    return minDistance;
+  }
+  return dataObjects[0].getFilterObject().getMinDistance();
+}
+function getMaxDistance() {
+  if (dataObjects.length > 1) {
+    var maxDistance = dataObjects[0].getFilterObject().getMaxDistance();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMinDistance() > maxDistance) {
+        maxDistance = dataObjects[index].getFilterObject().getMaxDistance();
+      }
+    }
+    return maxDistance;
+  }
+  return dataObjects[0].getFilterObject().getMaxDistance();
+}
+
+function getMinHeartRate() {
+  if (dataObjects.length > 1) {
+    var minHeartRate = dataObjects[0].getFilterObject().getMinHeartRate();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMinHeartRate() < minHeartRate) {
+        minHeartRate = dataObjects[index].getFilterObject().getMinHeartRate();
+      }
+    }
+    return minHeartRate;
+  }
+  return dataObjects[0].getFilterObject().getMinHeartRate();
+}
+function getMaxHeartRate() {
+  if (dataObjects.length > 1) {
+    var maxHeartRate = dataObjects[0].getFilterObject().getMaxHeartRate();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getMaxHeartRate() > maxHeartRate) {
+        maxHeartRate = dataObjects[index].getFilterObject().getMaxHeartRate();
+      }
+    }
+    return maxHeartRate;
+  }
+  return dataObjects[0].getFilterObject().getMaxHeartRate();
+}
+
+function getMinDate() {
+  if (dataObjects.length > 1) {
+    var minDate = dataObjects[0].getFilterObject().getEarliestDate();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getEarliestDate().getTime() < minDate.getTime()) {
+        minDate = dataObjects[index].getFilterObject().getEarliestDate();
+      }
+    }
+    return minDate;
+  }
+  return dataObjects[0].getFilterObject().getEarliestDate();
+}
+function getMaxDate() {
+  if (dataObjects.length > 1) {
+    var maxDate = dataObjects[0].getFilterObject().getLatestDate();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getLatestDate().getTime() > maxDate.getTime()) {
+        maxDate = dataObjects[index].getFilterObject().getLatestDate();
+      }
+    }
+    return maxDate;
+  }
+  return dataObjects[0].getFilterObject().getLatestDate();
+}
+
+function getMinTime() {
+  if (dataObjects.length > 1) {
+    var minTime = dataObjects[0].getFilterObject().getEarliestTime();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getEarliestTime().getTime() < minTime.getTime()) {
+        minTime = dataObjects[index].getFilterObject().getEarliestTime();
+      }
+    }
+    return minTime;
+  }
+  return dataObjects[0].getFilterObject().getEarliestTime();
+}
+function getMaxTime() {
+  if (dataObjects.length > 1) {
+    var maxTime = dataObjects[0].getFilterObject().getLatestTime();
+    for (index in dataObjects) {
+      if (dataObjects[index].getFilterObject().getLatestTime().getTime() > maxTime.getTime()) {
+        maxTime = dataObjects[index].getFilterObject().getLatestTime();
+      }
+    }
+    return maxTime
+  }
+  return dataObjects[0].getFilterObject().getLatestTime();
 }

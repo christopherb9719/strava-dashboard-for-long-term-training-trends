@@ -40,26 +40,25 @@ class PositiveAndNegativeBarChart {
       .y(function(d) { return d.y; });
 
     this.xAxisScale = d3.scaleLinear().domain([0, 23]).range([0, this.width]);
-    this.xAxisCall = d3.axisBottom(this.xAxisScale)
+    this.xAxisCall = d3.axisBottom(this.xAxisScale).ticks(24)
           .tickFormat(function(d) {
-              if (d == 0) return "";
-              else if (d < 10) d = "0" + d;
+              if (d < 10) d = "0" + d;
               return d + ":00";
             });
 
-    //this.yAxisCall = d3.axisLeft(this.y);
+    this.xAxisSecondaryCall = d3.axisBottom(this.xAxisScale).tickValues([]);
 
     this.xAxis = this.plot.append("g")
       .attr("id", "x axis")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.y(0) + ")")
+      .attr("class", "axis-invisible")
+      .attr("transform", "translate(0," + this.height + ")")
       .call(this.xAxisCall)
 
-    this.plot.append("path")
-      .attr("d", lineFunction([{"x": this.xAxisScale(0), "y": this.y(0)}, {"x": this.xAxisScale("23"), "y": this.y(0)}]))
-
-    //this.yAxis = this.plot.append("g")
-    //  .call(this.yAxisCall);
+    this.xAxisSecondary = this.plot.append("g")
+      .attr("id", "x axis")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + this.y(0) + ")")
+      .call(this.xAxisSecondaryCall)
   }
 
 
@@ -99,12 +98,12 @@ class PositiveAndNegativeBarChart {
     //this.yAxis.call(this.yAxisCall);
   }
 
-  update(filteredData, filtersObject){
+  update(filteredData){
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
 
     var max_y = d3.max(barVals, d => Math.abs(d))
-
+    console.log(max_y);
     // Update the scales
     this.y.domain([max_y, -1*max_y]).nice();
 
@@ -299,7 +298,7 @@ class StandardBarChart {
     }
   }
 
-  update(filteredData, filtersObject){
+  update(filteredData){
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
 
@@ -407,7 +406,7 @@ function plotBars(graph, filtered, x, y, graph_width, colour, id) {
           .style("top", (d3.event.pageY - 28) + "px")
         .transition()
           .duration(200) // ms
-          .style("opacity", .9) // started as 0!
+          .style("opacity", 1) // started as 0!
     })
     .on('mouseout', function(d) {
       d3.select(this)
@@ -483,7 +482,7 @@ function standardPlotBars(graph, filtered, x, y, colour, id) {
           .style("top", (d3.event.pageY - 28) + "px")
         .transition()
           .duration(200) // ms
-          .style("opacity", .9) // started as 0!
+          .style("opacity", 1) // started as 0!
     })
     .on('mouseout', function(d) {
       d3.select(this)

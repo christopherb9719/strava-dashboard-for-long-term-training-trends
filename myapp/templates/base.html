@@ -67,18 +67,42 @@
       </nav>
     </div>
       <br></br>
-      {% block body %}
         <div class="row">
           <div id="mainColumn" class="col-9">
-            {% block main_column %}
-            {% endblock %}
+              <div id="graphs" class="row graph_container">
+                {% block graphs %}
+                {% endblock %}
+              </div>
+              <br/>
+              <div class="row sliders_container">
+                {% block sliders %}
+                {% endblock %}
+              </div>
           </div>
           <div id="rightColumn" class="col-2 right_column col-sm-offset-1">
             {% block right_column %}
             {% endblock %}
+            <label for="getPace">Search your average pace for a distance</label>
+            <input type="text" id="getPace" placeholder="Distance (m)" name="tags" class="form-control" onchange="getNeededPace(document.getElementById('getPace').value, dataObject1)"/>
+            <div style="height: 200px;">
+            <ul id="distancePace" class="list-group"></ul>
+            </div>
+
+            <label for="ThresholdPace">Click on trend line to set a threshold pace: </label>
+            <div style="height: 200px;">
+              <ul id="ThresholdPace" class="list-group"></ul>
+            </div>
+
+            <label for="tags">Apply custom tags (Filters all activities featuring these tags)</label>
+            <label for="tags">Click to remove a tag</label>
+            <input type="text" id="tags" placeholder="Add Filter Tags" name="tags" class="form-control" onchange="filterTags(document.getElementById('tags').value)"/>
+
+            <div style="height: 200px;">
+              <ul id="tagsList" class="list-group"></ul>
+            </div>
+            <input type="button" class="btn btn-primary mb1 bg-orange" value="Refresh Trend Lines" onclick="refreshTrendLines(dataObjects)"/>
           </div>
         </div>
-      {% endblock %}
       <script src="{{url_for('static', filename='javascripts/functions.js')}}"></script>
       <script src="{{url_for('static', filename='javascripts/filters.js')}}"></script>
       <script src="{{url_for('static', filename='javascripts/scatter.js')}}"></script>

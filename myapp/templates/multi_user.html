@@ -1,70 +1,57 @@
 {% extends "base.html" %}
 
-{% block main_column %}
-<div id="graphSet1Container" class="col-12 graph_container"></div>
-<div id="sliders" class="col-12">
-  <p>
-  <label>Date:</label>
-  <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
-  <div id="slider"></div>
+{% block graphs %}
+<div id="graphSet1Container" class="col-12"></div>
+{% endblock %}
 
-  <p>
-  <label>Time:</label>
-  <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
-  <div id="timeSlider"></div>
+{% block sliders %}
+  <div id="sliders" class="col-12">
+    <p>
+    <label>Date:</label>
+    <input type="text" id="date" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="slider"></div>
 
-  <p>
-  <label>Distance:</label>
-  <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
-  <div id="distanceSlider"></div>
+    <p>
+    <label>Time:</label>
+    <input type="text" id="time" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="timeSlider"></div>
 
-  <p>
-  <label>Elevation:</label>
-  <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
-  <div id="elevationSlider"></div>
+    <p>
+    <label>Distance:</label>
+    <input type="text" id="distance" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="distanceSlider"></div>
 
-  <p>
-  <label>Heart Rate:</label>
-  <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
-  <div id="heartrateSlider"></div>
-</div>
+    <p>
+    <label>Elevation:</label>
+    <input type="text" id="elevation" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="elevationSlider"></div>
 
+    <p>
+    <label>Heart Rate:</label>
+    <input type="text" id="heartrate" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    <div id="heartrateSlider"></div>
+  </div>
 {% endblock %}
 
 {% block right_column %}
 <br></br>
 <div class="dropdown">
-  <button onclick="showDropdown('myDropdown')" class="btn btn-secondary">Add User's Data</button>
+  <button onclick="showDropdown('myDropdown')" class="btn btn-secondary">Add Users' Data</button>
   <div id="myDropdown" class="dropdown-content" onchange="findUserData()">
     <input id="userSearch" placeholder="Search for users">
   </div>
 </div>
-<br></br>
-<label for="getPace">Search for your average pace in runs around a distance</label>
-<input type="text" id="getPace" placeholder="Distance (m)" name="tags" class="form-control" onchange="getNeededPace(document.getElementById('getPace').value)"/>
-<ul id="distancePace" class="list-group"></ul>
-<br></br>
-<label for="ThresholdPace">Click on regression line to set a threshold pace: </label>
-<ul id="ThresholdPace" class="list-group"></ul><br></br>
-<label for="tags">Apply custom tags to filter data with (This will filter any activities with these tags in the description)</label>
-<input type="text" id="tags" placeholder="Add Filter Tags" name="tags" class="form-control" onchange="filterTags(document.getElementById('tags').value)"/>
-<br></br>
-<input type="button" class="btn btn-primary" value="Refresh Trend Lines" onclick="refreshTrendLines(dataObjects)"/>
-<br></br>
 <div id="usersColumn">
-  <label for="usersList">Users Data present: </label>
+  <label for="usersList">Users' Data present: </label>
+  <label for="usersList">Click to remove a users' data</label>
   <ul id="usersList" class="list-group"></ul>
 </div>
-<br></br>
-<div id="tagsColumn">
-  <label for="tagsList">Tags present: </label>
-  <ul id="tagsList" class="list-group"></ul>
-</div>
+
 {% endblock %}
 
 {% block scripts %}

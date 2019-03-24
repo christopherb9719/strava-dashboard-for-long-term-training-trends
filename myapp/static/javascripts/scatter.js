@@ -26,7 +26,7 @@ class Scatter {
         .attr("y", 0 - (this.margin.top/3))
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
-        .text("Activities according to Average Pace and Average Heart Rate");
+        .text("Activities");
 
     this.createAxes();
   }
@@ -57,7 +57,7 @@ class Scatter {
             "translate(" + this.width/2 + " ," +
                       (this.height + this.margin.top + 20) + ")")
         .style("text-anchor", "middle")
-        .text("Mean Heart Rate (beats per minute)");
+        .text("Mean Heart Rate (bpm)");
 
     this.plot.append("text")
         .attr("transform", "rotate(-90)")
@@ -91,9 +91,6 @@ class Scatter {
     this.xAxis.call(this.xAxisCall);
     this.yAxis.call(this.yAxisCall);
   }
-
-
-  update(filtersObject, id){}
 
   getX() {
     return this.x;
@@ -166,7 +163,7 @@ function plotScatterPoints(plot, data, colour, x, y, filters, id) {
             .style("top", (d3.event.pageY - 28) + "px")
           .transition()
             .duration(200) // ms
-            .style("opacity", .9) // started as 0!
+            .style("opacity", 1) // started as 0!
         }
       )
       .on('mouseout', function() {
