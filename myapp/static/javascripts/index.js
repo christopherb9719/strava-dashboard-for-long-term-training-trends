@@ -234,7 +234,7 @@ function createGraphs(d, line_points, colour) {
     var filterObject = new Filters(dataset);
     dataObject1.setGraphSet(graphSet1);
     dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-    dataObject1.updateGraphs();
+    updateGraphScales(dataObject1);
     updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
   }
 }
