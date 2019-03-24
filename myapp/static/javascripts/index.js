@@ -68,7 +68,7 @@ function split() {
   var graphSet1 = new graphSet(margin, width, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-  dataObject1.getGraphSet().updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
+  updateGraphScales(dataObject1);
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
 
@@ -80,7 +80,7 @@ function split() {
   var graphSet2 = new graphSet(margin, width, h, "secondary_graphs");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
-  dataObject2.getGraphSet().updatePlots(dataObject2.getFilteredData(), dataObject2.getFilterObject(), dataObject2.getColour(), dataObject2.getId());
+  updateGraphScales(dataObject2);
   updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
 
