@@ -11,7 +11,6 @@ document.getElementById('mergeGraphs').style.display = "none";
 $('#single_user').addClass( 'active' )
 
 
-
 function showSecondarySliders() {
   var dom = document.getElementById("graph2sliders");
   var display = dom.style.display;
@@ -29,7 +28,6 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
     w = width - margin.left - margin.right,
     h = 500 - margin.top - margin.bottom;
 
-var graphSets = [];
 var dataObjects = [];
 
 var secondaryFilterObject;
@@ -49,7 +47,6 @@ var dataObject1 = new DataObject(dataset, "1", "#ff471a", graphSet1);
 graphSet1.buildGraphs(dataObject1.getFilterObject(), dataset);
 graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
 updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
-graphSets.push(graphSet1);
 dataObjects.push(dataObject1);
 
 
@@ -68,7 +65,7 @@ function split() {
   var graphSet1 = new graphSet(margin, width, h, "primary_graphs");
   dataObject1.setGraphSet(graphSet1);
   dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-  updateGraphScales(dataObject1);
+  updateGraphScales();
   updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 
 
@@ -80,7 +77,7 @@ function split() {
   var graphSet2 = new graphSet(margin, width, h, "secondary_graphs");
   dataObject2.setGraphSet(graphSet2);
   dataObject2.getGraphSet().buildGraphs(filterObject, dataObject2.getData());
-  updateGraphScales(dataObject2);
+  updateGraphScales();
   updateTrendline(dataObject2.getFilteredData(), graphSet2.getScatter(), "line_secondary", dataObject2.getId(), dataObject2.getColour());
 }
 
@@ -98,7 +95,6 @@ function createGraphs(d, line_points, colour) {
     clicked = true;
 
     //Update Graphs
-    console.log("Creating new graphs");
     dataObject2 = new DataObject(d, "2", "#00e600", graphSet1);
     dataObjects.push(dataObject2);
     updateGraphScales();
@@ -119,7 +115,7 @@ function createGraphs(d, line_points, colour) {
         values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
         slide: function( event, ui ) {
           dataObject2.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-          updateGraphScales(dataObject2);
+          updateGraphScales();
 
           min_date = new Date(ui.values[0]*1000);
           max_date = new Date(ui.values[1]*1000);
@@ -143,7 +139,7 @@ function createGraphs(d, line_points, colour) {
         values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
         slide: function( event, ui ) {
           dataObject2.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-          updateGraphScales(dataObject2);
+          updateGraphScales();
 
           min_time = new Date(ui.values[0]*1000);
           max_time = new Date(ui.values[1]*1000);
@@ -165,7 +161,7 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.distance })],
         slide: function( event, ui ) {
           dataObject2.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-          updateGraphScales(dataObject2)
+          updateGraphScales()
 
           $("#distance2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
@@ -182,7 +178,7 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
         slide: function( event, ui ) {
           dataObject2.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-          updateGraphScales(dataObject2)
+          updateGraphScales()
 
           $("#elevation2" ).val(ui.values[0]+ "m" + " - " + ui.values[1] + "m");
         }
@@ -199,7 +195,7 @@ function createGraphs(d, line_points, colour) {
         values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
         slide: function( event, ui ) {
           dataObject2.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-          updateGraphScales(dataObject2)
+          updateGraphScales()
           $("#heartrate2" ).val(ui.values[0]+ "bpm" + " - " + ui.values[1] + "bpm");
         }
       });
@@ -234,7 +230,7 @@ function createGraphs(d, line_points, colour) {
     var filterObject = new Filters(dataset);
     dataObject1.setGraphSet(graphSet1);
     dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-    updateGraphScales(dataObject1);
+    updateGraphScales();
     updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
   }
 }
@@ -247,7 +243,7 @@ $(function() {
     values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      updateGraphScales(dataObject1);
+      updateGraphScales();
 
       min_date = new Date(ui.values[0]*1000);
       max_date = new Date(ui.values[1]*1000);
@@ -271,7 +267,7 @@ $(function() {
       min_time = new Date(ui.values[0]*1000);
       max_time = new Date(ui.values[1]*1000);
       dataObject1.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      updateGraphScales(dataObject1);
+      updateGraphScales();
 
       $("#time" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
           " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
@@ -293,7 +289,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.distance })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-      updateGraphScales(dataObject1);
+      updateGraphScales();
 
       $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
@@ -311,7 +307,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-      updateGraphScales(dataObject1);
+      updateGraphScales();
 
       $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
           " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
@@ -329,7 +325,7 @@ $(function() {
     values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
     slide: function( event, ui ) {
       dataObject1.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-      updateGraphScales(dataObject1);
+      updateGraphScales();
 
       $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
           " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
@@ -341,23 +337,25 @@ $(function() {
 
 function filterTags(tag) {
   if (/\S/.test(tag)) { //Checks the tag is not just whitespace
+    document.getElementById('tags').value = null;
     var tagObject = document.createElement("li");
     tagObject.innerHTML = tag;
     tagObject.className = "list-group-item";
     tagObject.title = "Click to remove";
     document.getElementById("tagsList").appendChild(tagObject);
     tagObject.onclick = function(d) {
-      dataObject.getFilterObject().removeTag(tagObject.innerHTML)
-      d3.select(tagObject).remove();
-      dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
-      dataObject.updateGraphs();
+      for (index in dataObjects) {
+        var dataObject = dataObjects[index];
+        dataObject.getFilterObject().removeTag(tagObject.innerHTML)
+        d3.select(tagObject).remove();
+      }
+      updateGraphScales();
     };
     for (index in dataObjects) {
       var dataObject = dataObjects[index];
       dataObject.getFilterObject().addTag(tag);
-      dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
-      dataObject.updateGraphs();
     }
+    updateGraphScales();
   }
 }
 
@@ -382,28 +380,11 @@ function mergeGraphs() {
 function getNeededPace(distance) {
   var min_dist = distance - (0.1*distance);
   var max_dist = parseInt(distance) + parseInt((0.1*distance));
-  $('#distanceSlider').slider( "values", 0, min_dist );
-  $('#distanceSlider').slider( "values", 1, max_dist );
+  updateSliderValues('distanceSlider', min_dist, max_dist)
   $("#distance" ).val(min_dist + "m" + " - " + max_dist + "m");
-  $('#graph2distanceSlider').slider( "values", 0, min_dist );
-  $('#graph2distanceSlider').slider( "values", 1, max_dist );
+  updateSliderValues('graph2distanceSlider', min_dist, max_dist);
   $("#distance2" ).val(min_dist + "m" + " - " + max_dist + "m");
-  document.getElementById("distancePace").innerHTML = "";
-  for (index in dataObjects) {
-    console.log(index);
-    var dataObject = dataObjects[index];
-    acceptable_data = dataObject.getData().filter(d => (d.distance <= max_dist && d.distance >= min_dist));
-    dataObject.getFilterObject().setDistances(min_dist, max_dist);
-    dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
-    dataObject.updateGraphs();
-    var filtered = dataObject.getFilteredData();
-    var needed_pace = d3.mean(filtered, d => d.average_pace);
-    var paceObject = document.createElement("li");
-    paceObject.innerHTML = dataObject.id + ": " + needed_pace.toFixed(2) + "mins/km"
-    paceObject.className = "list-group-item";
-    paceObject.id = "#pace"+dataObject.id
-    document.getElementById('distancePace').appendChild(paceObject);
-  }
+  paceSearch(max_dist, min_dist);
 }
 
 document.getElementById("addChart").onclick = function() {

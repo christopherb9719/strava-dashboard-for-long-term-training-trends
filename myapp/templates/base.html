@@ -45,10 +45,10 @@
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-left">
               <li id="single_user">
-                <a href="{{url_for('auth.loadDashboard')}}" title="Analyse your own data">Single User</a>
+                <a href="{{url_for('loadDashboard')}}" title="Analyse your own data">Single User</a>
               </li>
               <li id="multi_user">
-                <a href="{{url_for('auth.loadMultiUser')}}" title="Compare your data with other user's">Multi-User<span class="sr-only">(current)</span></a>
+                <a href="{{url_for('loadMultiUser')}}" title="Compare your data with other user's">Multi-User<span class="sr-only">(current)</span></a>
               </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -83,7 +83,7 @@
             {% block right_column %}
             {% endblock %}
             <label for="getPace">Search your average pace for a distance</label>
-            <input type="text" id="getPace" placeholder="Distance (m)" name="tags" class="form-control" onchange="getNeededPace(document.getElementById('getPace').value, dataObject1)"/>
+            <input type="text" id="getPace" placeholder="Distance (m)" name="tags" class="form-control" onchange="getNeededPace(document.getElementById('getPace').value)"/>
             <div style="height: 200px;">
             <ul id="distancePace" class="list-group"></ul>
             </div>

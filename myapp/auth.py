@@ -48,7 +48,6 @@ def login():
         if check_user:
             bcrypt = Bcrypt(current_app)
             if bcrypt.check_password_hash(check_user.password, str(form.password.data)):
-                print("Hash matched")
                 login_user(check_user)
 
                 client = Client()
@@ -61,12 +60,7 @@ def login():
                         new_token = client.refresh_access_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
                         user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
-                next = flask.request.args.get('next')
-                # is_safe_url should check if the url is safe for redirects.
-                # See http://flask.pocoo.org/snippets/62/ for an example.
-                #if not is_safe_url(next):
-                #    return flask.abort(400)
-                return redirect(next or flask.url_for('auth.loadDashboard'))
+                return redirect(flask.url_for('auth.loadDashboard'))
             else:
                 e = BadRequest()
                 e.data = "Invalid log in details"
@@ -99,20 +93,14 @@ def redir():
 @login_required
 def loadDashboard():
     activities = parse_data(current_user)
-    if len(activities) > 0:
-        line_coords = calculateRegression(activities)
-    else:
-        line_coords = []
+    line_coords = getLineCoords(activities)
     return render_template("index.html", sample = activities, regression = line_coords)
 
 @bp.route("/multi_user")
 @login_required
 def loadMultiUser():
     activities = parse_data(current_user)
-    if len(activities) > 0:
-        line_coords = calculateRegression(activities)
-    else:
-        line_coords = []
+    line_coords = getLineCoords(activities)
     return render_template("multi_user.html", sample = activities, regression = line_coords)
 
 
@@ -121,10 +109,7 @@ def loadMultiUser():
 def getUserData():
     user = User.objects(username = request.data.decode('utf-8')).first()
     activities = parse_data(user)
-    if len(activities) > 0:
-        line_coords = calculateRegression(activities)
-    else:
-        line_coords = []
+    line_coords = getLineCoords(activities)
     response = [activities, line_coords]
     return jsonify(response)
 
@@ -181,3 +166,9 @@ def parse_data(user):
             'second' : run.start_date.second
         })
     return summaries
+
+def getLineCoords(activities):
+        if len(activities) > 0:
+            return calculateRegression(activities)
+        else:
+            return []

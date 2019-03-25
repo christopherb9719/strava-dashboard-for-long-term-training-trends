@@ -103,44 +103,10 @@ class PositiveAndNegativeBarChart {
     var barVals = this.buildBarValues(filteredData);
 
     var max_y = d3.max(barVals, d => Math.abs(d))
-    console.log(max_y);
     // Update the scales
     this.y.domain([max_y, -1*max_y]).nice();
 
 
-  }
-
-  dataInDate(d) {
-    if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
-      return true;
-    }
-    else if (d.year == this.filters.getEarliestDate().getFullYear()) {
-        if (d.month >= this.filters.getEarliestDate().getMonth()) return true;
-    }
-    else if (d.year == this.filters.getLatestDate().getFullYear()) {
-      if (d.month <= this.filters.getLatestDate().getMonth()) return true;
-    }
-  }
-
-  dataInTime(d) {
-    if (d.hour > this.filters.getEarliestTime().getHours() && d.hour < this.filters.getLatestTime().getHours()) {
-      return true;
-    }
-    else if (d.hour == this.filters.getEarliestTime().getHours()) {
-      if (d.minute >= this.filters.getEarliestTime().getMinutes()) return true;
-    }
-    else if (d.year == this.filters.getLatestTime().getHours()) {
-      if (d.minute <= this.filters.getLatestTime().getMinutes()) return true;
-    }
-  }
-
-  containsTags(d) {
-    this.filters.getTags().forEach(function(tag) {
-      if (d.description != null && d.description.contains(tag)) {
-        return false;
-      }
-    })
-    return true;
   }
 
   getX() {
@@ -314,40 +280,7 @@ class StandardBarChart {
       this.x.domain([0, max_y]).nice();
     }
   }
-
-  dataInDate(d) {
-    if (d.year > this.filters.getEarliestDate().getFullYear() && d.year < this.filters.getLatestDate().getFullYear()) {
-      return true;
-    }
-    else if (d.year == this.filters.getEarliestDate().getFullYear()) {
-        if (d.month >= this.filters.getEarliestDate().getMonth()) return true;
-    }
-    else if (d.year == this.filters.getLatestDate().getFullYear()) {
-      if (d.month <= this.filters.getLatestDate().getMonth()) return true;
-    }
-  }
-
-  dataInTime(d) {
-    if (d.hour > this.filters.getEarliestTime().getHours() && d.hour < this.filters.getLatestTime().getHours()) {
-      return true;
-    }
-    else if (d.hour == this.filters.getEarliestTime().getHours()) {
-      if (d.minute >= this.filters.getEarliestTime().getMinutes()) return true;
-    }
-    else if (d.year == this.filters.getLatestTime().getHours()) {
-      if (d.minute <= this.filters.getLatestTime().getMinutes()) return true;
-    }
-  }
-
-  containsTags(d) {
-    this.filters.getTags().forEach(function(tag) {
-      if (d.description != null && d.description.contains(tag)) {
-        return false;
-      }
-    })
-    return true;
-  }
-
+  
   getX() {
     return this.x;
   }

@@ -183,9 +183,9 @@ class Filters {
 
   containsTags(d) {
     var containsTag = false;
-    var list = d.name.split(" ");
+    var list = d.name.toLowerCase().split(" ");
     this.getTags().forEach(function(tag) {
-      if (list.includes(tag)) {
+      if (list.includes(tag.toLowerCase())) {
         containsTag = true;
       }
     })
