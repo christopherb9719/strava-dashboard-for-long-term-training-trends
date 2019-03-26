@@ -128,14 +128,14 @@ def create_app(**config_class):
     @app.route("/dashboard", methods=['POST', 'GET'])
     @login_required
     def loadDashboard():
-        activities = parse_data(current_user)
+        activities = parse_data(current_user, CLIENT_ID, CLIENT_SECRET)
         line_coords = getLineCoords(activities)
         return render_template("index.html", sample = activities, regression = line_coords)
 
     @app.route("/multi_user")
     @login_required
     def loadMultiUser():
-        activities = parse_data(current_user)
+        activities = parse_data(current_user, CLIENT_ID, CLIENT_SECRET)
         line_coords = getLineCoords(activities)
         return render_template("multi_user.html", sample = activities, regression = line_coords)
 
@@ -144,7 +144,7 @@ def create_app(**config_class):
     @login_required
     def getUserData():
         user = User.objects(username = request.data.decode('utf-8')).first()
-        activities = parse_data(user)
+        activities = parse_data(user, CLIENT_ID, CLIENT_SECRET)
         line_coords = getLineCoords(activities)
         response = [activities, line_coords]
         return jsonify(response)

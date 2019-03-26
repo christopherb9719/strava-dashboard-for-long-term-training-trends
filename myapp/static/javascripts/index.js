@@ -6,22 +6,12 @@ var bb = document.querySelector ('#primary_graphs')
                     .getBoundingClientRect();
 
 var width = bb.right - bb.left;
-
+var clicked = false;
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 document.getElementById('mergeGraphs').style.display = "none";
 $('#single_user').addClass( 'active' )
-
-
-function showSecondarySliders() {
-  var dom = document.getElementById("graph2sliders");
-  var display = dom.style.display;
-  if (display == "none") {
-    dom.style.display = "";
-  }
-  else {
-    dom.style.display = "none";
-  }
-}
-
 
 showSecondarySliders();
 var margin = {top: 20, right: 20, bottom: 50, left: 70},
@@ -33,13 +23,10 @@ var dataObjects = [];
 var secondaryFilterObject;
 var graphSet2;
 var dataObject2;
-var clicked = false;
 
 // Add the tooltip container to the vis container
 // it's invisible and its position/contents are defined during mouseover
-var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
+
 
 //Build Graphs
 var graphSet1 = new graphSet(margin, w, h, "primary_graphs");
@@ -48,6 +35,51 @@ graphSet1.buildGraphs(dataObject1.getFilterObject(), dataset);
 graphSet1.updatePlots(dataObject1.getFilteredData(), dataObject1.getFilterObject(), dataObject1.getColour(), dataObject1.getId());
 updateTrendline(dataObject1.getFilteredData(), graphSet1.getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
 dataObjects.push(dataObject1);
+
+buildSliders(dataObject1.getFilterObject());
+
+
+
+
+
+
+////// FUNCTIONS //////
+function updateGraphScales() {
+  if (document.getElementById("mergeGraphs").value == "true") {
+    var max_y = 0;
+    var indexOf_max_y = 0;
+    for (index in dataObjects) {
+      dataObject = dataObjects[index];
+      var y = dataObject.graphSet.effortChart.buildBarValues(dataObject.getFilterObject().filterData(dataObject.getData()));
+      if (d3.max(y, d => Math.abs(d)) > max_y) {
+        max_y = d3.max(y, d => Math.abs(d));
+        indexOf_max_y = index;
+      }
+    }
+    graphSet1.updateScales(dataObjects[indexOf_max_y].getFilterObject().filterData(dataObjects[indexOf_max_y].getData()));
+    for (index in dataObjects) {
+      dataObjects[index].updateGraphs();
+    }
+  }
+  else {
+    for (index in dataObjects) {
+      var dataObject = dataObjects[index];
+      dataObject.getGraphSet().updateScales(dataObject.getFilterObject().filterData(dataObject.getData()));
+      dataObject.updateGraphs();
+    }
+  }
+}
+
+function showSecondarySliders() {
+  var dom = document.getElementById("graph2sliders");
+  var display = dom.style.display;
+  if (display == "none") {
+    dom.style.display = "";
+  }
+  else {
+    dom.style.display = "none";
+  }
+}
 
 
 function split() {
@@ -104,7 +136,41 @@ function createGraphs(d, line_points, colour) {
     showSecondarySliders();
     document.getElementById('sliders').className = "col-6";
     document.getElementById('graph2sliders').className = "col-6";
+    buildSecondaryGraphs();
+  }
+  else {
+    document.getElementById('addChart').innerText = "Add Graph";
+    document.getElementById('addChart').title = "Add a Second Layer of Data to the Graph";
+    document.getElementById('mergeGraphs').style.display = "none";
 
+    clicked = false;
+    //Remove second set of graphs
+
+    showSecondarySliders();
+    d3.selectAll("[id='#threshold2']").remove();
+    d3.selectAll("[id='#pace2']").remove()
+
+    d3.select('#secondary_graphs').selectAll('div').remove();
+    d3.select('#primary_graphs').selectAll('div').remove();
+    document.getElementById('primary_graphs').className = "col-12";
+    document.getElementById('sliders').className = "col-12";
+
+    var bb = document.querySelector ('#primary_graphs')
+                        .getBoundingClientRect();
+
+    var width = bb.right - bb.left;
+
+    //Update first set of graphs
+    graphSet1 = new graphSet(margin, width, h, "primary_graphs");
+    var filterObject = new Filters(dataset);
+    dataObject1.setGraphSet(graphSet1);
+    dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
+    updateGraphScales();
+    updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
+  }
+}
+
+function buildSecondaryGraphs() {
     $(function() {
       var min_date;
       var max_date;
@@ -202,138 +268,8 @@ function createGraphs(d, line_points, colour) {
       $("#heartrate2" ).val($( "#graph2heartrateSlider" ).slider( "values", 0 ) + "bpm" +
           " - " + $( "#graph2heartrateSlider" ).slider( "values", 1 ) + "bpm");
     });
-  }
-  else {
-    document.getElementById('addChart').innerText = "Add Graph";
-    document.getElementById('addChart').title = "Add a Second Layer of Data to the Graph";
-    document.getElementById('mergeGraphs').style.display = "none";
-
-    clicked = false;
-    //Remove second set of graphs
-
-    showSecondarySliders();
-    d3.selectAll("[id='#threshold2']").remove();
-    d3.selectAll("[id='#pace2']").remove()
-
-    d3.select('#secondary_graphs').selectAll('div').remove();
-    d3.select('#primary_graphs').selectAll('div').remove();
-    document.getElementById('primary_graphs').className = "col-12";
-    document.getElementById('sliders').className = "col-12";
-
-    var bb = document.querySelector ('#primary_graphs')
-                        .getBoundingClientRect();
-
-    var width = bb.right - bb.left;
-
-    //Update first set of graphs
-    graphSet1 = new graphSet(margin, width, h, "primary_graphs");
-    var filterObject = new Filters(dataset);
-    dataObject1.setGraphSet(graphSet1);
-    dataObject1.getGraphSet().buildGraphs(filterObject, dataObject1.getData());
-    updateGraphScales();
-    updateTrendline(dataObject1.getFilteredData(), dataObject1.getGraphSet().getScatter(), "line_primary", dataObject1.getId(), dataObject1.getColour());
-  }
 }
 
-$(function() {
-  $( "#slider" ).slider({
-    range: true,
-    min: new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000,
-    max: new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000,
-    values: [new Date(d3.min(dataset, function(d) {return d.year; }), 0, 1, 0, 0, 0).getTime()/1000, new Date(d3.max(dataset, function(d) {return d.year; }), 11, 31, 0, 0, 0).getTime()/1000],
-    slide: function( event, ui ) {
-      dataObject1.getFilterObject().setDates(ui.values[0] * 1000, ui.values[1] * 1000);
-      updateGraphScales();
-
-      min_date = new Date(ui.values[0]*1000);
-      max_date = new Date(ui.values[1]*1000);
-      $("#date" ).val(min_date.getDay()+1 + "/" + parseInt(min_date.getMonth()+1) + "/" + min_date.getFullYear() +
-          " - " + parseInt(max_date.getDay()+1) + "/" + parseInt(max_date.getMonth()+1)+ "/" + max_date.getFullYear());
-    }
-  });
-  d1 = new Date($( "#slider" ).slider( "values", 0 )*1000);
-  d2 = new Date($( "#slider" ).slider( "values", 1 )*1000);
-  $("#date" ).val(d1.getDay()+1 + "/" + parseInt(d1.getMonth()+1) + "/" + d1.getFullYear() +
-      " - " + parseInt(d2.getDay()+1) + "/" + parseInt(d2.getMonth()+1)+ "/" + d2.getFullYear());
-});
-
-$(function() {
-  $( "#timeSlider" ).slider({
-    range: true,
-    min: new Date(0, 0, 0, 0, 0, 0).getTime()/1000,
-    max: new Date(0, 0, 0, 23, 59, 59).getTime()/1000,
-    values: [new Date(0, 0, 0, 0, 0, 0).getTime()/1000, new Date(0, 0, 0, 23, 59, 59).getTime()/1000],
-    slide: function( event, ui ) {
-      min_time = new Date(ui.values[0]*1000);
-      max_time = new Date(ui.values[1]*1000);
-      dataObject1.getFilterObject().setTimes(ui.values[0] * 1000, ui.values[1] * 1000);
-      updateGraphScales();
-
-      $("#time" ).val(buildTimeString(min_time.getHours(), min_time.getMinutes()) +
-          " - " + buildTimeString(max_time.getHours(), max_time.getMinutes()));
-    }
-  });
-  t1 = new Date($( "#timeSlider" ).slider( "values", 0 )*1000);
-  t2 = new Date($( "#timeSlider" ).slider( "values", 1 )*1000);
-  $("#time" ).val(buildTimeString(t1.getHours(), t1.getMinutes()) +
-      " - " + buildTimeString(t2.getHours(), t2.getMinutes()));
-
-});
-
-
-$(function() {
-  $( "#distanceSlider" ).slider({
-    range: true,
-    min: d3.min(dataset, function(d) { return d.distance }),
-    max: d3.max(dataset, function(d) { return d.distance }),
-    values: [0, d3.max(dataset, function(d) { return d.distance })],
-    slide: function( event, ui ) {
-      dataObject1.getFilterObject().setDistances(ui.values[0], ui.values[1]);
-      updateGraphScales();
-
-      $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
-          " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
-    }
-  })
-  $("#distance" ).val($( "#distanceSlider" ).slider( "values", 0 ) + "m" +
-      " - " + $( "#distanceSlider" ).slider( "values", 1 ) + "m");
-});
-
-$(function() {
-  $( "#elevationSlider" ).slider({
-    range: true,
-    min: d3.min(dataset, function(d) { return d.total_elevation_gain }),
-    max: d3.max(dataset, function(d) { return d.total_elevation_gain }),
-    values: [0, d3.max(dataset, function(d) { return d.total_elevation_gain })],
-    slide: function( event, ui ) {
-      dataObject1.getFilterObject().setElevationGain(ui.values[0], ui.values[1]);
-      updateGraphScales();
-
-      $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
-          " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
-    }
-  })
-  $("#elevation" ).val($( "#elevationSlider" ).slider( "values", 0 ) + "m" +
-      " - " + $( "#elevationSlider" ).slider( "values", 1 ) + "m");
-});
-
-$(function() {
-  $( "#heartrateSlider" ).slider({
-    range: true,
-    min: d3.min(dataset, function(d) { return d.heart_rate }),
-    max: d3.max(dataset, function(d) { return d.heart_rate }),
-    values: [0, d3.max(dataset, function(d) { return d.heart_rate })],
-    slide: function( event, ui ) {
-      dataObject1.getFilterObject().setHeartRates(ui.values[0], ui.values[1]);
-      updateGraphScales();
-
-      $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
-          " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
-    }
-  });
-  $("#heartrate" ).val($( "#heartrateSlider" ).slider( "values", 0 ) + "bpm" +
-      " - " + $( "#heartrateSlider" ).slider( "values", 1 ) + "bpm");
-});
 
 function filterTags(tag) {
   if (/\S/.test(tag)) { //Checks the tag is not just whitespace
@@ -387,6 +323,16 @@ function getNeededPace(distance) {
   paceSearch(max_dist, min_dist);
 }
 
+function getAllData() {
+  var allData = [];
+  for (var index in dataObjects) {
+    allData = allData.concat(dataObjects[index].getData());
+  }
+  return allData;
+}
+
+////// EVENT LISTENERS //////
+
 document.getElementById("addChart").onclick = function() {
   createGraphs(dataset, reg, "#00e600");
 };
@@ -403,11 +349,3 @@ document.getElementById("mergeGraphs").onclick = function() {
     mergeGraphs();
   }
 };
-
-function getAllData() {
-  var allData = [];
-  for (var index in dataObjects) {
-    allData = allData.concat(dataObjects[index].getData());
-  }
-  return allData;
-}
