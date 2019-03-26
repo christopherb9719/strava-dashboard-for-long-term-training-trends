@@ -257,8 +257,6 @@ class HeartRateBarChart {
       var data = this.buildBarValues(filteredData);
       var keys = Object.keys(data);
       var rects = this.plot.selectAll("rects").data(keys);
-      console.log(typeof this.x.domain()[this.x.domain().length-1]);
-      console.log(this.x.domain()[0]);
       rects.enter()
         .append("rect")
           .attr("x", d => this.x(d))
@@ -380,8 +378,6 @@ class PaceBarChart {
     var data = this.buildBarValues(filteredData);
     var keys = Object.keys(data);
     var rects = this.plot.selectAll("rects").data(keys);
-    console.log(parseFloat(this.y.domain()[this.y.domain().length-1]));
-    console.log(parseFloat(this.y.domain()[0]));
     rects.enter()
       .append("rect")
         .attr("x", d => this.x(0))

@@ -146,6 +146,7 @@ class Filters {
     return this.max_average_pace;
   }
 
+  //Filters data according to the applied filters
   filterData(data) {
     var filtered = data.filter(d => ((d.distance <= this.getMaxDistance() && d.distance >= this.getMinDistance())
       && (d.total_elevation_gain <= this.getMaxElevationGain() && d.total_elevation_gain >= this.getMinElevationGain())
@@ -157,6 +158,7 @@ class Filters {
     return filtered;
   }
 
+  //Checks if the activity falls within the date filters applied
   dataInDate(d) {
     if (d.year > this.getEarliestDate().getFullYear() && d.year < this.getLatestDate().getFullYear()) {
       return true;
@@ -169,6 +171,7 @@ class Filters {
     }
   }
 
+  //Checks if the activity falls within the time filters applied
   dataInTime(d) {
     if (d.hour > this.getEarliestTime().getHours() && d.hour < this.getLatestTime().getHours()) {
       return true;
@@ -181,14 +184,17 @@ class Filters {
     }
   }
 
+  //Checks if the activities description contains any of the custom 'tags' added to the filters
   containsTags(d) {
     var containsTag = false;
-    var list = d.name.toLowerCase().split(" ");
-    this.getTags().forEach(function(tag) {
-      if (list.includes(tag.toLowerCase())) {
-        containsTag = true;
-      }
-    })
+    if (d.description != null) {
+      var list = d.description.toLowerCase().split(" "); //puts description in lower case to remove case sensitivity, and splts by whitespace to create a list
+      this.getTags().forEach(function(tag) {
+        if (list.includes(tag.toLowerCase())) {
+          containsTag = true;
+        }
+      })
+    }
     return containsTag;
   }
 }

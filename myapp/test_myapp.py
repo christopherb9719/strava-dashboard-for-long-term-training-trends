@@ -1,9 +1,12 @@
 import os
 import tempfile
 import unittest
-from myapp import forms
+from urlparse import urlparse
+from app import create_app
+import sys
+sys.path.append('./static/python/')
+from forms import *
 
-from myapp import create_app, db, forms
 
 class BasicTests(unittest.TestCase):
 
@@ -62,10 +65,10 @@ class BasicTests(unittest.TestCase):
 
     def test_invalid_user_login(self):
         response = self.app.post('login', {'email': 'chriiiis@gmail.com', 'password': 'pass'})
-        self.assertEqual(response.status_code, 400)
+        assert b'Login Form' in response.data
 
         response = self.app.post('login', {'email': 'chris.boland97@gmail.com', 'password': 'pass'})
-        self.assertEqual(response.status_code, 400)
+        assert b'Login Form' in response.data
 
 
     def test_valid_user_login_and_logout(self):

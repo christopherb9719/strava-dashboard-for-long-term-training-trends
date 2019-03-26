@@ -9,9 +9,10 @@ from jinja2 import TemplateNotFound
 from flask_bcrypt import Bcrypt
 import time
 import json
+from config import *
 
 import sys
-sys.path.append('./myapp/static/python/')
+sys.path.append('./static/python/')
 from parse import parse_data
 from forms import RegistrationForm, LoginForm
 from gaussianregression import calculateRegression
@@ -31,10 +32,7 @@ def create_app(**config_class):
     app = Flask(__name__)
 
     #set up database
-    app.config['TESTING'] = False
-    app.config['MONGODB_SETTINGS'] = { 'db' : 'test'}
-    app.config['SECRET_KEY'] = '988e4784dc468d83a3fc32b69f469a0571442806'
-    app.config['DEBUG'] = True
+    app.config.from_object(DevelopmentConfig)
     app.config.update(config_class)
 
     ###### INITIALISE LOGIN MANAGER AND DATABASE ######
@@ -81,7 +79,7 @@ def create_app(**config_class):
                 session['email'] = form.email.data;
                 session['password'] = bcrypt.generate_password_hash(form.password.data)
                 client = Client()
-                authorize_url = client.authorization_url(client_id='29429', redirect_uri='http://localhost:5000/redirect')
+                authorize_url = client.authorization_url(client_id=CLIENT_ID, redirect_uri='http://localhost:5000/redirect')
                 return redirect(authorize_url)
         return render_template('register.html', form=form)
 
@@ -103,7 +101,7 @@ def create_app(**config_class):
 
                     if client.token_expires_at != None: #TAKE THIS OUT!
                         if time.time() > client.token_expires_at:
-                            new_token = client.refresh_access_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
+                            new_token = client.refresh_access_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, refresh_token=client.refresh_token)
                             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
                     return redirect(flask.url_for('loadDashboard'))
@@ -121,7 +119,7 @@ def create_app(**config_class):
         import requests
         client=Client()
         code = request.args.get('code')
-        tokens = client.exchange_code_for_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', code=code)
+        tokens = client.exchange_code_for_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, code=code)
         user = User(username=session['username'], email=session['email'], password=session['password'], token=tokens['access_token'], refresh_token=tokens['refresh_token'], expires_at=tokens['expires_at']).save()
         login_user(user);
 
@@ -171,4 +169,4 @@ def create_app(**config_class):
 
 
 if __name__=="__main__":
-    app = create_app()
+    app = create_app(DevelopmentConfig)
