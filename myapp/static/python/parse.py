@@ -8,6 +8,7 @@ def parse_data(user):
     client.refresh_token = user['refresh_token'];
     client.token_expires_at = user['expires_at'];
 
+    ###### RETRIEVE USER ACTIVITY DATA ######
     #This is only here because the test user for Simon was made before refresh tokens became a thing and so does not have one
     #REMOVE THIS IF STATEMENT WHEN A NEW ACCOUNT FOR SIMON IS MADE!!!!!!!!!
     if client.token_expires_at != None:
@@ -16,26 +17,28 @@ def parse_data(user):
             new_token = client.refresh_token(client_id=29429, client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
-    athlete = client.get_athlete()
     activities = client.get_activities()
 
+    ###### FILTER OUT ACTIVITIES THAT AREN'T RUNS OR THAT DOEN'T HAVE NECESSARY DATA ######
     runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None and a.average_speed.num != 0.00, activities)
 
+    ###### PARSE ACTIVITY DATA FOR RELEVANT DATA AND CONVERT TO JSON ######
     summaries = []
     for run in runs:
-        summary = {}
-        summary['id'] = run.id
-        summary['distance'] = run.distance.num
-        summary['heart_rate'] = run.average_heartrate
-        summary['average_speed'] = (run.average_speed.num*60*60)/1000
-        summary['average_pace'] = 60/summary['average_speed']
-        summary['description'] = run.description
-        summary['total_elevation_gain'] = run.total_elevation_gain.num
-        summary['year'] = run.start_date.year
-        summary['month'] = run.start_date.month
-        summary['day'] = run.start_date.day
-        summary['hour'] = run.start_date.hour
-        summary['minute'] = run.start_date.minute
-        summary['second'] = run.start_date.second
-        summaries.append(summary.copy())
+        summaries.append({
+            'id' : run.id,
+            'name': run.name,
+            'distance' : run.distance.num,
+            'heart_rate' : run.average_heartrate,
+            'average_speed' : (run.average_speed.num*60*60)/1000,
+            'average_pace' : 60/((run.average_speed.num*60*60)/1000),
+            'description' : run.description,
+            'total_elevation_gain' : run.total_elevation_gain.num,
+            'year' : run.start_date.year,
+            'month' : run.start_date.month,
+            'day' : run.start_date.day,
+            'hour' : run.start_date.hour,
+            'minute' : run.start_date.minute,
+            'second' : run.start_date.second
+        })
     return summaries

@@ -5,7 +5,6 @@ from flask_login import LoginManager, UserMixin
 from flask_wtf.csrf import CSRFProtect
 from stravalib import Client
 from flask_login import current_user, login_required, login_user, logout_user
-from werkzeug.exceptions import BadRequest
 from jinja2 import TemplateNotFound
 from flask_bcrypt import Bcrypt
 import time
@@ -13,6 +12,7 @@ import json
 
 import sys
 sys.path.append('./myapp/static/python/')
+from parse import parse_data
 from forms import RegistrationForm, LoginForm
 from gaussianregression import calculateRegression
 
@@ -23,47 +23,7 @@ def getLineCoords(activities):
         else:
             return []
 
-def parse_data(user):
-    client=Client();
-    client.access_token = user['token'];
-    client.refresh_token = user['refresh_token'];
-    client.token_expires_at = user['expires_at'];
-
-    #This is only here because the test user for Simon was made before refresh tokens became a thing and so does not have one
-    #REMOVE THIS IF STATEMENT WHEN A NEW ACCOUNT FOR SIMON IS MADE!!!!!!!!!
-    if client.token_expires_at != None:
-        if time.time() > client.token_expires_at:
-            print("Token expired, getting new token")
-            new_token = client.refresh_access_token(client_id='29429', client_secret='988e4784dc468d83a3fc32b69f469a0571442806', refresh_token=client.refresh_token)
-            user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
-
-    activities = client.get_activities()
-
-    runs = filter(lambda a: a.type=="Run" and a.average_heartrate != None and a.average_speed.num != 0.00, activities)
-
-    summaries = []
-    for run in runs:
-        summaries.append({
-            'id' : run.id,
-            'name': run.name,
-            'distance' : run.distance.num,
-            'heart_rate' : run.average_heartrate,
-            'average_speed' : (run.average_speed.num*60*60)/1000,
-            'average_pace' : 60/((run.average_speed.num*60*60)/1000),
-            'description' : run.description,
-            'total_elevation_gain' : run.total_elevation_gain.num,
-            'year' : run.start_date.year,
-            'month' : run.start_date.month,
-            'day' : run.start_date.day,
-            'hour' : run.start_date.hour,
-            'minute' : run.start_date.minute,
-            'second' : run.start_date.second
-        })
-
-    return summaries
-
-
-##################BUILD THE APP#############################
+############################# BUILD THE APP #############################
 def create_app(**config_class):
     login = LoginManager()
     db = MongoEngine()
@@ -77,9 +37,12 @@ def create_app(**config_class):
     app.config['DEBUG'] = True
     app.config.update(config_class)
 
+    ###### INITIALISE LOGIN MANAGER AND DATABASE ######
     login.init_app(app)
     db.init_app(app)
 
+
+    ###### DEFINE THE USER OBJECT ######
     class User(db.Document, UserMixin):
         username = db.StringField()
         email = db.EmailField()
@@ -88,10 +51,15 @@ def create_app(**config_class):
         refresh_token = db.StringField()
         expires_at = db.IntField()
 
+
+    ###### BUILD THE USER LOADER ######
     @login.user_loader
     def load_user(user_id):
         return User.objects(id=user_id).first()
 
+
+
+    ###### DEFINE APPLICATION ROUTES ######
     @app.route('/<page>')
     def show(page):
         try:
@@ -139,14 +107,6 @@ def create_app(**config_class):
                             user.update(token = new_token['access_token'], refresh_token = new_token['refresh_token'], expires_at = new_token['expires_at'])
 
                     return redirect(flask.url_for('loadDashboard'))
-                else:
-                    e = BadRequest()
-                    e.data = "Invalid log in details"
-                    raise e
-            else:
-                e = BadRequest()
-                e.data = "Invalid log in details"
-                raise e
         return render_template('login.html', form=form)
 
     @app.route("/logout")
@@ -206,9 +166,7 @@ def create_app(**config_class):
         users = User.objects(username__contains=query).only('username')
         return users.to_json()
 
-
-
-
+    ###### RETURN APPLICATION ######
     return app
 
 

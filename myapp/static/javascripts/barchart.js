@@ -1,4 +1,4 @@
-class PositiveAndNegativeBarChart {
+class EffortBarChart {
   constructor(container, margin, width, height) {
     this.margin = margin;
     this.container = container;
@@ -105,8 +105,46 @@ class PositiveAndNegativeBarChart {
     var max_y = d3.max(barVals, d => Math.abs(d))
     // Update the scales
     this.y.domain([max_y, -1*max_y]).nice();
+  }
 
+  plotBars(filteredData, id, colour) {
+    this.plot.selectAll("[id='#dataset" + id + "']").remove();
+    var data = this.buildBarValues(filteredData);
+    var keys = Object.keys(data);
+    var rects = this.plot.selectAll("rects").data(keys);
+    rects.data(data).enter()
+      .append("rect")
+        .attr("x", d => this.xAxisScale(Object.keys(data).find(key => data[key] === d)))
+        .attr("y", d => Math.min(this.y(0), this.y(d)))
+        .attr('width', this.width/24)
+        .attr("fill", colour)
+        .attr("id", "#dataset" + id)
+        .style("opacity", 0.5)
+        .attr('height', d => Math.abs(this.y(d) - this.y(0)))
+      .on('mouseover', function(d, i) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
+        if (i < 10) { var time = "0" + i + ":00" }
+        else { var time = i + ":00" }
+        var html  = "Time of run: <b> " + time + "</b><br/>" +
+                    "Variance from mean bpkm: <b>" + d.toFixed(3) + "bpkm</b>";
 
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", 1) // started as 0!
+      })
+      .on('mouseout', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", colour)
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
+      });
   }
 
   getX() {
@@ -135,13 +173,10 @@ class PositiveAndNegativeBarChart {
 }
 
 
-class StandardBarChart {
-  constructor(container, margin, width, height, x_val, type, x_or_y) {
-    this.x_val = x_val;
-    this.x_or_y = x_or_y;
-    this.type = type;
-    this.margin = margin;
+class HeartRateBarChart {
+  constructor(container, margin, width, height) {
     this.container = container;
+    this.margin = margin;
     this.width = width;
     this.height = height;
   }
@@ -149,21 +184,12 @@ class StandardBarChart {
   draw(filtersObject, data) {
     var filteredData = filtersObject.filterData(data);
     var barVals = this.buildBarValues(filteredData);
+    var max_y = Math.max.apply(null, Object.values(barVals).map(d => parseInt(d)));
 
-    var values = Object.values(barVals).map(d => parseInt(d));
+    this.x = d3.scaleLinear().domain([d3.min(filteredData, function(d) { return d["heart_rate"]; }),
+      d3.max(filteredData, function(d) { return d["heart_rate"]; })]).range([0, this.width]);
+    this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
 
-    var max_y = Math.max.apply(null, values);
-    var x_title = this.x_val;
-    if (this.x_or_y == "x") {
-      this.x = d3.scaleLinear().domain([d3.min(filteredData, function(d) { return d[x_title]; }),
-        d3.max(filteredData, function(d) { return d[x_title]; })]).range([0, this.width]);
-      this.y = d3.scaleLinear().range([this.height, 0]).domain([0, max_y]).nice();
-    }
-    else {
-      this.y = d3.scaleLinear().domain([d3.max(filteredData, function(d) { return d[x_title]; }),
-        d3.min(filteredData, function(d) { return d[x_title]; })]).range([0, this.height]);
-      this.x = d3.scaleLinear().range([0, this.width]).domain([0, max_y]).nice();
-    }
     this.svg = d3.select(this.container).append('svg')
       .attr("id", this.id)
       .attr('width', this.width + this.margin.left + this.margin.right)
@@ -173,45 +199,139 @@ class StandardBarChart {
           .attr("transform",
               "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-    if (this.x_or_y == "x") {
-      this.plot.append("text")
-          .attr("x", (this.width / 2))
-          .attr("y", 0 - (this.margin.top/3))
-          .attr("text-anchor", "middle")
-          .style("font-size", "13px")
-          .text("No. Activities per Heart Rate");
-      this.createXAxis();
-    }
-    else {
-      this.plot.append("text")
-          .attr("x", (this.width / 2))
-          .attr("y", 0 - (this.margin.top/3))
-          .style("font-size", "13px")
-          .attr("text-anchor", "middle")
-          .text("No. Activities per Pace");
-      this.createYAxis();
-    }
-    var width = w/(d3.max(filteredData, d => d[this.x_val]) - d3.min(filteredData, d => d[this.x_val]));
+    this.plot.append("text")
+        .attr("x", (this.width / 2))
+        .attr("y", 0 - (this.margin.top/3))
+        .attr("text-anchor", "left")
+        .style("font-size", "13px")
+        .text("Activities by HR");
+    this.createAxis();
   }
 
-  createXAxis() {
-    var x_title = this.x_val;
-    //this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
-    //  d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
+    createAxis() {
+      var x_title = this.x_val;
 
-    this.xAxisCall = d3.axisBottom(this.x)
+      this.xAxisCall = d3.axisBottom(this.x)
 
-    this.xAxis = this.plot.append("g")
-      .attr("id", "x axis")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.height + ")")
-      .call(this.xAxisCall)
+      this.xAxis = this.plot.append("g")
+        .attr("id", "x axis")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + this.height + ")")
+        .call(this.xAxisCall)
+    }
+
+
+    //Iterates through all datapoints, checks their HR, and increements the value in the relevant bin in an array
+    buildBarValues(filteredData) {
+      var bins = {};
+      Object.values(filteredData).forEach(function(d) {
+        var bin = Math.floor(d["heart_rate"]);
+
+        if (bin in bins) bins[bin] += 1;
+        else bins[bin] = 1;
+      });
+      return bins;
+    }
+
+    resize(new_width) {
+      this.xAxisScale.range([0, new_width]);
+      this.width = new_width;
+
+      this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+
+      // Update the axes
+      this.xAxis.call(this.xAxisCall);
+    }
+
+    update(filteredData){
+      // Re-calculate the bar values
+      var barVals = this.buildBarValues(filteredData);
+      var max_y = Math.max.apply(null, Object.values(barVals).map(d => parseInt(d)));
+
+      // Update the scales
+      this.y.domain([0, max_y]).nice();
+    }
+
+    plotBars(filteredData, id, colour) {
+      this.plot.selectAll("[id='#dataset" + id + "']").remove();
+      var data = this.buildBarValues(filteredData);
+      var keys = Object.keys(data);
+      var rects = this.plot.selectAll("rects").data(keys);
+      console.log(typeof this.x.domain()[this.x.domain().length-1]);
+      console.log(this.x.domain()[0]);
+      rects.enter()
+        .append("rect")
+          .attr("x", d => this.x(d))
+          .attr("y", d => this.y(data[d]))
+          .attr('width', d => (this.width/(parseInt(this.x.domain()[this.x.domain().length-1]) - parseInt(this.x.domain()[0]))))
+          .attr("id", "#dataset"+id)
+          .attr("fill", colour)
+          .style("opacity", 0.5)
+          .attr('height', d => (this.y(0) - this.y(data[d])))
+        .on('mouseover', function(d, i) {
+          d3.select(this)
+            .transition()
+            .attr("fill", "#000000")
+          if (i < 10) { var time = "0" + i + ":00" }
+          else { var time = i + ":00" }
+          var html  = "Heart Rate: <b> " + d + "bpm</b><br/>" +
+                      "Runs with this HR: <b>" + data[d] + "</b>";
+
+          tooltip.html(html)
+              .style("left", (d3.event.pageX + 15) + "px")
+              .style("top", (d3.event.pageY - 28) + "px")
+            .transition()
+              .duration(200) // ms
+              .style("opacity", 1) // started as 0!
+        })
+        .on('mouseout', function(d) {
+          d3.select(this)
+            .transition()
+            .attr("fill", colour)
+          tooltip.transition()
+              .duration(300) // ms
+              .style("opacity", 0); // don't care about position!
+        });
+    }
+}
+
+
+class PaceBarChart {
+  constructor(container, margin, width, height) {
+    this.container = container;
+    this.margin = margin;
+    this.width = width;
+    this.height = height;
   }
 
-  createYAxis() {
+  draw(filtersObject, data) {
+    var filteredData = filtersObject.filterData(data);
+    var barVals = this.buildBarValues(filteredData);
+    var max_y = Math.max.apply(null, Object.values(barVals).map(d => parseInt(d)));
+
+    this.y = d3.scaleLinear().domain([d3.max(filteredData, function(d) { return d["average_pace"]; }),
+      d3.min(filteredData, function(d) { return d["average_pace"]; })]).range([0, this.height]);
+    this.x = d3.scaleLinear().range([0, this.width]).domain([0, max_y]).nice();
+    this.svg = d3.select(this.container).append('svg')
+      .attr("id", this.id)
+      .attr('width', this.width + this.margin.left + this.margin.right)
+      .attr("height", this.height + this.margin.top + this.margin.bottom)
+
+    this.plot = this.svg.append("g")
+          .attr("transform",
+              "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+    this.plot.append("text")
+        .attr("x", (this.width / 2))
+        .attr("y", 0 - (this.margin.top/3))
+        .style("font-size", "13px")
+        .attr("text-anchor", "middle")
+        .text("Activities by Pace");
+    this.createAxis();
+  }
+
+  createAxis() {
     var y_title = this.y_val;
-    //this.xAxisScale = d3.scaleLinear().domain([d3.min(this.data, function(d) { return d[x_title]; }),
-    //  d3.max(this.data, function(d) { return d[x_title]; })]).range([0, this.width]);
 
     this.yAxisCall = d3.axisLeft(this.y);
 
@@ -220,18 +340,12 @@ class StandardBarChart {
   }
 
   buildBarValues(filteredData) {
-    var x_title = this.x_val;
-    var type = this.type;
     var bins = {};
     Object.values(filteredData).forEach(function(d) {
       var bin;
-      if (type == "decimal") {
-        bin = (Math.floor(d[x_title]*100))/100;
-        bin = bin.toFixed(1);
-      }
-      else {
-        bin = Math.floor(d[x_title]);
-      }
+      bin = (Math.floor(d["average_pace"]*100))/100;
+      bin = bin.toFixed(1);
+
       if (bin in bins) {
         bins[bin] += 1;
       }
@@ -242,187 +356,63 @@ class StandardBarChart {
     return bins;
   }
 
-
   resize(new_width) {
-    if (this.x_or_y == "x") {
-      this.xAxisScale.range([0, new_width]);
-      this.width = new_width;
+    this.yAxisScale.range([0, new_width]);
+    this.width = new_width;
 
-      this.svg.attr("width", new_width + this.margin.left + this.margin.right);
+    this.svg.attr("width", new_width + this.margin.left + this.margin.right);
 
-      // Update the axes
-      this.xAxis.call(this.xAxisCall);
-    }
-    else {
-      this.yAxisScale.range([0, new_width]);
-      this.width = new_width;
-
-      this.svg.attr("width", new_width + this.margin.left + this.margin.right);
-
-      // Update the axes
-      this.yAxis.call(this.yAxisCall);
-    }
+    // Update the axes
+    this.yAxis.call(this.yAxisCall);
   }
 
   update(filteredData){
     // Re-calculate the bar values
     var barVals = this.buildBarValues(filteredData);
-
-    var values = Object.values(barVals).map(d => parseInt(d));
-
-    var max_y = Math.max.apply(null, values);
+    var max_y = Math.max.apply(null, Object.values(barVals).map(d => parseInt(d)));
 
     // Update the scales
-    if (this.x_or_y == "x") {
-      this.y.domain([0, max_y]).nice();
-    }
-    else {
-      this.x.domain([0, max_y]).nice();
-    }
-  }
-  
-  getX() {
-    return this.x;
+    this.x.domain([0, max_y]).nice();
   }
 
-  getY() {
-    return this.y;
-  }
-
-  getXVal() {
-    return this.x_val;
-  }
-
-  getPlot() {
-    return this.plot;
-  }
-
-  getData() {
-    return this.data;
-  }
-
-  getSvg() {
-    return this.svg;
-  }
-
-  getBarValues() {
-    return this.barVals;
-  }
-}
-
-
-function plotBars(graph, filtered, x, y, graph_width, colour, id) {
-  var plot = graph.getPlot();
-  plot.selectAll("[id='#dataset" + id + "']").remove();
-  var data = graph.buildBarValues(filtered);
-  var rects = plot.selectAll("rects");
-  rects.data(data).enter()
-    .append("rect")
-      .attr("x", d => x(Object.keys(data).find(key => data[key] === d)))
-      .attr("y", d => Math.min(y(0), y(d)))
-      .attr('width', graph_width/24)
-      .attr("fill", colour)
-      .attr("id", "#dataset" + id)
-      .style("opacity", 0.5)
-      .attr('height', d => Math.abs(y(d) - y(0)))
-    .on('mouseover', function(d, i) {
-      d3.select(this)
-        .transition()
-        .attr("fill", "#000000")
-      if (i < 10) { var time = "0" + i + ":00" }
-      else { var time = i + ":00" }
-      var html  = "Time of run: <b> " + time + "</b><br/>" +
-                  "Variance from mean bpkm: <b>" + d.toFixed(3) + "bpkm</b>";
-
-      tooltip.html(html)
-          .style("left", (d3.event.pageX + 15) + "px")
-          .style("top", (d3.event.pageY - 28) + "px")
-        .transition()
-          .duration(200) // ms
-          .style("opacity", 1) // started as 0!
-    })
-    .on('mouseout', function(d) {
-      d3.select(this)
-        .transition()
+  plotBars(filteredData, id, colour) {
+    this.plot.selectAll("[id='#dataset" + id + "']").remove();
+    var data = this.buildBarValues(filteredData);
+    var keys = Object.keys(data);
+    var rects = this.plot.selectAll("rects").data(keys);
+    console.log(parseFloat(this.y.domain()[this.y.domain().length-1]));
+    console.log(parseFloat(this.y.domain()[0]));
+    rects.enter()
+      .append("rect")
+        .attr("x", d => this.x(0))
+        .attr("y", d => this.y(d))
+        .attr('width', d => (this.x(data[d]) - this.x(0)))
+        .attr("id", "#dataset"+id)
         .attr("fill", colour)
-      tooltip.transition()
-          .duration(300) // ms
-          .style("opacity", 0); // don't care about position!
-    });
-}
-
-
-function standardPlotBars(graph, filtered, x, y, colour, id) {
-  var plot = graph.getPlot();
-  plot.selectAll("[id='#dataset" + id + "']").remove();
-  var data = graph.buildBarValues(filtered);
-  var keys = Object.keys(data);
-  var rects = plot.selectAll("rects").data(keys);
-  rects.enter()
-    .append("rect")
-      .attr("x", function(d) {
-        if (graph.x_or_y == "x") {
-          return x(d);
-        }
-        else {
-          return x(0);
-        }
-      })
-      .attr("y", function(d) {
-        if (graph.x_or_y == "x") {
-          return y(data[d]);
-        }
-        else {
-          return y(d);
-        }
-      })
-      .attr('width', function(d) {
-        if (graph.x_or_y == "y") {
-          return (x(data[d]) - x(0));
-        }
-        else {
-          return "6";
-        }
-      })
-      .attr("id", "#dataset"+id)
-      .attr("fill", colour)
-      .style("opacity", 0.5)
-      .attr('height', function(d) {
-        if (graph.x_or_y == "x") {
-          return (y(0) -  y(data[d]));
-        }
-        else {
-          return "6";
-        }
-      })
-    .on('mouseover', function(d, i) {
-      d3.select(this)
-        .transition()
-        .attr("fill", "#000000")
-      if (i < 10) { var time = "0" + i + ":00" }
-      else { var time = i + ":00" }
-      if (graph.x_or_y == "x") {
-        var html  = "Heart Rate: <b> " + d + "bpm</b><br/>" +
-                    "Runs with this HR: <b>" + data[d] + "</b>";
-      }
-      else {
+        .style("opacity", 0.5)
+        .attr('height', d => (this.height/(parseFloat(this.y.domain()[0])*10 - parseFloat(this.y.domain()[this.y.domain().length-1])*10)))
+      .on('mouseover', function(d, i) {
+        d3.select(this)
+          .transition()
+          .attr("fill", "#000000")
+        if (i < 10) { var time = "0" + i + ":00" }
+        else { var time = i + ":00" }
         var html  = "Pace: <b> " + d + "mins/km</b><br/>" +
                     "Runs with this Pace: <b>" + data[d] + "</b>";
-      }
-
-      tooltip.html(html)
-          .style("left", (d3.event.pageX + 15) + "px")
-          .style("top", (d3.event.pageY - 28) + "px")
-        .transition()
-          .duration(200) // ms
-          .style("opacity", 1) // started as 0!
-    })
-    .on('mouseout', function(d) {
-      d3.select(this)
-        .transition()
-        .attr("fill", colour)
-      tooltip.transition()
-          .duration(300) // ms
-          .style("opacity", 0); // don't care about position!
-    });
+        tooltip.html(html)
+            .style("left", (d3.event.pageX + 15) + "px")
+            .style("top", (d3.event.pageY - 28) + "px")
+          .transition()
+            .duration(200) // ms
+            .style("opacity", 1) // started as 0!
+      })
+      .on('mouseout', function(d) {
+        d3.select(this)
+          .transition()
+          .attr("fill", colour)
+        tooltip.transition()
+            .duration(300) // ms
+            .style("opacity", 0); // don't care about position!
+      });
+  }
 }

@@ -1,7 +1,9 @@
 import GPy
 import numpy as np
 
+###### CODE TAKEN FROM GPY DOCUMENTATION AND ADAPTED ######
 def calculateRegression(activities):
+    #If there are no activities return an empty array - otherwise would crash app
     if len(activities) > 0:
         hr = [run['heart_rate'] for run in activities]
         avs = [run['average_pace'] for run in activities]

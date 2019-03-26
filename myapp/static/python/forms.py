@@ -16,13 +16,14 @@ def hasNumber(form, field):
     if allChars:
         raise ValidationError('Password must contain at least one number')
 
+
 class RegistrationForm(FlaskForm):
     username = fields.TextField(validators=[validators.required()])
     email = fields.TextField('Email', [validators.Email(message='Not a valid email')])
     password = fields.PasswordField('New Password', [
         validators.DataRequired(),
         validators.Length(min=10, message='Password must be at least 10 characters long'),
-        validators.EqualTo('confirm', message='Passwords must match'),
+        validators.EqualTo('confirm', message='Passwords must match'), #This makes sure that the password and confirmation password must match
         isAllLowerCase,
         isAllUpperCase,
         hasNumber
